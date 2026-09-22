@@ -1,0 +1,16 @@
+# Ignore system and IDE files
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Ignore Node modules
+node_modules/
+
+# Ignore env files
+.env
+.env.*
+!.env.example
+
+# Antigravity agent task files
+.agent-tasks/

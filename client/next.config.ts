@@ -1,0 +1,63 @@
+import type { NextConfig } from "next";
+
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://images.unsplash.com;
+    font-src 'self';
+    connect-src 'self' ws: wss:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+`;
+
+const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader.replace(/\n/g, ''),
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          }
+        ],
+      },
+    ];
+  },
+  async rewrites() {
+    const publicApi = process.env.NEXT_PUBLIC_API_URL || "";
+    const preferLocal =
+      publicApi.includes("localhost") || publicApi.includes("127.0.0.1");
+    const raw = preferLocal
+      ? "http://127.0.0.1:3001"
+      : (process.env.API_BASE_URL || "http://127.0.0.1:3001");
+    const backendUrl = raw.replace(/\/api\/v1\/?$/, "");
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${backendUrl}/api/v1/:path*`,
+      },
+    ];
+  },
+};
+
+export default nextConfig;

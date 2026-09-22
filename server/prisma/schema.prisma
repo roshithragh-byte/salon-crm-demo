@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  STYLIST
+  STAFF
+  CUSTOMER
+}
+
+model User {
+  id              String        @id @default(uuid())
+  email           String        @unique
+  phoneNumber     String?
+  passwordHash    String?
+  firstName       String
+  lastName        String
+  avatarUrl       String?
+  isActive        Boolean       @default(true)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  salonMembers    SalonMember[]
+  customers       Customer[]
+  auditLogs       AuditLog[]
+}
+
+model Salon {
+  id              String        @id @default(uuid())
+  name            String
+  slug            String        @unique
+  phone           String
+  email           String?
+  addressLine1    String
+  addressLine2    String?
+  city            String
+  state           String
+  postalCode      String
+  countryCode     String        @default("IN")
+  timezone        String        @default("Asia/Kolkata")
+  currencyCode    String        @default("INR")
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  members         SalonMember[]
+  customers       Customer[]
+  categories      ServiceCategory[]
+  services        Service[]
+  serviceAddons   ServiceAddon[]
+  appointments    Appointment[]
+  payments        Payment[]
+  loyaltyTransactions LoyaltyTransaction[]
+  outboxEvents    OutboxEvent[] // temporary until Bookings phase
+  businessHours  SalonBusinessHour[]
+}
+
+model SalonMember {
+  id              String        @id @default(uuid())
+  salonId         String
+  userId          String
+  role            Role
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  salon           Salon         @relation(fields: [salonId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+  
+  staffServices   StaffService[]
+  staffSchedules  StaffSchedule[]
+  staffTimeOffs   StaffTimeOff[]
+  appointments    Appointment[] // staff member taking the appointment
+
+  @@unique([salonId, userId])
+}
+
+model Customer {
+  id              String        @id @default(uuid())
+  salonId         String
+  userId          String?
+  firstName       String
+  lastName        String?
+  phoneNumber     String
+  email           String?
+  dateOfBirth     DateTime?     @db.Date
+  notes           String?
+  visitCount      Int           @default(0)
+  loyaltyPoints   Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  salon           Salon         @relation(fields: [salonId], references: [id])
+  user            User?         @relation(fields: [userId], references: [id])
+  appointments    Appointment[]
+  loyaltyTransactions LoyaltyTransaction[]
+
+  @@unique([salonId, phoneNumber])
+}
+
+model ServiceCategory {
+  id              String        @id @default(uuid())
+  salonId         String
+  name            String
+  slug            String
+  description     String?
+  displayOrder    Int           @default(0)
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  salon           Salon         @relation(fields: [salonId], references: [id])
+  services        Service[]
+
+  @@unique([salonId, slug])
+}
+
+model Service {
+  id              String        @id @default(uuid())
+  salonId         String
+  categoryId      String
+  name            String
+  slug            String
+  description     String?
+  durationMinutes Int
+  basePrice       Float
+  offerPrice      Float?
+  currencyCode    String        @default("INR")
+  isActive        Boolean       @default(true)
+  displayOrder    Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  salon           Salon             @relation(fields: [salonId], references: [id])
+  category        ServiceCategory   @relation(fields: [categoryId], references: [id])
+  
+  staffServices   StaffService[]
+  addonsAsBase    ServiceAddon[]    @relation("BaseService")
+  addonsAsAddon   ServiceAddon[]    @relation("AddonService")
+  
+  appointments    Appointment[]
+  
+  @@unique([salonId, slug])
+}
+
+model ServiceAddon {
+  id              String        @id @default(uuid())
+  salonId         String
+  serviceId       String
+  addonServiceId  String
+  createdAt       DateTime      @default(now())
+
+  salon           Salon         @relation(fields: [salonId], references: [id])
+  service         Service       @relation("BaseService", fields: [serviceId], references: [id])
+  addonService    Service       @relation("AddonService", fields: [addonServiceId], references: [id])
+
+  @@unique([serviceId, addonServiceId])
+}
+
+model StaffService {
+  staffMemberId   String
+  serviceId       String
+
+  staffMember     SalonMember   @relation(fields: [staffMemberId], references: [id])
+  service         Service       @relation(fields: [serviceId], references: [id])
+
+  @@id([staffMemberId, serviceId])
+}
+
+
+model SalonBusinessHour {
+  id        String   @id @default(uuid())
+  salonId   String
+  dayOfWeek Int      @db.SmallInt // 0=Sun .. 6=Sat (salon local)
+  openTime  DateTime @db.Time
+  closeTime DateTime @db.Time
+  isClosed  Boolean  @default(false)
+
+  salon     Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@unique([salonId, dayOfWeek])
+  @@index([salonId])
+}
+
+model StaffSchedule {
+  id              String        @id @default(uuid())
+  salonMemberId   String
+  dayOfWeek       Int           @db.SmallInt // 0-6
+  startTime       DateTime      @db.Time
+  endTime         DateTime      @db.Time
+  isActive        Boolean       @default(true)
+
+  salonMember     SalonMember   @relation(fields: [salonMemberId], references: [id])
+}
+
+model StaffTimeOff {
+  id              String        @id @default(uuid())
+  salonMemberId   String
+  startsAt        DateTime
+  endsAt          DateTime
+  reason          String?
+  createdAt       DateTime      @default(now())
+
+  salonMember     SalonMember   @relation(fields: [salonMemberId], references: [id])
+}
+
+// Keeping Appointment temporarily until Bookings Phase 5
+model Appointment {
+  id            String   @id @default(uuid())
+  salonId       String
+  
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  
+  customerName  String
+  customerPhone String
+  customerEmail String?
+
+  serviceId     String
+  service       Service  @relation(fields: [serviceId], references: [id])
+
+  staffId       String?
+  staff         SalonMember?   @relation(fields: [staffId], references: [id])
+
+  startsAt DateTime
+  endsAt DateTime
+  notes         String?
+  
+  totalValue       Float?
+  discountApplied  Float?
+  finalRevenue     Float?
+
+  idempotencyKey String? @unique
+  status        String   @default("PENDING")
+  consent       Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  payments      Payment[]
+  loyaltyTransactions LoyaltyTransaction[]
+
+  salon         Salon    @relation(fields: [salonId], references: [id])
+}
+
+model Review {
+  id            String   @id @default(uuid())
+  authorName    String
+  rating        Int
+  content       String
+  source        String   @default("GOOGLE")
+  verified      Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  recipient String
+  status    String   @default("SENT")
+  read      Boolean  @default(false)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+
+model Payment {
+  id                String   @id @default(uuid())
+  salonId           String
+  appointmentId     String
+  amount            Float
+  currency          String   @default("INR")
+  provider          String
+  providerOrderId   String?
+  providerPaymentId String?
+  status            String
+  idempotencyKey    String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  salon             Salon       @relation(fields: [salonId], references: [id])
+  appointment       Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+
+enum LoyaltyTransactionType {
+  EARN
+  REDEEM
+  ADJUST
+  EXPIRE
+}
+
+model LoyaltyTransaction {
+  id              String   @id @default(uuid())
+  salonId         String
+  customerId      String
+  bookingId       String?
+  type            LoyaltyTransactionType
+  points          Int
+  description     String?
+  createdAt       DateTime @default(now())
+
+  salon           Salon       @relation(fields: [salonId], references: [id])
+  customer        Customer    @relation(fields: [customerId], references: [id])
+  appointment     Appointment? @relation(fields: [bookingId], references: [id])
+}
+
+
+model OutboxEvent {
+  id            String   @id @default(uuid())
+  salonId       String?
+  type          String
+  payload       Json
+  status        String   @default("PENDING")
+  error         String?
+  attempts      Int      @default(0)
+  createdAt     DateTime @default(now())
+  processedAt   DateTime?
+
+  salon         Salon?   @relation(fields: [salonId], references: [id])
+}
+
+model AuditLog {
+  id              String   @id @default(uuid())
+  salonId         String?
+  userId          String
+  action          String
+  targetResource  String
+  targetId        String?
+  details         Json?
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
