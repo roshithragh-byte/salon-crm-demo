@@ -50,7 +50,10 @@ const nextConfig: NextConfig = {
     const raw = preferLocal
       ? "http://127.0.0.1:3001"
       : (process.env.API_BASE_URL || "http://127.0.0.1:3001");
-    const backendUrl = raw.replace(/\/api\/v1\/?$/, "");
+    let backendUrl = raw.replace(/\/api\/v1\/?$/, "");
+    if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
+      backendUrl = "https://" + backendUrl;
+    }
     return [
       {
         source: "/api/v1/:path*",
