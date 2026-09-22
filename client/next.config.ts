@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
       publicApi.includes("localhost") || publicApi.includes("127.0.0.1");
     const raw = preferLocal
       ? "http://127.0.0.1:3001"
-      : ((process.env.API_BASE_URL || "http://127.0.0.1:3001").trim());
+      : ((process.env.API_BASE_URL || "http://127.0.0.1:3001").replace(/^["'\s]+|["'\s]+$/g, ""));
     let backendUrl = raw.replace(/\/api\/v1\/?$/, "");
     if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
       backendUrl = "https://" + backendUrl;
