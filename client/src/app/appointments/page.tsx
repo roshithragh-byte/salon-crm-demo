@@ -4,6 +4,8 @@ import { businessConfig } from "@/business.config";
 import BookingForm from "./BookingForm";
 import { ApiClient } from "@/lib/api/client";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Book an Appointment",
   description: "Book your personalised skincare or wellness appointment online.",

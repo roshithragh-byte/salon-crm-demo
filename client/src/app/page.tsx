@@ -6,6 +6,8 @@ import { MapPin, Phone, Clock, Globe } from "lucide-react";
 import Gallery from "@/components/Gallery";
 import ReviewCarousel from "@/components/ReviewCarousel";
 
+export const dynamic = 'force-dynamic';
+
 interface ServiceCard {
   id: string;
   name: string;
