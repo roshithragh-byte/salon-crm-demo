@@ -11,8 +11,12 @@ export default withAuth(
     const isAccountPath = req.nextUrl.pathname.startsWith("/account");
 
     if (req.nextUrl.pathname.startsWith("/api/v1")) {
-      const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
-      const finalRaw = (raw || (process.env.NODE_ENV === 'production' ? 'https://salon-crm-demo-production.up.railway.app' : `http://127.0.0.1:${process.env.API_PORT || 3001}`)).replace(/^["'\s]+|["'\s]+$/g, "");
+      // Force production URL directly!
+      let finalRaw = process.env.NODE_ENV === 'production' 
+        ? 'https://salon-crm-demo-production.up.railway.app/api/v1' 
+        : (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
+        
+      finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
       let backendUrl = finalRaw.replace(/\/api\/v1\/?$/, "");
       if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
         backendUrl = "https://" + backendUrl;
