@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/co
 import { AppointmentsService, CreateBookingDto } from './appointments.service';
 import { JwtAuthGuard } from '../auth/jwt.auth.guard';
 
-@Controller('salons/:salonId/bookings')
+@Controller('salons/:salonId/appointments')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
