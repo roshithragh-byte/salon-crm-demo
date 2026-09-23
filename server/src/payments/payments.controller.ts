@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../auth/jwt.auth.guard';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // Removed JwtAuthGuard to allow customers to initialize payments
   @Post('salons/:salonId/bookings/:bookingId/payment')
   async createPayment(
     @Param('salonId') salonId: string,
@@ -16,7 +16,7 @@ export class PaymentsController {
     return this.paymentsService.createPaymentOrder(salonId, bookingId, idempotencyKey);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // Removed JwtAuthGuard to allow webhooks to hit it anonymously
   @Post('payments/webhook/:provider')
   async handleWebhook(
     @Param('provider') provider: string,

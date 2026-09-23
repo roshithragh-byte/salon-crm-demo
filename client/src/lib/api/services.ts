@@ -69,7 +69,7 @@ export const ServicesApi = {
 export const BookingApi = {
   getAvailableServices: (salonId = 'hq') => ApiClient.get<{ data: Service[] }>(`/salons/${salonId}/services`, false, { cache: 'no-store' }),
   getAvailableStaff: (salonId = 'hq') => ApiClient.get<{ data: Staff[] }>(`/salons/${salonId}/staff`, false, { cache: 'no-store' }),
-  createBooking: (salonId: string, data: BookingData) => ApiClient.post<{ data: BookingData & { id: string } }>(`/salons/${salonId}/bookings`, data, true),
+  createBooking: (salonId: string, data: BookingData) => ApiClient.post<{ data: BookingData & { id: string } }>(`/salons/${salonId}/bookings`, data, false),
   getAvailability: (salonId: string, date: string, serviceId: string, stylistId?: string) => {
     const params = new URLSearchParams({ date, service_id: serviceId });
     if (stylistId) params.append('stylist_id', stylistId);

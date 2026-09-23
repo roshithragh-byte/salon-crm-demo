@@ -139,8 +139,8 @@ export default function BookingForm({ services, staff }: { services: Service[], 
         <p className="text-slate-500 max-w-sm text-sm">
           Thank you! We have received your appointment request. An order confirmation will be sent to the contact details provided above.
         </p>
-        <Button variant="outline" onClick={() => { reset(); setResult(null); }} className="mt-4">
-          Book Another Appointment
+        <Button variant="outline" onClick={() => router.push('/')} className="mt-4">
+          Return to Homepage
         </Button>
       </div>
     );

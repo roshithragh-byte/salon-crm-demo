@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../auth/jwt.auth.guard';
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
-  @UseGuards(JwtAuthGuard)
+  // Removed JwtAuthGuard to allow customers to book
   @Post()
   async createBooking(
     @Param('salonId') salonId: string,
