@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build && npx tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --skipLibCheck",
+    "build": "npx prisma generate && nest build && npx tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --skipLibCheck",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
