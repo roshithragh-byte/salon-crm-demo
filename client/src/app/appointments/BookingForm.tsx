@@ -53,7 +53,7 @@ export default function BookingForm({ services, staff }: { services: Service[], 
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const router = useRouter();
 
-  const { register, handleSubmit, control, reset } = useForm<FormValues>({
+  const { register, handleSubmit, control, reset, getValues } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { consent: true }
   });
