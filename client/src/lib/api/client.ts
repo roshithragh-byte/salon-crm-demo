@@ -4,12 +4,13 @@ export class ApiClient {
     if (typeof window !== "undefined") {
       return "/api/v1";
     }
-    const raw =
-      process.env.NEXT_PUBLIC_API_URL ||
-      process.env.API_BASE_URL ||
-      "http://127.0.0.1:3001/api/v1";
-    if (raw.endsWith("/api/v1") || raw.includes("/api/v1/")) return raw.replace(/\/$/, "");
-    return `${raw.replace(/\/$/, "")}/api/v1`;
+    const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL;
+    if (!raw && process.env.NODE_ENV === 'production') {
+      console.warn("API_BASE_URL or NEXT_PUBLIC_API_URL must be defined in production. Proxy might fail.");
+    }
+    const finalRaw = (raw || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`).replace(/^["'\s]+|["'\s]+$/g, "");
+    if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) return finalRaw.replace(/\/$/, "");
+    return `${finalRaw.replace(/\/$/, "")}/api/v1`;
   }
 
   private static async getHeaders(requiresAuth = false): Promise<HeadersInit> {

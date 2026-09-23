@@ -10,6 +10,18 @@ export default withAuth(
 
     const isAccountPath = req.nextUrl.pathname.startsWith("/account");
 
+    if (req.nextUrl.pathname.startsWith("/api/v1")) {
+      const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+      const finalRaw = (raw || (process.env.NODE_ENV === 'production' ? 'https://localhost' : `http://127.0.0.1:${process.env.API_PORT || 3001}`)).replace(/^["'\s]+|["'\s]+$/g, "");
+      let backendUrl = finalRaw.replace(/\/api\/v1\/?$/, "");
+      if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
+        backendUrl = "https://" + backendUrl;
+      }
+      const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
+      targetUrl.search = req.nextUrl.search;
+      return NextResponse.rewrite(targetUrl);
+    }
+
     if (isLoginPath) {
       if (isAuth) {
         return NextResponse.redirect(new URL("/admin/dashboard", req.url));
@@ -52,5 +64,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/admin/:path*", "/account/:path*"],
+  matcher: ["/admin/:path*", "/account/:path*", "/api/v1/:path*"],
 };
