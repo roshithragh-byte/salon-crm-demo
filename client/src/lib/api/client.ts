@@ -3,15 +3,13 @@ export class ApiClient {
     if (typeof window !== "undefined") {
       return "/api/v1";
     }
-    const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL;
-    let finalRaw = raw;
-    if (!finalRaw) {
-      if (process.env.NODE_ENV === 'production') {
-        finalRaw = 'https://salon-crm-demo-production.up.railway.app/api/v1';
-      } else {
-        finalRaw = `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
-      }
+    // FORCE PRODUCTION URL to bypass bad Vercel environment variables
+    if (process.env.NODE_ENV === 'production') {
+      return 'https://salon-crm-demo-production.up.railway.app/api/v1';
     }
+    
+    const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL;
+    let finalRaw = raw || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
     
     finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
     if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) return finalRaw.replace(/\/$/, "");
