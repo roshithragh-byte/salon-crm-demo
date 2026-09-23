@@ -8,10 +8,10 @@
   "scripts": {
     "build": "npx prisma generate && nest build && npx tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --skipLibCheck",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "npx prisma migrate deploy && node dist/prisma/seed.js && PORT=3001 node dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "npx prisma migrate deploy && node dist/prisma/seed.js && PORT=3001 node dist/main",
+    "start:prod": "node dist/main",
     "lint": "echo 'no lint'",
     "test": "jest",
     "test:watch": "jest --watch",
