@@ -96,3 +96,7 @@ export const CustomerApi = {
   getAppointments: () => ApiClient.get<{ upcoming: any[]; history: any[] }>('/me/appointments', true, { cache: 'no-store' }),
 };
 
+
+export const AdminCustomerApi = {
+  getCustomers: (salonId = 'hq') => ApiClient.get<{ data: any[] }>(`/salons/${salonId}/customers`, true, { cache: 'no-store' }),
+};
