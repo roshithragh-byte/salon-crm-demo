@@ -1,6 +1,5 @@
 export class ApiClient {
   private static getBaseUrl() {
-    // Browser: same-origin /api/v1 so Next rewrites + CSP connect-src 'self' work.
     if (typeof window !== "undefined") {
       return "/api/v1";
     }
@@ -9,7 +8,6 @@ export class ApiClient {
     if (!finalRaw) {
       if (process.env.NODE_ENV === 'production') {
         finalRaw = 'https://salon-crm-demo-production.up.railway.app/api/v1';
-        console.warn("API_BASE_URL or NEXT_PUBLIC_API_URL missing in production. Falling back to: " + finalRaw);
       } else {
         finalRaw = `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
       }
@@ -44,6 +42,7 @@ export class ApiClient {
     const res = await fetch(url, {
       ...options,
       headers: { ...headers, ...options.headers },
+      cache: 'no-store', // Disable Next.js aggressive Data Cache to prevent 502/404 persisting
     });
 
     if (res.status === 401) {
