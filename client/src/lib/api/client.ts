@@ -5,10 +5,17 @@ export class ApiClient {
       return "/api/v1";
     }
     const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL;
-    if (!raw && process.env.NODE_ENV === 'production') {
-      console.warn("API_BASE_URL or NEXT_PUBLIC_API_URL must be defined in production. Proxy might fail.");
+    let finalRaw = raw;
+    if (!finalRaw) {
+      if (process.env.NODE_ENV === 'production') {
+        finalRaw = 'https://salon-crm-demo-production.up.railway.app/api/v1';
+        console.warn("API_BASE_URL or NEXT_PUBLIC_API_URL missing in production. Falling back to: " + finalRaw);
+      } else {
+        finalRaw = `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
+      }
     }
-    const finalRaw = (raw || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`).replace(/^["'\s]+|["'\s]+$/g, "");
+    
+    finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
     if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) return finalRaw.replace(/\/$/, "");
     return `${finalRaw.replace(/\/$/, "")}/api/v1`;
   }
@@ -21,23 +28,12 @@ export class ApiClient {
     if (requiresAuth) {
       let token = '';
       if (typeof window !== 'undefined') {
-        // Client-side: get token from sessionStorage
         token = sessionStorage.getItem('accessToken') || '';
-      } else {
-        // Server-side: we cannot reliably get the token here without complex setup
-        // For server-side rendering, we will rely on the fact that the request is
-        // made same-origin after rewriting and that the NextAuth session is valid.
-        // However, the backend still needs the access token.
-        // For now, we will leave it empty and assume that server-side data fetching
-        // is only used for public endpoints or that we have switched to client-side
-        // data fetching for protected endpoints.
       }
-
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
     }
-
     return headers;
   }
 
@@ -50,10 +46,7 @@ export class ApiClient {
       headers: { ...headers, ...options.headers },
     });
 
-    // Handle 401 Unauthorized
     if (res.status === 401) {
-      // We do not store the token in sessionStorage, so nothing to remove.
-      // Throw an error that can be caught by the caller to redirect to login.
       throw new Error('Unauthorized');
     }
 
