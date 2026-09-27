@@ -23,7 +23,19 @@ export default withAuth(
       }
       const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
       targetUrl.search = req.nextUrl.search;
-      return NextResponse.rewrite(targetUrl);
+
+      const requestHeaders = new Headers(req.headers);
+      const cookieName = process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
+      const tokenString = req.cookies.get(cookieName)?.value;
+      if (tokenString) {
+        requestHeaders.set('Authorization', `Bearer ${tokenString}`);
+      }
+
+      return NextResponse.rewrite(targetUrl, {
+        request: {
+          headers: requestHeaders,
+        }
+      });
     }
 
     if (isLoginPath) {

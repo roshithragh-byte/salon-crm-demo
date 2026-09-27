@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApiClient } from "@/lib/api/client";
+import { BookingApi } from "@/lib/api/services";
 import { Calendar as CalendarIcon, Clock, Search, ChevronDown, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 
@@ -11,18 +11,13 @@ export default function BookingsPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    // In a real scenario we'd fetch all or paginated appointments for the salon.
-    // The existing API doesn't have a direct "getAllBookings" for admin in the client SDK, 
-    // but we can use the dashboard upcoming appointments or fetch from a known endpoint.
-    // Assuming we use a generic fetch since we need all bookings.
-    ApiClient.request<{ data: any[] }>('/salons/hq/dashboard', { method: 'GET' }, true)
+    BookingApi.getBookings('hq')
       .then((res: any) => {
-        // The dashboard endpoint returns upcomingAppointments. 
-        // If there is an admin bookings endpoint, it's missing in services.ts.
-        // Wait, earlier I saw we have /me/appointments but that's for the logged in customer.
-        // Let's use the dashboard data for now, or if there's a specific endpoint, we can use it.
-        // Let's assume /salons/hq/appointments exists on backend or we just use dashboard.
-        setAppointments(res.data?.upcomingAppointments || []);
+        if (Array.isArray(res)) {
+          setAppointments(res);
+        } else {
+          setAppointments(res.data || []);
+        }
       })
       .catch((err: any) => {
         console.error("Failed to load appointments", err);
@@ -65,14 +60,16 @@ export default function BookingsPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Service</th>
+                <th className="px-6 py-4 font-medium">Staff</th>
                 <th className="px-6 py-4 font-medium">Date & Time</th>
+                <th className="px-6 py-4 font-medium">Payment</th>
                 <th className="px-6 py-4 font-medium text-right">Status</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                     <div className="flex flex-col items-center justify-center">
                       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-2" />
                       Loading appointments...
@@ -81,7 +78,7 @@ export default function BookingsPage() {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                     <CalendarIcon className="mx-auto h-12 w-12 text-muted-foreground/30 mb-3" />
                     <p className="text-base font-medium text-foreground">No appointments found</p>
                     <p className="text-sm mt-1">Try adjusting your search filters.</p>
@@ -92,15 +89,31 @@ export default function BookingsPage() {
                   <tr key={a.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-foreground">{a.customerName}</div>
+                      {a.customerPhone && <div className="text-xs text-muted-foreground mt-0.5">{a.customerPhone}</div>}
                     </td>
                     <td className="px-6 py-4 text-muted-foreground">
-                      {a.serviceName || "Service"}
+                      {a.service?.name || a.serviceName || "Service"}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {a.staff?.user?.firstName ? `${a.staff.user.firstName} ${a.staff.user.lastName || ''}` : 'Any Staff'}
                     </td>
                     <td className="px-6 py-4 text-foreground">
                       <div className="flex items-center gap-2">
                         <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                         {format(new Date(a.startsAt), "MMM d, yyyy • h:mm a")}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {a.payments && a.payments.length > 0 ? (
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                          a.payments[0].status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' :
+                          'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}>
+                          {a.payments[0].status}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">None</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${

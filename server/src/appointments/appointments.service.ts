@@ -90,6 +90,7 @@ export class AppointmentsService {
         include: {
           customer: true,
           service: true,
+          payments: true,
           staff: {
             include: {
               user: true
