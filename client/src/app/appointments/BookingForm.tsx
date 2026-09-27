@@ -1,25 +1,25 @@
 "use client";
 
-import { BookingApi } from '@/lib/api/services';
-import { ApiClient } from '@/lib/api/client';
-import { useRouter } from 'next/navigation';
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { useState, useTransition, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState, useTransition } from "react";
+import { BookingApi } from "@/lib/api/services";
+import { ApiClient } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, CheckCircle2, AlertCircle, Calendar as CalendarIcon, Clock, Scissors, UserCheck, CreditCard } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-interface Slot {
-  starts_at: string;
-}
-
-
-
-interface WebhookResponse {
-  received: boolean;
+interface BookingFormData {
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  serviceId: string;
+  staffId?: string;
+  preferredDate: string;
+  startsAt: string;
+  notes?: string;
+  consent: boolean;
 }
 
 interface Service {
@@ -33,59 +33,55 @@ interface Staff {
   name: string;
 }
 
-const formSchema = z.object({
-  customerName: z.string().min(1, "Name is required"),
-  customerPhone: z.string().min(10, "Valid phone number required"),
-  customerEmail: z.string().email("Valid email is required").optional().or(z.literal("")),
-  serviceId: z.string().min(1, "Please select a service"),
-  staffId: z.string().optional(),
-  preferredDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Please select a date"),
-  startsAt: z.string().min(1, "Please select a time"),
-  notes: z.string().optional(),
-  consent: z.boolean().refine(val => val, "You must provide consent"),
-});
-type FormValues = z.infer<typeof formSchema>;
+interface WebhookResponse {
+  received: boolean;
+}
 
-export default function BookingForm({ services, staff }: { services: Service[], staff: Staff[] }) {
-  const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<Slot[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+export function BookingForm() {
   const router = useRouter();
-
-  const { register, handleSubmit, control, reset, getValues } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { consent: true }
+  const { register, handleSubmit, control, watch, reset, getValues } = useForm<BookingFormData>({
+    defaultValues: { staffId: "any", consent: true }
   });
 
-  const watchedDate = useWatch({ control, name: "preferredDate" });
-  const watchedServiceId = useWatch({ control, name: "serviceId" });
-  const watchedStaffId = useWatch({ control, name: "staffId" });
+  const [isPending, startTransition] = useTransition();
+  const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
+
+  const [services, setServices] = useState<Service[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(true);
+
+  const watchedServiceId = watch("serviceId");
+  const watchedStaffId = watch("staffId");
+  const watchedDate = watch("preferredDate");
 
   useEffect(() => {
-    let cancelled = false;
+    Promise.all([
+      BookingApi.getAvailableServices('hq'),
+      BookingApi.getAvailableStaff('hq')
+    ])
+    .then(([svcRes, staffRes]) => {
+      setServices(svcRes.data);
+      setStaff(staffRes.data);
+    })
+    .catch(console.error)
+    .finally(() => setIsFetchingMetadata(false));
+  }, []);
+
+  useEffect(() => {
     if (watchedDate && watchedServiceId) {
-      (async () => {
-        try {
-          setIsLoadingSlots(true);
-          const stylistId = watchedStaffId && watchedStaffId !== "any" ? watchedStaffId : undefined;
-          const res = await BookingApi.getAvailability("hq", watchedDate, watchedServiceId, stylistId);
-          if (!cancelled) setAvailableSlots(res.data?.slots ?? []);
-        } catch (err) {
-          console.error("Failed to fetch slots", err);
-          if (!cancelled) setAvailableSlots([]);
-        } finally {
-          if (!cancelled) setIsLoadingSlots(false);
-        }
-      })();
+      setIsLoadingSlots(true);
+      BookingApi.getAvailability('hq', watchedDate, watchedServiceId, watchedStaffId === "any" ? undefined : watchedStaffId)
+        .then(res => setAvailableSlots(res.data.slots || []))
+        .catch(console.error)
+        .finally(() => setIsLoadingSlots(false));
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvailableSlots([]);
     }
-    return () => { cancelled = true; };
   }, [watchedDate, watchedServiceId, watchedStaffId]);
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: BookingFormData) => {
     setResult(null);
     startTransition(async () => {
       try {
@@ -101,7 +97,7 @@ export default function BookingForm({ services, staff }: { services: Service[], 
         const bookingId = bookingJson.data.id;
 
         const paymentJson = await BookingApi.initializePayment('hq', bookingId);
-
+        
         await ApiClient.post<WebhookResponse>('/payments/webhook/razorpay', {
           order_id: paymentJson.data.providerOrderId
         }, false);
@@ -112,7 +108,6 @@ export default function BookingForm({ services, staff }: { services: Service[], 
         if (err instanceof Error) {
           console.error("Failed to create booking", err);
           if (err.message === 'Unauthorized') {
-            // Redirect to login page
             router.push('/admin/login');
           } else {
             setResult({ success: false, message: 'Failed to create booking' });
@@ -125,21 +120,52 @@ export default function BookingForm({ services, staff }: { services: Service[], 
     });
   };
 
+  if (isFetchingMetadata) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-muted-foreground font-medium">Loading salon services...</p>
+      </div>
+    );
+  }
+
   if (result?.success) {
     const email = getValues('customerEmail');
     const phone = getValues('customerPhone');
     return (
-      <div className="flex flex-col items-center text-center py-8 gap-4">
-        <CheckCircle2 className="w-16 h-16 text-green-500" />
-        <h2 className="text-2xl font-serif font-bold text-slate-800">Booking Confirmed!</h2>
-        <div className="bg-slate-50 border border-slate-100 p-5 rounded-xl w-full text-left space-y-3 mt-2 mb-2">
-          <p className="text-slate-700"><span className="font-semibold text-purple-950">Phone / WhatsApp:</span> {phone}</p>
-          {email && <p className="text-slate-700"><span className="font-semibold text-purple-950">Email:</span> {email}</p>}
+      <div className="flex flex-col items-center text-center py-12 px-4 gap-6 animate-in fade-in zoom-in duration-500">
+        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center">
+          <CheckCircle2 className="w-10 h-10 text-green-600" />
         </div>
-        <p className="text-slate-500 max-w-sm text-sm">
-          Thank you! We have received your appointment request. An order confirmation will be sent to the contact details provided above.
-        </p>
-        <Button variant="outline" onClick={() => router.push('/')} className="mt-4">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-serif font-medium text-foreground">Booking Confirmed</h2>
+          <p className="text-muted-foreground max-w-sm text-sm mx-auto">
+            Your appointment has been successfully scheduled. We look forward to seeing you.
+          </p>
+        </div>
+        
+        <div className="bg-muted/50 border rounded-2xl w-full max-w-md p-6 text-left space-y-4 mt-2">
+          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Confirmation Details</h3>
+          <div className="flex justify-between items-center border-b border-border pb-3">
+            <span className="text-muted-foreground">Phone / WhatsApp</span>
+            <span className="font-medium text-foreground">{phone}</span>
+          </div>
+          {email && (
+            <div className="flex justify-between items-center border-b border-border pb-3">
+              <span className="text-muted-foreground">Email</span>
+              <span className="font-medium text-foreground">{email}</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center pb-1">
+            <span className="text-muted-foreground">Payment</span>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full">
+              <CheckCircle2 className="w-3 h-3" />
+              Verified
+            </span>
+          </div>
+        </div>
+        
+        <Button size="lg" onClick={() => router.push('/')} className="mt-6 w-full max-w-md h-12 text-base">
           Return to Homepage
         </Button>
       </div>
@@ -147,123 +173,169 @@ export default function BookingForm({ services, staff }: { services: Service[], 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
       {result && !result.success && (
-        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{result.message ?? "Something went wrong. Please try again."}</span>
+        <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-4 text-sm text-destructive animate-in slide-in-from-top-2">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span className="font-medium">{result.message ?? "Something went wrong. Please try again."}</span>
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Full Name *</label>
-        <Input {...register("customerName")} placeholder="Your full name" />
+      <div className="space-y-6">
+        <div className="border-b pb-2">
+          <h3 className="text-lg font-serif font-medium text-foreground">Appointment Details</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Scissors className="w-4 h-4 text-muted-foreground" /> Service *
+            </label>
+            <Controller
+              control={control}
+              name="serviceId"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 bg-muted/30">
+                    <SelectValue placeholder="Select a service">
+                      {services.find((s: Service) => s.id === field.value)?.name || "Select a service"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((s: Service) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-muted-foreground" /> Stylist (optional)
+            </label>
+            <Controller
+              control={control}
+              name="staffId"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="h-12 bg-muted/30">
+                    <SelectValue placeholder="Any Available Stylist">
+                      {field.value === "any" ? "Any Available Stylist" : staff.find((s: Staff) => s.id === field.value)?.name || "Any Available Stylist"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Available Stylist</SelectItem>
+                    {staff.map((s: Staff) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4 text-muted-foreground" /> Date *
+            </label>
+            <Controller
+              control={control}
+              name="preferredDate"
+              render={({ field }) => (
+                <input 
+                  type="date" 
+                  className="flex w-full rounded-md border border-input bg-muted/30 h-12 px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" 
+                  value={field.value || ""} 
+                  min={new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })} 
+                  onChange={(evt) => field.onChange(evt.target.value)} 
+                />
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" /> Time *
+            </label>
+            <Controller
+              control={control}
+              name="startsAt"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDate || !watchedServiceId || isLoadingSlots}>
+                  <SelectTrigger className="h-12 bg-muted/30">
+                    <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : "Select a time"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSlots.length === 0 && !isLoadingSlots ? (
+                      <SelectItem value="__none" disabled>No slots for this date</SelectItem>
+                    ) : (
+                      availableSlots.map(slot => {
+                        const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                          timeZone: "Asia/Kolkata",
+                        });
+                        return <SelectItem key={slot.starts_at} value={slot.starts_at}>{timeString}</SelectItem>;
+                      })
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Phone Number *</label>
-        <Input {...register("customerPhone")} placeholder="10-digit mobile number" type="tel" />
+      <div className="space-y-6 pt-4 border-t">
+        <div className="border-b pb-2">
+          <h3 className="text-lg font-serif font-medium text-foreground">Your Information</h3>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Full Name *</label>
+            <Input {...register("customerName")} placeholder="Your full name" className="h-12 bg-muted/30" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Phone Number *</label>
+              <Input {...register("customerPhone")} placeholder="10-digit mobile number" type="tel" className="h-12 bg-muted/30" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Email <span className="text-muted-foreground font-normal">(optional)</span></label>
+              <Input {...register("customerEmail")} placeholder="you@example.com" type="email" className="h-12 bg-muted/30" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Notes <span className="text-muted-foreground font-normal">(optional)</span></label>
+            <Input {...register("notes")} placeholder="Any special requests?" className="h-12 bg-muted/30" />
+          </div>
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Email (optional)</label>
-        <Input {...register("customerEmail")} placeholder="you@example.com" type="email" />
+      <div className="flex items-start gap-3 bg-muted/30 rounded-xl p-5 border">
+        <input type="checkbox" {...register("consent")} className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary" />
+        <label className="text-sm text-muted-foreground leading-relaxed">
+          I consent to being contacted regarding this appointment and agree to the salon's booking policies.
+        </label>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Service *</label>
-        <Controller
-          control={control}
-          name="serviceId"
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a service">
-                  {services.find((s: Service) => s.id === field.value)?.name || "Select a service"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((s: Service) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Staff (optional)</label>
-        <Controller
-          control={control}
-          name="staffId"
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Any Available Stylist">
-                  {field.value === "any" ? "Any Available Stylist" : staff.find((s: Staff) => s.id === field.value)?.name || "Any Available Stylist"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any">Any Available Stylist</SelectItem>
-                {staff.map((s: Staff) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Date *</label>
-        <Controller
-          control={control}
-          name="preferredDate"
-          render={({ field }) => (
-            <input type="date" className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={field.value || ""} min={new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })} onChange={(evt) => field.onChange(evt.target.value)} />
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Time *</label>
-        <Controller
-          control={control}
-          name="startsAt"
-          render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDate || !watchedServiceId || isLoadingSlots}>
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : "Select a time"} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableSlots.length === 0 && !isLoadingSlots ? (
-                  <SelectItem value="__none" disabled>No slots for this date</SelectItem>
-                ) : (
-                  availableSlots.map(slot => {
-                    const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                      timeZone: "Asia/Kolkata",
-                    });
-                    return <SelectItem key={slot.starts_at} value={slot.starts_at}>{timeString}</SelectItem>;
-                  })
-                )}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-slate-700">Notes (optional)</label>
-        <Input {...register("notes")} placeholder="Any special requests?" />
-      </div>
-
-      <div className="flex items-start gap-3 bg-slate-50 rounded-lg p-4 border border-slate-100">
-        <input type="checkbox" {...register("consent")} className="mt-0.5 h-4 w-4" />
-        <label className="text-sm text-slate-600">I consent to being contacted regarding this appointment.</label>
-      </div>
-
-      <Button type="submit" disabled={isPending} className="w-full bg-purple-950 hover:bg-purple-800 text-white py-3">
-        {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Confirm Appointment Request"}
+      <Button type="submit" disabled={isPending} className="w-full h-14 text-base font-medium shadow-md">
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Processing Booking...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-5 w-5" />
+            Confirm & Pay Securely
+          </>
+        )}
       </Button>
     </form>
   );

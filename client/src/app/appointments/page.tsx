@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { businessConfig } from "@/business.config";
-import BookingForm from "./BookingForm";
+import { BookingForm } from "./BookingForm";
 import { ApiClient } from "@/lib/api/client";
 
 export const dynamic = 'force-dynamic';
@@ -83,7 +83,7 @@ export default async function AppointmentsPage() {
               </p>
             </div>
           ) : (
-            <BookingForm services={services} staff={staff} />
+            <BookingForm />
           )}
         </div>
 
