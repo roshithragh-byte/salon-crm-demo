@@ -34,11 +34,11 @@ export default function Home() {
           <Link href="/" className="flex items-center">
             {/* Nav logo with mix-blend-mode for the black background */}
             <div className="relative w-32 h-10 mix-blend-screen overflow-hidden flex items-center">
-              <Image 
-                src="/logo.jpg" 
-                alt="de salon bea" 
-                fill 
-                className="object-cover object-center" 
+              <Image
+                src="/logo.svg"
+                alt="de salon bea"
+                fill
+                className="object-cover object-center"
                 priority
               />
             </div>
@@ -65,13 +65,13 @@ export default function Home() {
       {/* ── HERO ── */}
       <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black">
         {/* Background Video */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity"
-          poster="/logo.jpg"
+          poster="/logo.svg"
         >
           {/* User needs to provide this video */}
           <source src="/hero-video.mp4" type="video/mp4" />
@@ -82,12 +82,12 @@ export default function Home() {
 
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Subtle Entrance Animation Sequence */}
-          
+
           {/* 1. Logo (mix-blend-screen makes the black background disappear, leaving gold over the cinematic video) */}
           <div className="animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-both relative w-64 h-64 md:w-80 md:h-80 mix-blend-screen mb-2">
-            <Image 
-              src="/logo.jpg" 
-              alt="de salon bea - Beauty. Confidence. You." 
+            <Image
+              src="/logo.svg"
+              alt="de salon bea - Beauty. Confidence. You."
               fill
               className="object-contain"
               priority
@@ -130,7 +130,7 @@ export default function Home() {
               Our Ethos
             </div>
             <h2 className="text-4xl md:text-5xl font-serif font-medium leading-[1.15]">
-              A Space Built <br/><span className="text-ring italic">Exclusively</span> for You.
+              A Space Built <br /><span className="text-ring italic">Exclusively</span> for You.
             </h2>
             <div className="space-y-6 text-muted-foreground text-lg font-light leading-relaxed">
               <p>
@@ -166,7 +166,7 @@ export default function Home() {
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg mb-20 font-light">
             A carefully selected collection of treatments designed to enhance your natural beauty and provide deep relaxation.
           </p>
-          
+
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12 text-left">
             {[
               { title: "Hair Styling", price: "From ₹800", desc: "Precision cuts, bespoke coloring, and deep conditioning treatments tailored to your features." },
@@ -186,7 +186,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          
+
           <div className="mt-20">
             <Link href="/appointments" className="inline-flex items-center justify-center gap-3 border border-foreground text-foreground px-10 py-4 font-medium tracking-widest uppercase text-sm hover:bg-foreground hover:text-background transition-colors">
               View Full Menu
@@ -200,11 +200,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-12 gap-16 lg:gap-24 mb-32">
           <div className="md:col-span-5 space-y-10">
             <div className="relative w-48 h-20 mix-blend-screen opacity-90 hover:opacity-100 transition-opacity">
-              <Image 
-                src="/logo.jpg" 
-                alt="de salon bea" 
-                fill 
-                className="object-contain object-left" 
+              <Image
+                src="/logo.svg"
+                alt="de salon bea"
+                fill
+                className="object-contain object-left"
               />
             </div>
             <p className="text-primary-foreground/70 text-lg font-light max-w-md leading-relaxed">
@@ -217,20 +217,20 @@ export default function Home() {
               Book Your Visit
             </Link>
           </div>
-          
+
           <div className="md:col-span-7 grid sm:grid-cols-2 gap-12 lg:gap-16 pt-4">
             <div className="space-y-8">
               <h4 className="text-xs font-medium text-ring uppercase tracking-[0.2em]">Visit Us</h4>
               <div className="flex gap-4 items-start text-primary-foreground/70 font-light">
                 <MapPin className="w-5 h-5 shrink-0 mt-1 opacity-70" />
                 <p className="leading-loose">
-                  {businessConfig.address.street}<br/>
-                  {businessConfig.address.landmark}<br/>
+                  {businessConfig.address.street}<br />
+                  {businessConfig.address.landmark}<br />
                   {businessConfig.address.city}, {businessConfig.address.state} {businessConfig.address.postalCode}
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-8">
               <h4 className="text-xs font-medium text-ring uppercase tracking-[0.2em]">Connect</h4>
               <div className="space-y-6 text-primary-foreground/70 font-light">
@@ -250,7 +250,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs tracking-wider text-primary-foreground/50">
           <p>© {new Date().getFullYear()} {businessConfig.name}. All rights reserved.</p>
           <div className="flex gap-8 uppercase font-medium">
