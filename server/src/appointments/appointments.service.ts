@@ -58,7 +58,16 @@ export class AppointmentsService {
   }
 
   async findAll(salonId: string, date?: string) {
-    const whereClause: any = { salonId };
+    // Determine actual salon ID if salonId is a slug
+    const salon = await this.prisma.salon.findFirst({
+      where: { OR: [{ id: salonId }, { slug: salonId }] }
+    });
+    
+    if (!salon) {
+      throw new NotFoundException('Salon not found');
+    }
+
+    const whereClause: any = { salonId: salon.id };
 
     if (date) {
       const startDate = new Date(date);
