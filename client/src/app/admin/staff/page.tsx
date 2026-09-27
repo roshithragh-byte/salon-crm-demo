@@ -2,31 +2,105 @@
 
 import { useEffect, useState } from "react";
 import { BookingApi } from "@/lib/api/services";
-import { UserCheck, Sparkles } from "lucide-react";
+import { UserCheck, Sparkles, Plus, Loader2 } from "lucide-react";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchStaff = () => {
+    setLoading(true);
+    BookingApi.getAvailableStaff("hq")
+      .then((res) => setStaff(res.data || []))
+      .catch((err) => console.error("Failed to load staff", err))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
-    BookingApi.getAvailableStaff("hq")
-      .then((res) => {
-        setStaff(res.data || []);
-      })
-      .catch((err) => {
-        console.error("Failed to load staff", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    fetchStaff();
   }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setCreating(true);
+    try {
+      await BookingApi.createStaff("hq", formData);
+      setFormData({ name: "", email: "", password: "" });
+      setShowForm(false);
+      fetchStaff();
+    } catch (err: any) {
+      setError(err.message || "Failed to create staff account");
+    } finally {
+      setCreating(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-serif font-bold tracking-tight text-foreground">Team & Stylists</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Manage your salon's professional staff members.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-serif font-bold tracking-tight text-foreground">Team & Stylists</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your salon's professional staff members.</p>
+        </div>
+        <button 
+          onClick={() => setShowForm(!showForm)}
+          className="flex items-center gap-2 bg-foreground text-background px-4 py-2 rounded-lg text-sm font-medium hover:bg-foreground/90 transition-colors"
+        >
+          {showForm ? "Cancel" : <><Plus className="w-4 h-4" /> Add Staff</>}
+        </button>
       </div>
+
+      {showForm && (
+        <div className="bg-card border rounded-2xl shadow-sm p-6 mb-6">
+          <h2 className="text-lg font-serif font-semibold mb-4">Create Staff Account</h2>
+          {error && <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>}
+          <form onSubmit={handleCreate} className="space-y-4 max-w-md">
+            <div>
+              <label className="block text-sm font-medium mb-1">Name</label>
+              <input 
+                required 
+                type="text" 
+                className="w-full border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={formData.name} 
+                onChange={e => setFormData({...formData, name: e.target.value})} 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input 
+                required 
+                type="email" 
+                className="w-full border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={formData.email} 
+                onChange={e => setFormData({...formData, email: e.target.value})} 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Password</label>
+              <input 
+                required 
+                type="password" 
+                className="w-full border rounded-lg px-3 py-2 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={formData.password} 
+                onChange={e => setFormData({...formData, password: e.target.value})} 
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={creating}
+              className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center justify-center disabled:opacity-70"
+            >
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Account"}
+            </button>
+          </form>
+        </div>
+      )}
 
       <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
         <table className="w-full text-sm text-left">
@@ -41,7 +115,7 @@ export default function StaffPage() {
               <tr>
                 <td colSpan={2} className="px-6 py-12 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center">
-                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mb-2" />
+                    <Loader2 className="w-6 h-6 animate-spin mb-2" />
                     Loading staff...
                   </div>
                 </td>

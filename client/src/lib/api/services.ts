@@ -77,6 +77,7 @@ export const BookingApi = {
   },
   initializePayment: (salonId: string, bookingId: string) => ApiClient.post<PaymentResponse>(`/salons/${salonId}/bookings/${bookingId}/payment`, {}),
   getBookings: (salonId: string, date: string) => ApiClient.get<{ data: any[] }>(`/salons/${salonId}/bookings?date=${date}`, true),
+  createStaff: (salonId: string, data: any) => ApiClient.post<{ data: any }>(`/salons/${salonId}/staff`, data, true),
 };
 
 export const DashboardApi = {

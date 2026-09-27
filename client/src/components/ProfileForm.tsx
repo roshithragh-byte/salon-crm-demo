@@ -24,6 +24,8 @@ export function ProfileForm() {
     const fetchProfile = async () => {
       try {
         const data = await ProfileApi.getProfile();
+        if (data?.user?.password) delete data.user.password;
+        if (data?.user?.passwordHash) delete data.user.passwordHash;
         setProfile(data);
         setFormData({
           firstName: data.user.firstName || "",

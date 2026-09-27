@@ -1,20 +1,15 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { AppointmentsService, CreateBookingDto } from './appointments.service';
 import { JwtAuthGuard } from '../auth/jwt.auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
-@Controller('salons/:salonId/appointments')
+@Controller('salons/:salonId/bookings')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
-  @Post()
-  async create(
-    @Param('salonId') salonId: string,
-    @Body() createBookingDto: CreateBookingDto
-  ) {
-    return this.appointmentsService.create(salonId, createBookingDto);
-  }
-
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'OWNER', 'STAFF', 'STYLIST')
   @Get()
   async findAll(
     @Param('salonId') salonId: string,

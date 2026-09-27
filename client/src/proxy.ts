@@ -39,8 +39,16 @@ export default withAuth(
     }
 
     const role = token?.role?.toString().toUpperCase();
-    if (isAdminPath && role !== "ADMIN" && role !== "OWNER") {
-      return NextResponse.redirect(new URL("/account", req.url));
+    if (isAdminPath) {
+      if (role === "STAFF") {
+        const allowedForStaff = req.nextUrl.pathname.startsWith("/admin/dashboard") || 
+                                req.nextUrl.pathname.startsWith("/admin/bookings");
+        if (!allowedForStaff) {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
+      } else if (role !== "ADMIN" && role !== "OWNER") {
+        return NextResponse.redirect(new URL("/account", req.url));
+      }
     }
 
     return null;

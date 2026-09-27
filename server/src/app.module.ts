@@ -14,6 +14,7 @@ import { logger } from './logger/winston.logger';
 import { AuthModule } from './auth/auth.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { MeModule } from './me/me.module';
+import { StaffModule } from './staff/staff.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MeModule } from './me/me.module';
     AuthModule,
     AppointmentsModule,
     MeModule,
+    StaffModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: 'LOGGER', useValue: logger }],

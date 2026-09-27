@@ -5,18 +5,23 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Calendar, Users, Scissors, UserCheck, Settings, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || '';
 
-  const navigation = [
+  const allNavigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Appointments', href: '/admin/bookings', icon: Calendar },
-    { name: 'Customers', href: '/admin/customers', icon: Users },
-    { name: 'Services', href: '/admin/services', icon: Scissors },
-    { name: 'Staff', href: '/admin/staff', icon: UserCheck },
+    { name: 'Customers', href: '/admin/customers', icon: Users, adminOnly: true },
+    { name: 'Services', href: '/admin/services', icon: Scissors, adminOnly: true },
+    { name: 'Staff', href: '/admin/staff', icon: UserCheck, adminOnly: true },
   ];
+
+  const navigation = allNavigation.filter(item => !item.adminOnly || userRole === 'ADMIN' || userRole === 'OWNER');
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
@@ -65,24 +70,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
           
           <div className="px-4 space-y-1">
-            <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-4 px-2">Settings</div>
-            <Link 
-              href="/admin/profile" 
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                pathname === '/admin/profile'
-                  ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm' 
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-              }`}
-            >
-              <Settings className="w-4 h-4 text-sidebar-foreground/50" />
-              Salon Profile
-            </Link>
+            {(userRole === 'ADMIN' || userRole === 'OWNER') && (
+              <>
+                <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-4 px-2">Settings</div>
+                <Link 
+                  href="/admin/profile" 
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                    pathname === '/admin/profile'
+                      ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm' 
+                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 text-sidebar-foreground/50" />
+                  Salon Profile
+                </Link>
+              </>
+            )}
             <button 
               onClick={() => {
                 sessionStorage.removeItem('accessToken');
-                window.location.href = '/admin/login';
+                signOut({ callbackUrl: '/admin/login' });
               }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors mt-4"
             >
               <LogOut className="w-4 h-4" />
               Sign Out
