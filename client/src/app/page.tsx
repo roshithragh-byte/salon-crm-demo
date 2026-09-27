@@ -4,7 +4,7 @@ import { ArrowRight, MapPin, Phone, Globe, CheckCircle2 } from "lucide-react";
 
 const businessConfig = {
   name: "de salon bea",
-  phone: "+91 99999 99999",
+  phone: "+91 87142 29297",
   email: "hello@desalonbea.com",
   address: {
     street: "123 Elegance Avenue",

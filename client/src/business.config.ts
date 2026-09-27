@@ -1,7 +1,7 @@
 export const businessConfig = {
   name: "SALON DE BEAUTÉ",
-  phone: "+919207121213",
-  whatsapp: "+919207121213",
+  phone: "+91 87142 29297",
+  whatsapp: "+91 87142 29297",
   email: "hello@salondebea.com", // Placeholder until provided
   address: {
     street: "1st Floor, Al Wahad Complex, Changuvetty",
