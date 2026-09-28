@@ -36,10 +36,12 @@ export class AuthService {
     const primaryMembership = user.salonMembers.find(m => m.isActive);
     let role = "CUSTOMER";
     let salonId = null;
+    let salonSlug = null;
 
     if (primaryMembership) {
       role = primaryMembership.role;
       salonId = primaryMembership.salonId;
+      salonSlug = primaryMembership.salon?.slug || null;
     }
 
     return {
@@ -47,7 +49,8 @@ export class AuthService {
       email: user.email,
       name: `${user.firstName} ${user.lastName}`,
       role,
-      salonId
+      salonId,
+      salonSlug,
     };
   }
 }

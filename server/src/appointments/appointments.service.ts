@@ -85,7 +85,7 @@ export class AppointmentsService {
     }
 
     try {
-      return await this.prisma.appointment.findMany({
+      const appointments = await this.prisma.appointment.findMany({
         where: whereClause,
         include: {
           customer: true,
@@ -99,9 +99,10 @@ export class AppointmentsService {
           salon: true
         },
         orderBy: {
-          startsAt: 'asc',
+          startsAt: 'desc',
         },
       });
+      return { data: appointments };
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch bookings: ' + error.message);
     }

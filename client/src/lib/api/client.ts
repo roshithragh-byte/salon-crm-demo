@@ -3,15 +3,15 @@ export class ApiClient {
     if (typeof window !== "undefined") {
       return "/api/v1";
     }
-    // FORCE PRODUCTION URL to bypass bad Vercel environment variables
-    if (process.env.NODE_ENV === 'production') {
-      return 'https://salon-crm-demo-production.up.railway.app/api/v1';
-    }
-    
-    const raw = process.env.NEXT_PUBLIC_API_URL || process.env.API_BASE_URL;
-    let finalRaw = raw || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
+    const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+    let finalRaw = raw || (process.env.NODE_ENV === 'production'
+      ? 'https://salon-crm-demo-production.up.railway.app/api/v1'
+      : `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
     
     finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
+    if (!finalRaw.startsWith("http://") && !finalRaw.startsWith("https://")) {
+      finalRaw = (process.env.NODE_ENV === "production" ? "https://" : "http://") + finalRaw;
+    }
     if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) return finalRaw.replace(/\/$/, "");
     return `${finalRaw.replace(/\/$/, "")}/api/v1`;
   }

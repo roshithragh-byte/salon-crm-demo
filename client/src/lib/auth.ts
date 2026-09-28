@@ -8,6 +8,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     role: string;
     salonId: string;
+    salonSlug?: string;
     id: string;
   }
 }
@@ -21,6 +22,7 @@ declare module "next-auth" {
       email: string;
       role: string;
       salonId: string;
+      salonSlug?: string;
     } & DefaultSession["user"];
   }
 }
@@ -49,6 +51,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = user.role;
         token.salonId = user.salonId;
+        token.salonSlug = (user as any).salonSlug;
         token.id = user.id;
       }
       return token;
@@ -58,6 +61,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.role = token.role;
         session.user.salonId = token.salonId;
+        session.user.salonSlug = token.salonSlug;
         session.user.id = token.id;
       }
       return session;

@@ -2,12 +2,16 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
 import { ROLES_KEY } from './roles.decorator';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private prisma: PrismaService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -34,9 +38,19 @@ export class RolesGuard implements CanActivate {
     // Check salonId if it's a salon-specific route
     const params = request.params;
     if (params.salonId && user.salonId !== params.salonId) {
-       // If user is OWNER or ADMIN but for a DIFFERENT salon, they are not authorized
-       // Unless they are a superadmin, but we assume no superadmin for now.
-       throw new ForbiddenException('You are not authorized for this salon');
+      // Check if user has salonSlug matching params.salonId
+      if (user.salonSlug && user.salonSlug === params.salonId) {
+        return true;
+      }
+
+      // Check database to see if params.salonId resolves to user.salonId
+      const salon = await this.prisma.client.salon.findFirst({
+        where: { OR: [{ id: params.salonId }, { slug: params.salonId }] },
+      });
+
+      if (!salon || salon.id !== user.salonId) {
+        throw new ForbiddenException('You are not authorized for this salon');
+      }
     }
     
     return true;

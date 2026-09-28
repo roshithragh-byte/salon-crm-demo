@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -14,6 +14,10 @@ export class BookingsService {
     if (!salon) throw new NotFoundException('Salon not found');
 
     const { serviceId, stylistId, startsAt, customerName, customerPhone, customerEmail, notes } = body;
+    if (!serviceId) throw new BadRequestException('serviceId is required');
+    if (!startsAt || isNaN(new Date(startsAt).getTime())) throw new BadRequestException('Valid startsAt date is required');
+    if (!customerName) throw new BadRequestException('customerName is required');
+    if (!customerPhone) throw new BadRequestException('customerPhone is required');
     const start = new Date(startsAt);
 
     // Fetch the service to get duration and price

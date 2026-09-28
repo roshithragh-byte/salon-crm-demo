@@ -11,15 +11,15 @@ export default withAuth(
     const isAccountPath = req.nextUrl.pathname.startsWith("/account");
 
     if (req.nextUrl.pathname.startsWith("/api/v1")) {
-      // Force production URL directly!
-      let finalRaw = process.env.NODE_ENV === 'production' 
+      const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+      let finalRaw = raw || (process.env.NODE_ENV === 'production' 
         ? 'https://salon-crm-demo-production.up.railway.app/api/v1' 
-        : (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
+        : `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
         
       finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
       let backendUrl = finalRaw.replace(/\/api\/v1\/?$/, "");
       if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
-        backendUrl = "https://" + backendUrl;
+        backendUrl = (process.env.NODE_ENV === "production" ? "https://" : "http://") + backendUrl;
       }
       const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
       targetUrl.search = req.nextUrl.search;
@@ -27,7 +27,7 @@ export default withAuth(
       const requestHeaders = new Headers(req.headers);
       const cookieName = process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token';
       const tokenString = req.cookies.get(cookieName)?.value;
-      if (tokenString) {
+      if (tokenString && !requestHeaders.has('Authorization')) {
         requestHeaders.set('Authorization', `Bearer ${tokenString}`);
       }
 

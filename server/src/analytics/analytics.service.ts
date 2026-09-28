@@ -11,9 +11,9 @@ export class AnalyticsService {
     });
     if (!salon) throw new NotFoundException('Salon not found');
 
-    // 1. Total Revenue (from COMPLETED bookings)
+    // 1. Total Revenue (from CONFIRMED and COMPLETED bookings)
     const revenueResult = await this.prisma.client.appointment.aggregate({
-      where: { salonId: salon.id, status: 'COMPLETED' },
+      where: { salonId: salon.id, status: { in: ['CONFIRMED', 'COMPLETED'] } },
       _sum: { finalRevenue: true }
     });
     const totalRevenue = revenueResult._sum.finalRevenue || 0;
@@ -23,15 +23,18 @@ export class AnalyticsService {
       where: { salonId: salon.id }
     });
 
-    // 3. Upcoming Appointments
+    // 3. Upcoming Appointments (from today onwards)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
     const upcomingAppointments = await this.prisma.client.appointment.findMany({
       where: { 
         salonId: salon.id,
         status: { in: ['PENDING', 'CONFIRMED'] },
-        startsAt: { gte: new Date() }
+        startsAt: { gte: startOfToday }
       },
       orderBy: { startsAt: 'asc' },
-      take: 5
+      take: 10
     });
 
     // 4. Top Services

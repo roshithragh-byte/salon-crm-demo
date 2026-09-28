@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+*.tsbuildinfo
 
 # Logs
 logs
@@ -18,4 +19,14 @@ lerna-debug.log*
 
 # Env
 .env
-.env.test
+.env.*
+*.local
+!.env.example
+
+# Scratch and ad-hoc scripts
+test-*.js
+test*.js
+patch*.js
+fix*.js
+create-*.js
+FINAL_*.txt

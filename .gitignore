@@ -1,16 +1,63 @@
-# Ignore system and IDE files
+# OS and Editor metadata
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# Logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
 
-# Ignore Node modules
+# Dependencies
 node_modules/
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
 
-# Ignore env files
+# Environment and sensitive files
 .env
 .env.*
+*.env
+*.local
+.dev.vars
+*.pem
+*.key
+*.cert
 !.env.example
+
+# Build and runtime outputs
+dist/
+build/
+out/
+.next/
+.open-next/
+*.tsbuildinfo
+
+# Cloudflare and local dev cache
+.wrangler/
+
+# Databases and cache files
+*.db
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Testing & coverage
+coverage/
+.nyc_output/
+
+# Temporary patch & scratch scripts
+patch*.js
+fix-ts*.js
+*automation*.js
 
 # Antigravity agent task files
 .agent-tasks/

@@ -1,4 +1,8 @@
-import "dotenv/config";
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { logger } from './logger/winston.logger';
@@ -27,7 +31,7 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v1');
-  const port = process.env.PORT || process.env.API_PORT || 3001;
+  const port = process.env.API_PORT || (process.env.NODE_ENV === 'production' ? process.env.PORT : (process.env.PORT !== '3000' ? process.env.PORT : null)) || 3001;
   await app.listen(port, '0.0.0.0');
   logger.info(`API server running on port ${port}`);
 }

@@ -8,6 +8,12 @@ export class StaffService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createStaff(salonId: string, data: any) {
+    const salon = await this.prisma.salon.findFirst({
+      where: { OR: [{ id: salonId }, { slug: salonId }] }
+    });
+    if (!salon) throw new NotFoundException('Salon not found');
+    const actualSalonId = salon.id;
+
     const { email, firstName, lastName, password, role = 'STAFF' } = data;
     
     // Check if user exists
@@ -28,7 +34,7 @@ export class StaffService {
 
     // Check if already a member of this salon
     const existingMember = await this.prisma.salonMember.findUnique({
-      where: { salonId_userId: { salonId, userId: user.id } },
+      where: { salonId_userId: { salonId: actualSalonId, userId: user.id } },
     });
 
     if (existingMember) {
@@ -37,7 +43,7 @@ export class StaffService {
 
     const member = await this.prisma.salonMember.create({
       data: {
-        salonId,
+        salonId: actualSalonId,
         userId: user.id,
         role: role as Role,
         isActive: true,
@@ -48,11 +54,17 @@ export class StaffService {
   }
 
   async setStaffStatus(salonId: string, staffId: string, isActive: boolean) {
+    const salon = await this.prisma.salon.findFirst({
+      where: { OR: [{ id: salonId }, { slug: salonId }] }
+    });
+    if (!salon) throw new NotFoundException('Salon not found');
+    const actualSalonId = salon.id;
+
     const member = await this.prisma.salonMember.findUnique({
       where: { id: staffId },
     });
 
-    if (!member || member.salonId !== salonId) {
+    if (!member || member.salonId !== actualSalonId) {
       throw new NotFoundException('Staff member not found');
     }
 
