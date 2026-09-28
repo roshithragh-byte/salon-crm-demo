@@ -9,7 +9,17 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   public client = this;
 
   constructor() {
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 15000,
+      max: 10,
+    });
+    pool.on('error', (err) => {
+      console.warn('PrismaPg pool idle client warning (handled):', err.message);
+    });
     const adapter = new PrismaPg(pool);
     super({ adapter });
   }
