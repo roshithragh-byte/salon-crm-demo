@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin, Phone, Globe, CheckCircle2 } from "lucide-react";
+import Gallery from "@/components/Gallery";
 
 const businessConfig = {
   name: "de salon bea",
@@ -46,6 +47,7 @@ export default function Home() {
           <nav className="hidden md:flex gap-8 text-sm font-medium text-white/80 tracking-wide uppercase">
             <a href="#about" className="hover:text-ring transition-colors">Our Story</a>
             <a href="#services" className="hover:text-ring transition-colors">Services</a>
+            <a href="#gallery" className="hover:text-ring transition-colors">Gallery</a>
             <a href="#contact" className="hover:text-ring transition-colors">Visit Us</a>
           </nav>
           <div className="flex items-center gap-6">
@@ -71,10 +73,9 @@ export default function Home() {
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity"
-          poster="/logo.svg"
+          poster="/gallery/SaveClip.App_742267988_18064408028720091_204410455176690846_n.jpg"
         >
-          {/* User needs to provide this video */}
-          <source src="/hero-video.mp4" type="video/mp4" />
+          <source src="/gallery/SaveClip.App_AQNA3rEOxlgy0ApDQ-j_OAt6OQ6enxZVMuhB0bkAXihskR2Z9x65z6QbeheccQ2W-AK_kwoKxq_FNSkkeL8lLeaG-Z89-2VB6QIzOvo.mp4" type="video/mp4" />
         </video>
 
         {/* Cinematic Gradient Overlay */}
@@ -194,6 +195,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── CLIENT SHOWCASE & GALLERY ── */}
+      <Gallery />
 
       {/* ── CONTACT & FOOTER ── */}
       <footer id="contact" className="bg-primary text-primary-foreground pt-32 pb-12 px-6">
