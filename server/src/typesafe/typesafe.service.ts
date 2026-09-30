@@ -8,10 +8,21 @@ import { TypeSafeClient } from '@typesafe-ai/sdk';
 @Injectable()
 export class TypeSafeService {
   private readonly logger = new Logger(TypeSafeService.name);
-  private readonly client: TypeSafeClient;
+  private readonly client: TypeSafeClient | null = null;
 
   constructor() {
-    this.client = new TypeSafeClient(); // reads TYPESAFE_API_KEY from env
+    const apiKey = process.env.TYPESAFE_API_KEY;
+    if (apiKey && apiKey.trim().length > 0) {
+      try {
+        this.client = new TypeSafeClient({ apiKey: apiKey.trim() });
+      } catch (err: any) {
+        this.logger.warn(`Failed to initialize TypeSafeClient: ${err?.message ?? err}`);
+      }
+    } else {
+      this.logger.warn(
+        'TYPESAFE_API_KEY is not configured. TypeSafe AI features will gracefully degrade.',
+      );
+    }
   }
 
   /**
@@ -22,6 +33,9 @@ export class TypeSafeService {
   async ask<Q extends Record<string, any>>(
     request: Parameters<TypeSafeClient['systemOne']>[0],
   ): Promise<ReturnType<TypeSafeClient['systemOne']> | null> {
+    if (!this.client) {
+      return null;
+    }
     try {
       return await this.client.systemOne(request as any);
     } catch (err: any) {
