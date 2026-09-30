@@ -10,3 +10,5 @@ import { NotificationsModule } from '../notifications/notifications.module';
   providers: [BookingsService],
 })
 export class BookingsModule {}
+
+

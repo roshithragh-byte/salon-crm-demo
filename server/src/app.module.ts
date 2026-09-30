@@ -15,6 +15,8 @@ import { AuthModule } from './auth/auth.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { MeModule } from './me/me.module';
 import { StaffModule } from './staff/staff.module';
+import { TypeSafeModule } from './typesafe/typesafe.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { StaffModule } from './staff/staff.module';
     AppointmentsModule,
     MeModule,
     StaffModule,
+    TypeSafeModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: 'LOGGER', useValue: logger }],

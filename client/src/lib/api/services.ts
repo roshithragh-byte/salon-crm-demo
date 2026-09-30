@@ -101,3 +101,12 @@ export const CustomerApi = {
 export const AdminCustomerApi = {
   getCustomers: (salonId = 'hq') => ApiClient.get<{ data: any[] }>(`/salons/${salonId}/customers`, true, { cache: 'no-store' }),
 };
+
+export const ReviewApi = {
+  getReviews: (salonId = 'hq') =>
+    ApiClient.get<{ data: any[] }>(`/salons/${salonId}/reviews`, true, { cache: 'no-store' }),
+  getSentimentSummary: (salonId = 'hq') =>
+    ApiClient.get<{ data: any }>(`/salons/${salonId}/reviews/summary`, true, { cache: 'no-store' }),
+  createReview: (salonId: string, data: any) =>
+    ApiClient.post<{ data: any }>(`/salons/${salonId}/reviews`, data),
+};

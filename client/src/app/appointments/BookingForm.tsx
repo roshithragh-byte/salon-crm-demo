@@ -46,6 +46,7 @@ export function BookingForm() {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
 
+
   const [services, setServices] = useState<Service[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);

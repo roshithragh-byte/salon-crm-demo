@@ -61,7 +61,7 @@ export default function BookingsPage() {
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Service</th>
                 <th className="px-6 py-4 font-medium">Staff</th>
-                <th className="px-6 py-4 font-medium">Date & Time</th>
+                <th className="px-6 py-4 font-medium">Date &amp; Time</th>
                 <th className="px-6 py-4 font-medium">Payment</th>
                 <th className="px-6 py-4 font-medium text-right">Status</th>
               </tr>

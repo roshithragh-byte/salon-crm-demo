@@ -19,13 +19,15 @@ async function bootstrap() {
     next(err);
   });
 
-  // Configure CORS - restrict to localhost:3000 in development
-  const allowedOrigin = process.env.NODE_ENV === 'production'
-    ? process.env.ALLOWED_ORIGIN
-    : 'http://localhost:3000';
+  // Configure CORS
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://salon-crm-demo-theta.vercel.app',
+    process.env.ALLOWED_ORIGIN
+  ].filter(Boolean) as string[];
 
   app.enableCors({
-    origin: allowedOrigin,
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
