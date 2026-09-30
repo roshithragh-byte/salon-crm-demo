@@ -6,7 +6,7 @@ const cspHeader = `
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://images.unsplash.com;
     font-src 'self';
-    connect-src 'self' ws: wss:;
+    connect-src 'self' ws: wss: https://salon-crm-demo-production.up.railway.app;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -14,6 +14,14 @@ const cspHeader = `
 `;
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: 'https://salon-crm-demo-production.up.railway.app/api/v1/:path*',
+      },
+    ];
+  },
   async headers() {
     return [
       {

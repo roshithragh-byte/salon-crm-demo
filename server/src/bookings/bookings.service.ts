@@ -1,10 +1,19 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { TypeSafeService } from '../typesafe/typesafe.service';
+import { matchBestStaff } from '../typesafe/staff-matcher';
+import { detectSemanticConflict } from '../typesafe/conflict-detector';
 
 @Injectable()
 export class BookingsService {
-  constructor(private readonly prisma: PrismaService, private readonly notifications: NotificationsService) {}
+  private readonly logger = new Logger(BookingsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly typeSafe: TypeSafeService,
+  ) {}
 
   async createBooking(salonId: string, body: any, idempotencyKey?: string) {
     // Determine the actual salon ID if salonId is a slug
@@ -31,16 +40,54 @@ export class BookingsService {
 
     const end = new Date(start.getTime() + service.durationMinutes * 60000);
 
+    // Validate semantic conflicts in booking notes if provided
+    if (notes && notes.trim().length >= 5) {
+      const conflict = await detectSemanticConflict(this.typeSafe, notes, start, service.name);
+      if (conflict.isConflict) {
+        throw new BadRequestException({
+          code: 'SEMANTIC_CONFLICT',
+          message: 'The booking notes conflict with the selected appointment schedule. Please verify your requested time.',
+        });
+      }
+    }
+
     // Find staff ID
     let finalStaffId = stylistId;
     if (!finalStaffId) {
-       // If no stylist chosen, find one that provides this service and is free
-       // For simplicity in this demo, just pick the first available staff member
-       const staffService = await this.prisma.client.staffService.findFirst({
-         where: { serviceId }
+       // Query available staff members for this service
+       const staffServices = await this.prisma.client.staffService.findMany({
+         where: { serviceId },
+         include: {
+           staffMember: {
+             include: {
+               user: true,
+               appointments: { where: { serviceId } },
+             },
+           },
+         },
        });
-       if (!staffService) throw new ConflictException('No staff available for this service');
-       finalStaffId = staffService.staffMemberId;
+       if (!staffServices || staffServices.length === 0) {
+         throw new ConflictException('No staff available for this service');
+       }
+
+       if (staffServices.length === 1) {
+         finalStaffId = staffServices[0].staffMemberId;
+       } else {
+         const candidates = staffServices.map((s) => ({
+           staffMemberId: s.staffMemberId,
+           displayName: [s.staffMember.user.firstName, s.staffMember.user.lastName].filter(Boolean).join(' ') || 'Staff Stylist',
+           appointmentsForService: s.staffMember.appointments?.length || 0,
+           totalServices: 1,
+           isActive: s.staffMember.isActive ?? true,
+         }));
+         const ranked = await matchBestStaff(
+           this.typeSafe,
+           candidates,
+           service.name,
+           service.description || undefined,
+         );
+         finalStaffId = ranked[0]?.staffMemberId || staffServices[0].staffMemberId;
+       }
     }
 
     // --- CONCURRENCY PROTECTION ---

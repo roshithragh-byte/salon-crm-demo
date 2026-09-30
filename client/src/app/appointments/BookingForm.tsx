@@ -22,13 +22,13 @@ interface BookingFormData {
   consent: boolean;
 }
 
-interface Service {
+export interface Service {
   id: string;
   name: string;
   durationMinutes: number | null;
 }
 
-interface Staff {
+export interface Staff {
   id: string;
   name: string;
 }
@@ -37,7 +37,12 @@ interface WebhookResponse {
   received: boolean;
 }
 
-export function BookingForm() {
+export interface BookingFormProps {
+  initialServices?: Service[];
+  initialStaff?: Staff[];
+}
+
+export function BookingForm({ initialServices = [], initialStaff = [] }: BookingFormProps = {}) {
   const router = useRouter();
   const { register, handleSubmit, control, watch, reset, getValues } = useForm<BookingFormData>({
     defaultValues: { staffId: "any", consent: true }
@@ -46,29 +51,31 @@ export function BookingForm() {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
 
-
-  const [services, setServices] = useState<Service[]>([]);
-  const [staff, setStaff] = useState<Staff[]>([]);
+  const [services, setServices] = useState<Service[]>(initialServices);
+  const [staff, setStaff] = useState<Staff[]>(initialStaff);
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-  const [isFetchingMetadata, setIsFetchingMetadata] = useState(true);
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(
+    initialServices.length === 0 && initialStaff.length === 0
+  );
 
   const watchedServiceId = watch("serviceId");
   const watchedStaffId = watch("staffId");
   const watchedDate = watch("preferredDate");
 
   useEffect(() => {
+    if (initialServices.length > 0 && initialStaff.length > 0) return;
     Promise.all([
       BookingApi.getAvailableServices('hq'),
       BookingApi.getAvailableStaff('hq')
     ])
     .then(([svcRes, staffRes]) => {
-      setServices(svcRes.data);
-      setStaff(staffRes.data);
+      if (svcRes?.data) setServices(svcRes.data);
+      if (staffRes?.data) setStaff(staffRes.data);
     })
-    .catch(console.error)
+    .catch((err) => console.error("Client fetch for booking metadata failed:", err))
     .finally(() => setIsFetchingMetadata(false));
-  }, []);
+  }, [initialServices.length, initialStaff.length]);
 
   useEffect(() => {
     if (watchedDate && watchedServiceId) {

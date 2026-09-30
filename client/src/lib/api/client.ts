@@ -1,19 +1,38 @@
+export function getEffectiveBackendUrl(): string {
+  const raw = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "").trim();
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+
+  // In production (e.g. Vercel), override any missing, localhost, loopback, or placeholder URLs
+  if (
+    isProduction &&
+    (!raw ||
+      raw.includes("localhost") ||
+      raw.includes("127.0.0.1") ||
+      raw.includes("your-production-backend-url"))
+  ) {
+    return "https://salon-crm-demo-production.up.railway.app/api/v1";
+  }
+
+  if (!raw) {
+    return `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`;
+  }
+
+  let finalRaw = raw.replace(/^["'\s]+|["'\s]+$/g, "");
+  if (!finalRaw.startsWith("http://") && !finalRaw.startsWith("https://")) {
+    finalRaw = (isProduction ? "https://" : "http://") + finalRaw;
+  }
+  if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) {
+    return finalRaw.replace(/\/$/, "");
+  }
+  return `${finalRaw.replace(/\/$/, "")}/api/v1`;
+}
+
 export class ApiClient {
   private static getBaseUrl() {
     if (typeof window !== "undefined") {
       return "/api/v1";
     }
-    const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
-    let finalRaw = raw || (process.env.NODE_ENV === 'production'
-      ? 'https://salon-crm-demo-production.up.railway.app/api/v1'
-      : `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
-    
-    finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
-    if (!finalRaw.startsWith("http://") && !finalRaw.startsWith("https://")) {
-      finalRaw = (process.env.NODE_ENV === "production" ? "https://" : "http://") + finalRaw;
-    }
-    if (finalRaw.endsWith("/api/v1") || finalRaw.includes("/api/v1/")) return finalRaw.replace(/\/$/, "");
-    return `${finalRaw.replace(/\/$/, "")}/api/v1`;
+    return getEffectiveBackendUrl();
   }
 
   private static async getHeaders(requiresAuth = false): Promise<HeadersInit> {

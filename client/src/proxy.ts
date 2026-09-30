@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getEffectiveBackendUrl } from "./lib/api/client";
 
 export default withAuth(
   async function middleware(req) {
@@ -11,16 +12,8 @@ export default withAuth(
     const isAccountPath = req.nextUrl.pathname.startsWith("/account");
 
     if (req.nextUrl.pathname.startsWith("/api/v1")) {
-      const raw = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
-      let finalRaw = raw || (process.env.NODE_ENV === 'production' 
-        ? 'https://salon-crm-demo-production.up.railway.app/api/v1' 
-        : `http://127.0.0.1:${process.env.API_PORT || 3001}/api/v1`);
-        
-      finalRaw = finalRaw.replace(/^["'\s]+|["'\s]+$/g, "");
-      let backendUrl = finalRaw.replace(/\/api\/v1\/?$/, "");
-      if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
-        backendUrl = (process.env.NODE_ENV === "production" ? "https://" : "http://") + backendUrl;
-      }
+      const apiUrl = getEffectiveBackendUrl();
+      const backendUrl = apiUrl.replace(/\/api\/v1\/?$/, "");
       const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
       targetUrl.search = req.nextUrl.search;
 

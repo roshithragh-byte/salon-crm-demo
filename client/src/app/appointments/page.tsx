@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { businessConfig } from "@/business.config";
-import { BookingForm } from "./BookingForm";
+import { BookingForm, Service, Staff } from "./BookingForm";
 import { ApiClient } from "@/lib/api/client";
 
 export const dynamic = 'force-dynamic';
@@ -12,20 +12,8 @@ export const metadata = {
 };
 
 export default async function AppointmentsPage() {
-  interface Service {
-    id: string;
-    name: string;
-    durationMinutes: number | null;
-  }
-
-  interface Staff {
-    id: string;
-    name: string;
-  }
-
   let services: Service[] = [];
   let staff: Staff[] = [];
-  let fetchError = false;
 
   try {
     const [resServices, resStaff] = await Promise.all([
@@ -35,8 +23,7 @@ export default async function AppointmentsPage() {
     services = resServices?.data || [];
     staff = resStaff?.data || [];
   } catch (error) {
-    console.error("Failed to fetch booking data:", error);
-    fetchError = true;
+    console.error("Prefetching booking data during SSR failed, will fallback to client fetch:", error);
   }
 
   return (
@@ -70,21 +57,7 @@ export default async function AppointmentsPage() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
-          {fetchError ? (
-            <div className="text-center py-10">
-              <div className="mx-auto w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Booking System Offline</h3>
-              <p className="text-slate-500 mb-6">
-                We're currently experiencing technical difficulties. Please try again later or contact us directly to book your appointment.
-              </p>
-            </div>
-          ) : (
-            <BookingForm />
-          )}
+          <BookingForm initialServices={services} initialStaff={staff} />
         </div>
 
         {/* Alternative contact */}
