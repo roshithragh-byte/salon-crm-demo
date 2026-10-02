@@ -38,12 +38,9 @@ export class RolesGuard implements CanActivate {
     // Check salonId if it's a salon-specific route
     const params = request.params;
     if (params.salonId && user.salonId !== params.salonId) {
-      // Check if user has salonSlug matching params.salonId
-      if (user.salonSlug && user.salonSlug === params.salonId) {
-        return true;
-      }
+      // Resolve IDs and slugs against the database; a token's salonSlug claim
+      // must not independently grant tenant access.
 
-      // Check database to see if params.salonId resolves to user.salonId
       const salon = await this.prisma.client.salon.findFirst({
         where: { OR: [{ id: params.salonId }, { slug: params.salonId }] },
       });
