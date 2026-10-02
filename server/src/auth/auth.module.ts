@@ -1,5 +1,5 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from './jwt.auth.guard';
 import { RolesGuard } from './roles.guard';
@@ -11,8 +11,16 @@ import { AuthController } from './auth.controller';
 @Module({
   imports: [
     ConfigModule,
-    JwtModule.register({
-      secret: 'default-secret',
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('NEXTAUTH_SECRET');
+        if (!secret) {
+          throw new Error('NEXTAUTH_SECRET must be configured before the API can start');
+        }
+        return { secret };
+      },
     }),
   ],
   controllers: [AuthController],
