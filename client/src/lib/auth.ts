@@ -100,5 +100,5 @@ export const authOptions: NextAuthOptions = {
     async signIn() {},
     async signOut() {}
   },
-  secret: process.env.NEXTAUTH_SECRET || "salondebea-auth-secret-change-in-production",
+  secret: process.env.NEXTAUTH_SECRET,
 };
