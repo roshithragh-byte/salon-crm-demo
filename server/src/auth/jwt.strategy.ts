@@ -8,23 +8,11 @@ export class JwtStrategy {
 
   async verify(token: string): Promise<JWTPayload> {
     const expectedSecret = this.configService.get<string>('NEXTAUTH_SECRET');
-    const secretsToTry = Array.from(new Set([
-      expectedSecret,
-      'salondebea-auth-secret-change-in-production-2026',
-      'salondebea-auth-secret-change-in-production',
-      'default-secret'
-    ])).filter(Boolean) as string[];
-
-    let lastError: any = null;
-    for (const sec of secretsToTry) {
-      try {
-        const { payload } = await jwtVerify(token, new TextEncoder().encode(sec));
-        return payload as JWTPayload;
-      } catch (err) {
-        lastError = err;
-      }
+    if (!expectedSecret) {
+      throw new Error('NEXTAUTH_SECRET must be configured before token verification');
     }
 
-    throw lastError;
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(expectedSecret));
+    return payload as JWTPayload;
   }
 }
