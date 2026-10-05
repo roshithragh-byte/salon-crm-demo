@@ -13,7 +13,7 @@ export default withAuth(
 
     if (req.nextUrl.pathname.startsWith("/api/v1")) {
       const apiUrl = getEffectiveBackendUrl();
-      const backendUrl = apiUrl.replace(/\/api\/v1\/?$/, "");
+      const backendUrl = apiUrl.replace(/\\/api\\/v1\\/?$/, "");
       const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
       targetUrl.search = req.nextUrl.search;
 
@@ -46,7 +46,7 @@ export default withAuth(
     const role = token?.role?.toString().toUpperCase();
     if (isAdminPath) {
       if (role === "STAFF") {
-        const allowedForStaff = req.nextUrl.pathname.startsWith("/admin/dashboard") || 
+        const allowedForStaff = req.nextUrl.pathname.startsWith("/admin/dashboard") ||
                                 req.nextUrl.pathname.startsWith("/admin/bookings");
         if (!allowedForStaff) {
           return NextResponse.redirect(new URL("/admin/dashboard", req.url));
@@ -76,7 +76,7 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
-    secret: process.env.NEXTAUTH_SECRET || "salondebea-auth-secret-change-in-production"
+    secret: process.env.NEXTAUTH_SECRET
   }
 );
 
