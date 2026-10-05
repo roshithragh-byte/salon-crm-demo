@@ -52,3 +52,5 @@
 ## Next action
 
 Trigger/observe a fresh Vercel deployment using the corrected application code and configured shared `NEXTAUTH_SECRET`. Once runtime configuration is confirmed healthy, execute the authentication black-box matrix: unauthenticated access, valid login, invalid password, malformed/wrong-key/expired token rejection, insufficient-role denial, authorized dashboard access, and cross-salon denial. Do not alter authentication behavior unless a reproducible black-box test demonstrates a defect.
+
+| 2026-10-05 | B-001 | Validated post-configuration unauthenticated behavior on deployment `dpl_FC8QLZddaiD2ptEq9NL9woQEgqno`. | `/admin/login` returned 200; unauthenticated `/admin/dashboard` returned 307 to login; protected analytics API returned 401. Current deployment runtime logs contain no error/fatal entries. Historical `NO_SECRET` errors are confined to the prior deployment `dpl_F1JBGryf3zwXadN3xRoYbGJxwUFq` before Preview secret configuration. Credentialed POST/login and role/tenant cases remain pending because the available Vercel fetch path cannot submit the login form or attach test credentials/tokens. |
