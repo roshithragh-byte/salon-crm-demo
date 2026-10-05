@@ -4,7 +4,7 @@
 **Repository:** `roshithragh-byte/salon-crm-demo`  
 **Baseline branch:** `master`  
 **Audit branch:** `audit/blocker-register-b001-b008`  
-**Register status:** Initial baseline; findings require reproduction against the current checkout.  
+**Register status:** Active audit; findings are being reproduced against the current deployed checkout.  
 **Workstream boundary:** WhatsApp Agent implementation, Meta configuration, provider integration, and live outbound messaging are **ON HOLD** and excluded from this audit.
 
 ## Operating rules
@@ -43,7 +43,9 @@
 | 2026-10-01 | Register | Created initial B-001–B-008 register on isolated audit branch. | Documentation-only baseline. No application code, database, provider configuration, deployment, or live customer data changed. |
 | 2026-10-02 | B-001 | Confirmed fallback-secret paths and applied narrow code changes on audit branch. | Removed client hard-coded secret fallback; removed server candidate-secret loops; changed Nest JWT registration to require configured `NEXTAUTH_SECRET`. Current NextAuth custom encoder and server verifier both use HS256/shared secret. No issuer/audience claims are currently configured. Tests/build/runtime checks were not executable through the GitHub connector; status remains pending validation. Production secret rotation and deployment configuration were not inspected. |
 | 2026-10-02 | B-002 | User confirmed customers do not require login. Removed RolesGuard's early authorization return based solely on `user.salonSlug`; salon slug now resolves through the database and must map to `user.salonId`. | Public customer booking and payment initialization intentionally remain unauthenticated. Payment ownership/capability design not changed. Source change committed; tests/build and cross-tenant cases not executable via GitHub connector. Full endpoint inventory remains incomplete. |
+| 2026-10-05 | Build blocker | Investigated failed Vercel deployment `dpl_ChfWnxxXhbfoUsmRM55uPhXcXTuA` for commit `01c8d9c9c071a48a06470e1f4e317bb77e13035e`. Compared directly with previous READY deployment commit `d3de8bb87c5953c3906b0f03fd108116b7f96d05`. | Vercel reported `BUILD_UTILS_SPAWN_1`: `npm run build` exited 1. GitHub comparison shows exactly one changed file, `client/src/proxy.ts`; the commit changed the backend URL regex from `/\\/api\\/v1\\/?$/` to the malformed escaped form `/\\\\/api\\\\/v1\\\\/?$/`. This isolates the build regression to that regex change. |
+| 2026-10-05 | Build blocker | Minimal repair prepared for deployment validation. | Restore only the known-good backend URL regex while retaining `secret: process.env.NEXTAUTH_SECRET`; no authentication logic or secret fallback is being reintroduced. Vercel deployment validation is pending. |
 
 ## Next action
 
-Begin B-001 on the audit branch: re-fetch current authentication configuration and trace token issuance/verification across client and server before proposing any code change. Do not proceed to B-002 until B-001 has documented evidence, scoped changes, validation results, and an explicit review checkpoint.
+Validate the minimal build repair on Vercel. If the deployment reaches READY, proceed to black-box authentication validation against that newly READY deployment. Do not alter authentication behavior unless a reproducible black-box test demonstrates a defect.
