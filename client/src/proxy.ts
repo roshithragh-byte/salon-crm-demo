@@ -13,7 +13,7 @@ export default withAuth(
 
     if (req.nextUrl.pathname.startsWith("/api/v1")) {
       const apiUrl = getEffectiveBackendUrl();
-      const backendUrl = apiUrl.replace(/\\/api\\/v1\\/?$/, "");
+      const backendUrl = apiUrl.replace(/\/api\/v1\/?$/, "");
       const targetUrl = new URL(req.nextUrl.pathname, backendUrl);
       targetUrl.search = req.nextUrl.search;
 
