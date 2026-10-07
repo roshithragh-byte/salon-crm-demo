@@ -1,0 +1,49 @@
+---
+title: Tool Overview
+description: Authoritative inventory of the PilotWave Agent tools
+---
+
+# Tool Overview
+
+The MVP Agent exposes 13 controlled tools.
+
+## Read-only
+
+- `get_customer`
+- `search_customers`
+- `get_customer_history`
+- `get_appointments`
+- `get_available_slots`
+- `get_services`
+- `get_staff`
+- `get_reviews`
+
+## Action
+
+- `create_booking`
+- `cancel_booking`
+
+## Communication
+
+- `prepare_customer_message`
+- `send_customer_message`
+
+## Audit
+
+- `record_agent_decision`
+
+## Prohibited capabilities
+
+The Agent must not receive generic tools for:
+
+- SQL execution;
+- Prisma execution;
+- arbitrary database mutation;
+- arbitrary HTTP requests;
+- arbitrary filesystem access;
+- arbitrary code execution;
+- direct WhatsApp provider calls;
+- payment mutation;
+- role modification;
+- policy modification;
+- audit-log modification.

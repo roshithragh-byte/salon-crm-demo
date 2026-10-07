@@ -1,0 +1,51 @@
+---
+title: Agent Lifecycle
+description: Observe, decide, act, and verify lifecycle
+---
+
+# Agent Lifecycle
+
+## 1. Observe
+
+The Agent retrieves authoritative CRM context through read-only tools.
+
+Examples:
+
+- customer profile;
+- customer history;
+- appointments;
+- availability;
+- services;
+- staff;
+- reviews.
+
+## 2. Understand
+
+The model interprets the returned data and identifies the operational objective.
+
+The model must distinguish verified facts from inference.
+
+## 3. Decide
+
+The Agent selects an allowed tool and proposes the intended action.
+
+The model cannot bypass policy by selecting a more privileged tool.
+
+## 4. Act
+
+The Tool Gateway validates the request. The Policy Engine determines whether execution is permitted.
+
+Protected actions are either:
+
+- approved by a human in Copilot mode; or
+- automatically permitted by an explicit Autopilot policy.
+
+## 5. Verify
+
+The Agent receives the actual tool result and reports the observed outcome.
+
+It must never claim success when the tool returned failure, denial, timeout, or dependency-unavailable status.
+
+## 6. Audit
+
+The execution system records the Agent run, tool calls, authorization result, outcome, and correlation identifier.

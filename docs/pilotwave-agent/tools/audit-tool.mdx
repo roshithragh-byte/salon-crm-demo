@@ -1,0 +1,45 @@
+---
+title: Audit Tool
+description: Agent execution ledger and audit boundary
+---
+
+# Audit Tool
+
+## record_agent_decision
+
+Classification: system-only.
+
+The LLM must not be trusted to write its own audit record.
+
+The execution system automatically records:
+
+```json
+{
+  "agentRunId": "string",
+  "salonId": "string",
+  "actorType": "AGENT",
+  "mode": "COPILOT | AUTOPILOT",
+  "action": "string",
+  "toolCalls": [
+    {
+      "tool": "string",
+      "status": "SUCCESS | FAILED | DENIED"
+    }
+  ],
+  "outcome": "string",
+  "correlationId": "string",
+  "createdAt": "ISO-8601"
+}
+```
+
+Server-generated values include:
+
+- agentRunId;
+- authenticated actor identity;
+- authoritative salonId;
+- timestamp;
+- correlationId;
+- tool execution results;
+- authorization result.
+
+The Agent cannot modify or delete audit history.

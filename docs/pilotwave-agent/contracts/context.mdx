@@ -1,0 +1,28 @@
+---
+title: Tool Context
+description: Trusted execution context supplied by the server
+---
+
+# Tool Context
+
+The LLM supplies business parameters only.
+
+The Tool Gateway derives or injects:
+
+```json
+{
+  "authenticatedUserId": "string",
+  "salonId": "string",
+  "role": "OWNER | ADMIN | STAFF",
+  "mode": "COPILOT | AUTOPILOT",
+  "correlationId": "uuid"
+}
+```
+
+These values are security context, not model-controlled arguments.
+
+## Rule
+
+Never trust model-generated tenant identity.
+
+A request attempting to provide another salon identifier must not override the authenticated tenant context.

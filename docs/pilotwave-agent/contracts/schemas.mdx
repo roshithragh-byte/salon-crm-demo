@@ -1,0 +1,28 @@
+---
+title: Permission and Schema Summary
+description: Compact machine-reviewable contract for the 13 MVP tools
+---
+
+# Permission and Schema Summary
+
+| Tool | Copilot | Autopilot | Classification |
+| --- | --- | --- | --- |
+| get_customer | Automatic | Automatic | READ_ONLY |
+| search_customers | Automatic | Automatic | READ_ONLY |
+| get_customer_history | Automatic | Automatic | READ_ONLY |
+| get_appointments | Automatic | Automatic | READ_ONLY |
+| get_available_slots | Automatic | Automatic | READ_ONLY |
+| get_services | Automatic | Automatic | READ_ONLY |
+| get_staff | Automatic | Automatic | READ_ONLY |
+| get_reviews | Automatic | Automatic | READ_ONLY |
+| create_booking | Approval | Policy | MUTATION |
+| cancel_booking | Approval | Policy | MUTATION |
+| prepare_customer_message | Automatic | Automatic | DRAFT |
+| send_customer_message | Approval | Policy | EXTERNAL_SIDE_EFFECT |
+| record_agent_decision | System | System | AUDIT |
+
+## Global rule
+
+The Agent can choose among tools it has been granted, but cannot alter its own permission set.
+
+The Policy Engine remains authoritative for protected actions.

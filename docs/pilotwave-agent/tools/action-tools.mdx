@@ -1,0 +1,92 @@
+---
+title: Action Tools
+description: Booking and cancellation tool contracts
+---
+
+# Action Tools
+
+## create_booking
+
+Classification: mutation.
+
+Copilot: approval required.
+
+Autopilot: allowed only under explicit booking policy.
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "serviceId": "string",
+  "staffId": "string|null",
+  "startTime": "ISO-8601",
+  "idempotencyKey": "string"
+}
+```
+
+The model does not provide `salonId`, `userId`, `role`, or authorization context.
+
+### Output
+
+```json
+{
+  "booking": {
+    "id": "string",
+    "customerId": "string",
+    "serviceId": "string",
+    "staffId": "string|null",
+    "startTime": "ISO-8601",
+    "endTime": "ISO-8601",
+    "status": "PENDING | CONFIRMED"
+  },
+  "created": true
+}
+```
+
+Mandatory checks:
+
+1. Customer belongs to authenticated salon.
+2. Service belongs to authenticated salon.
+3. Staff belongs to authenticated salon.
+4. Slot is currently available.
+5. Idempotency key is valid.
+6. Agent booking policy permits execution.
+7. Existing transactional booking protections remain authoritative.
+
+## cancel_booking
+
+Classification: mutation.
+
+Copilot: approval required.
+
+Autopilot: allowed only under a narrowly defined cancellation policy.
+
+### Input
+
+```json
+{
+  "bookingId": "string",
+  "reason": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "booking": {
+    "id": "string",
+    "status": "CANCELLED"
+  },
+  "cancelled": true
+}
+```
+
+Mandatory checks:
+
+- booking belongs to authenticated salon;
+- cancellation is permitted for current booking state;
+- cancellation policy permits the action;
+- reason is present and bounded;
+- execution is audited.
