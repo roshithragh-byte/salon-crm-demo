@@ -1,0 +1,107 @@
+---
+title: "Step 4B — Module Boundaries"
+sidebarTitle: "Step 4B — Module Boundaries"
+description: "Exact runtime module ownership and dependency rules for the PilotWave Agent."
+---
+
+# Module Boundaries
+
+## `agent`
+
+Owns the agent execution lifecycle and runtime orchestration.
+
+```text
+agent/
+  agent.module.ts
+  agent.controller.ts
+  agent.service.ts
+  runtime/agent-runtime.service.ts
+  runtime/model-adapter.ts
+  runtime/context-builder.ts
+  runtime/response-builder.ts
+```
+
+It must not contain SQL, Prisma queries, or direct provider integrations.
+
+## `agent/tools`
+
+Owns the controlled tool registry, schemas, adapters, and tool execution boundary.
+
+```text
+tools/
+  tool.registry.ts
+  tool-context.ts
+  customer.tools.ts
+  appointment.tools.ts
+  service.tools.ts
+  staff.tools.ts
+  review.tools.ts
+  booking.tools.ts
+  communication.tools.ts
+```
+
+Tools call domain services; they do not access repositories directly unless the domain architecture explicitly requires a read service.
+
+## `agent/policy`
+
+Owns authorization decisions beyond ordinary authentication/RBAC.
+
+```text
+policy/
+  policy.engine.ts
+  permission.resolver.ts
+  tenant.policy.ts
+  booking.policy.ts
+  communication.policy.ts
+  autopilot.policy.ts
+```
+
+Policy returns a structured decision, never a model-generated boolean.
+
+## `agent/approval`
+
+Owns human approval lifecycle.
+
+```text
+approval/
+  approval.service.ts
+  approval.policy.ts
+  approval.controller.ts
+  approval.repository.ts
+```
+
+## `agent/audit`
+
+Owns immutable agent execution evidence.
+
+```text
+audit/
+  agent-run.service.ts
+  tool-event.service.ts
+  audit.repository.ts
+```
+
+## `agent/persistence`
+
+Owns agent-specific persistence models and repositories.
+
+## `agent/queue`
+
+Owns asynchronous execution, scheduled work, retries, and dead-letter handling through Redis/BullMQ.
+
+## Existing CRM domain modules
+
+Customer, booking, service, staff, review, loyalty, and communication modules remain the owners of business rules and business mutations.
+
+## Dependency rule
+
+```text
+Agent Runtime
+   -> Tool Registry
+      -> Policy Engine
+      -> CRM Domain Services
+         -> Repositories
+            -> PostgreSQL
+```
+
+Reverse dependencies are prohibited. CRM domain modules must not import the Agent Runtime.

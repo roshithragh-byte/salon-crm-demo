@@ -1,0 +1,93 @@
+---
+title: "Step 4B — Agent Data Model"
+sidebarTitle: "Step 4B — Agent Data Model"
+description: "PostgreSQL tables required to persist agent runs, tool events, approvals, and idempotency state."
+---
+
+# Agent Data Model
+
+PostgreSQL remains the canonical persistence layer. Agent-specific tables are additive to the existing CRM schema and must use the existing salon/tenant model.
+
+## `agent_runs`
+
+```text
+id UUID PK
+salon_id UUID NOT NULL
+user_id UUID NULL
+mode ENUM(COPILOT,AUTOPILOT)
+status ENUM(RUNNING,WAITING_APPROVAL,COMPLETED,FAILED,CANCELLED)
+intent TEXT NOT NULL
+model_provider TEXT NOT NULL
+model_name TEXT NOT NULL
+correlation_id UUID NOT NULL UNIQUE
+started_at TIMESTAMPTZ NOT NULL
+completed_at TIMESTAMPTZ NULL
+token_input INTEGER NULL
+token_output INTEGER NULL
+final_outcome TEXT NULL
+error_code TEXT NULL
+metadata JSONB NULL
+created_at TIMESTAMPTZ NOT NULL
+updated_at TIMESTAMPTZ NOT NULL
+```
+
+Indexes: `(salon_id, created_at)`, `(salon_id, status)`, unique `correlation_id`.
+
+## `agent_tool_events`
+
+```text
+id UUID PK
+agent_run_id UUID NOT NULL FK agent_runs(id)
+salon_id UUID NOT NULL
+tool_name TEXT NOT NULL
+sequence INTEGER NOT NULL
+request JSONB NOT NULL
+policy_state TEXT NOT NULL
+policy_reason TEXT NULL
+approval_id UUID NULL
+status ENUM(REQUESTED,APPROVED,REJECTED,EXECUTING,SUCCEEDED,FAILED)
+result_metadata JSONB NULL
+error_code TEXT NULL
+started_at TIMESTAMPTZ NOT NULL
+completed_at TIMESTAMPTZ NULL
+created_at TIMESTAMPTZ NOT NULL
+```
+
+Never store raw secrets. Consider redaction before persistence.
+
+## `agent_approvals`
+
+```text
+id UUID PK
+agent_run_id UUID NOT NULL FK agent_runs(id)
+agent_tool_event_id UUID NOT NULL FK agent_tool_events(id)
+salon_id UUID NOT NULL
+requested_by_user_id UUID NULL
+reviewed_by_user_id UUID NULL
+action TEXT NOT NULL
+status ENUM(PENDING,APPROVED,REJECTED,EXPIRED,CANCELLED)
+reason TEXT NULL
+expires_at TIMESTAMPTZ NOT NULL
+created_at TIMESTAMPTZ NOT NULL
+reviewed_at TIMESTAMPTZ NULL
+```
+
+## `agent_idempotency_keys`
+
+```text
+id UUID PK
+salon_id UUID NOT NULL
+scope TEXT NOT NULL
+idempotency_key TEXT NOT NULL
+request_hash TEXT NOT NULL
+result_reference TEXT NULL
+status ENUM(IN_PROGRESS,COMPLETED,FAILED)
+expires_at TIMESTAMPTZ NULL
+created_at TIMESTAMPTZ NOT NULL
+```
+
+Unique constraint: `(salon_id, scope, idempotency_key)`.
+
+## Data protection
+
+Tenant IDs must be enforced in every repository query. JSONB is for bounded metadata, not an alternative relational business model. Do not store complete customer profiles or unnecessary conversation transcripts in agent tables.

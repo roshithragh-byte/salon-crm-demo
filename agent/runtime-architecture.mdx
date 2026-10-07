@@ -1,0 +1,44 @@
+---
+title: "Step 4B — Agent Runtime Architecture"
+sidebarTitle: "Step 4B — Agent Runtime Architecture"
+description: "Production runtime architecture derived from the Step 1–3 Agent Charter, tool contracts, permission model, and error contract."
+---
+
+# Step 4B — Agent Runtime Architecture
+
+This specification converts the Step 1–3 Agent contracts into an implementation-ready runtime architecture. It defines module boundaries, execution lifecycle, persistence, tool/MCP interfaces, approvals, and deployment topology.
+
+## Architectural invariant
+
+The LLM is an untrusted decision component. PostgreSQL remains the business source of truth. NestJS remains the authoritative security and domain boundary. The agent can act only through validated tools and server-side policy.
+
+```text
+Next.js Agent UI
+      |
+      v
+NestJS Agent API
+      |
+      +--> Agent Runtime ----> Model Provider
+      |
+      +--> Policy Engine
+      |
+      +--> Approval Service
+      |
+      +--> Tool Registry ----> CRM Domain Services ----> PostgreSQL
+      |             |
+      |             +--------> External Providers (only through server adapters)
+      |
+      +--> Audit / Agent Run Ledger
+      |
+      +--> Redis / Queue
+```
+
+## Non-negotiable boundaries
+
+- Agent Runtime cannot query PostgreSQL directly.
+- Tools cannot bypass Policy Engine for action operations.
+- LLM output cannot supply `salonId`, authenticated `userId`, role, or authorization claims.
+- External provider credentials never enter model context.
+- Approval-required actions cannot execute without an approval decision.
+- Business state changes occur inside existing domain services and transactions.
+- Every agent run and tool execution receives a correlation ID and audit record.

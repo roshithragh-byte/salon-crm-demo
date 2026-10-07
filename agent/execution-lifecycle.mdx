@@ -1,0 +1,66 @@
+---
+title: "Step 4B — Execution Lifecycle"
+sidebarTitle: "Step 4B — Execution Lifecycle"
+description: "End-to-end lifecycle for synchronous and asynchronous agent runs."
+---
+
+# Execution Lifecycle
+
+## 1. Request intake
+
+The Agent API receives an authenticated request containing the user's intent and optional conversation/run metadata.
+
+The server resolves `userId`, `salonId`, role, mode, and correlation ID from trusted context.
+
+## 2. Run creation
+
+Create `AgentRun` with status `RUNNING`. Persist the normalized user intent and model configuration. Never persist secrets or unnecessary raw credentials.
+
+## 3. Context construction
+
+Build a minimal system context containing agent charter, active mode, tenant-scoped identity metadata, available tools, and policy constraints.
+
+## 4. Model invocation
+
+The model receives the user task and controlled tool definitions. Tool schemas contain only the parameters the model is allowed to choose.
+
+## 5. Tool request validation
+
+For each requested tool:
+
+1. Validate JSON schema.
+2. Resolve trusted execution context.
+3. Check tenant/resource ownership.
+4. Resolve permission state.
+5. Evaluate policy.
+
+## 6. Policy outcome
+
+- `READ_ONLY`: execute immediately.
+- `APPROVAL_REQUIRED`: persist approval request and suspend execution.
+- `AUTOPILOT_SAFE`: execute when every policy predicate passes.
+- `FORBIDDEN`: reject the tool call.
+
+## 7. Domain execution
+
+The tool invokes the existing CRM domain service. Business mutations use existing transactional and idempotency protections.
+
+## 8. Tool result sanitization
+
+Return only the minimum data needed for the next model step. Never return credentials, unrestricted internal records, or irrelevant tenant data.
+
+## 9. Verification
+
+For actions, verify the persisted business outcome after execution where practical. A successful provider call is not itself proof that the CRM state is correct.
+
+## 10. Audit
+
+Record tool request, policy decision, execution outcome, latency, correlation ID, and safe result metadata.
+
+## 11. Completion
+
+Set `AgentRun.status` to `COMPLETED`, `FAILED`, `WAITING_APPROVAL`, or `CANCELLED`. Return a user-safe response.
+
+## Retry rule
+
+Retries must be tool-aware. Reads may be retried when explicitly marked retryable. Business mutations require idempotency keys and must not be blindly retried by the model.
