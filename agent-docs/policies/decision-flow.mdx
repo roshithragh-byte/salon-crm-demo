@@ -1,0 +1,101 @@
+---
+title: "Decision and Execution Flow"
+description: "Reference workflows showing how the Agent observes, decides, acts, and verifies."
+---
+
+# Decision and Execution Flow
+
+## Reactivation workflow
+
+Example user request:
+
+> Find customers who have not visited recently and help bring them back.
+
+Execution:
+
+```
+search_customers
+      ↓
+get_customer_history
+      ↓
+get_services
+      ↓
+Agent analysis
+      ↓
+prepare_customer_message
+      ↓
+record execution
+```
+
+In Copilot mode, no message is sent unless approved.
+
+## Booking workflow
+
+```
+get_customer
+      ↓
+get_services
+      ↓
+get_available_slots
+      ↓
+Human approval or Autopilot policy
+      ↓
+create_booking
+      ↓
+CRM transaction/idempotency controls
+      ↓
+verify result
+      ↓
+audit
+```
+
+The Agent never creates its own slot-locking or idempotency mechanism.
+
+## Cancellation workflow
+
+```
+get_appointments
+      ↓
+identify booking
+      ↓
+policy evaluation
+      ↓
+approval if required
+      ↓
+cancel_booking
+      ↓
+verify status
+      ↓
+audit
+```
+
+## Communication workflow
+
+```
+CRM context
+      ↓
+prepare_customer_message
+      ↓
+message artifact
+      ↓
+approval/policy
+      ↓
+send_customer_message
+      ↓
+provider result
+      ↓
+audit
+```
+
+## Failure principle
+
+A failed tool call does not authorize a different privileged tool.
+
+The Agent should classify the failure using the common error contract and either:
+
+- retry only when the error is explicitly retryable;
+- request user intervention;
+- select another permitted read operation;
+- stop.
+
+It must not bypass a denied policy or authorization check.

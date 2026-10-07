@@ -1,0 +1,123 @@
+---
+title: "Permission Policy"
+description: "Authorization, tenant isolation, approval, and Autopilot policy."
+---
+
+# Permission Policy
+
+## Global rule
+
+The model does not grant itself permission.
+
+```
+LLM proposal
+    ↓
+Tool Gateway
+    ↓
+Authentication
+    ↓
+Tenant isolation
+    ↓
+RBAC
+    ↓
+Schema validation
+    ↓
+Policy evaluation
+    ↓
+CRM execution
+    ↓
+Audit
+```
+
+## Tenant isolation
+
+Every tool invocation is scoped to the authenticated salon.
+
+The model must not control the authoritative tenant context.
+
+Forbidden:
+
+```json
+{
+  "salonId": "attacker-selected-salon"
+}
+```
+
+The server derives salon identity from the authenticated principal.
+
+## RBAC
+
+The Agent inherits the permissions of the authenticated operational actor.
+
+Minimum conceptual roles:
+
+- OWNER
+- ADMIN
+- STAFF
+
+A tool must check both the role and the underlying resource ownership.
+
+## Tool classes
+
+### READ_ONLY
+
+Automatically permitted when authentication, tenant and RBAC checks pass.
+
+### APPROVAL_REQUIRED
+
+The Agent may prepare and explain the action. Copilot execution requires human approval.
+
+### AUTOPILOT_SAFE
+
+The action may execute without interactive approval only when a deterministic policy explicitly allows it.
+
+### SYSTEM_ONLY
+
+The platform invokes the capability internally. The LLM cannot call it directly.
+
+## Policy examples
+
+### Booking
+
+Allowed only if:
+
+- customer belongs to salon;
+- service belongs to salon;
+- selected staff belongs to salon;
+- slot is currently available;
+- idempotency key is valid;
+- booking policy permits Agent execution.
+
+### Cancellation
+
+Default: approval required.
+
+Possible future Autopilot rule:
+
+> Automatically cancel only when an authenticated customer explicitly requests cancellation through an approved channel and the booking satisfies the configured cancellation policy.
+
+### Messaging
+
+Sending requires:
+
+- message artifact exists;
+- artifact belongs to salon;
+- customer belongs to salon;
+- purpose is permitted;
+- customer is eligible for the communication;
+- applicable opt-in/communication rules pass;
+- rate limits pass;
+- provider call succeeds;
+- execution is audited.
+
+## Policy denial
+
+A denial is a normal Agent outcome, not an error to bypass.
+
+The Agent should explain:
+
+- what it attempted;
+- which policy denied it;
+- whether human approval can continue the workflow.
+
+It must never attempt a forbidden alternative tool to circumvent the denial.
