@@ -1,0 +1,53 @@
+---
+title: "Agent Architecture"
+sidebarTitle: "Agent Architecture"
+description: "Runtime boundary between the LLM, controlled tools, policy engine, NestJS CRM API, and PostgreSQL."
+---
+
+# Agent Architecture
+
+```text
+LLM / Agent Runtime
+        |
+        v
+Controlled Agent Tool Registry
+        |
+        v
+Policy Engine / Authorization
+        |
+        v
+NestJS CRM API
+        |
+        v
+PostgreSQL
+```
+
+## Responsibilities by layer
+
+### LLM / Agent Runtime
+
+Interprets the task, selects tools, reasons over returned data, and proposes or performs actions according to the active mode.
+
+### Controlled Tool Registry
+
+Defines the only operations the model can request. Each tool has a strict input and output schema, validation, permission state, and audit semantics.
+
+### Policy Engine / Authorization
+
+Determines whether a requested action is allowed, approval-required, autopilot-safe, or forbidden. The model cannot override this result.
+
+### NestJS CRM API
+
+Executes authorized operations against tenant-scoped domain services. Authentication context, tenant identity, role, correlation ID, and other security context are injected by the server.
+
+### PostgreSQL
+
+Remains the canonical source of business truth.
+
+## Execution context
+
+The server supplies `userId`, `salonId`, authenticated role, execution mode, and `correlationId`. The LLM must not be trusted to provide or alter these values.
+
+## Tenant isolation
+
+Every tool invocation is evaluated against the authenticated salon context. Cross-salon access is denied server-side even when an identifier is supplied by the model.

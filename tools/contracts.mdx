@@ -1,0 +1,105 @@
+---
+title: "Tool Contracts"
+sidebarTitle: "Tool Contracts"
+description: "Machine-oriented contracts for all initial agent tools and their server-side constraints."
+---
+
+# Tool Contracts
+
+All tool contracts assume authenticated server context containing `userId`, `salonId`, role, mode, and `correlationId`.
+
+## `get_customer`
+
+Input: `{ customerId }`
+
+Returns: `id`, `name`, `phone`, `email`, `visitCount`, `lastVisitAt`, `totalSpend`, `segment`, `rewardStatus`.
+
+Rule: customer must belong to the authenticated salon.
+
+## `search_customers`
+
+Input: `{ query?, segment?, inactiveDays?, limit?, cursor? }`
+
+Constraints: `limit` 1–100; `inactiveDays` 0–3650; query maximum 200 characters.
+
+Returns: `customers`, `nextCursor`, `total`.
+
+The model receives bounded filters, not arbitrary SQL-like expressions.
+
+## `get_customer_history`
+
+Input: `{ customerId, limit?, cursor? }`
+
+Returns bounded appointments, loyalty transactions, and reviews for the same-salon customer.
+
+## `get_appointments`
+
+Input: `{ from, to, staffId?, status?, limit?, cursor? }`
+
+The server caps the date range, for example to 90 days, and enforces tenant scope.
+
+## `get_available_slots`
+
+Input: `{ serviceId, date, staffId? }`
+
+Returns `{ date, serviceId, slots[] }`, where each slot contains `staffId`, `startTime`, `endTime`, and `available`.
+
+Availability must always come from the CRM. The agent must never infer it.
+
+## `get_services`
+
+Input: `{ category?, activeOnly?, limit? }`
+
+Returns service metadata including `id`, `name`, `category`, `price`, `durationMinutes`, `revenueTier`, `offerPrice`, `targetCustomer`, `benefits`, and `recommendedFrequency`.
+
+The agent must never invent service prices, durations, offers, benefits, or availability.
+
+## `get_staff`
+
+Input: `{ staffId?, activeOnly?, limit? }`
+
+Returns `id`, `name`, `role`, and `active` for staff in the same salon.
+
+## `get_reviews`
+
+Input: `{ rating?, status?, limit?, cursor? }`
+
+Returns bounded review data. If the underlying Review dependency is unavailable, the tool must return `DEPENDENCY_UNAVAILABLE` rather than fabricate results.
+
+## `create_booking`
+
+Input: `{ customerId, serviceId, staffId?, startTime, idempotencyKey }`
+
+The server supplies `salonId`, `userId`, and role.
+
+Checks include same-salon ownership of customer/service/staff, live slot availability, idempotency validity, policy permission, and transactional booking behavior.
+
+## `cancel_booking`
+
+Input: `{ bookingId, reason }`
+
+Returns a cancelled booking.
+
+Default MVP policy: approval required. Autopilot is allowed only when an explicit approved policy covers the cancellation context.
+
+## `prepare_customer_message`
+
+Input: `{ customerId, purpose, context: { bookingId?, serviceId?, offerId?, additionalInstructions? } }`
+
+Returns a controlled message draft with message ID, customer ID, channel, purpose, content, status, and creation time.
+
+The model must not invent discounts, prices, bookings, services, or history.
+
+## `send_customer_message`
+
+Input: `{ messageId }`
+
+The model provides only the previously created message ID. The server resolves recipient, content, salon, eligibility, opt-in rules, provider, and rate limits.
+
+The tool may return `QUEUED`, `SENT`, or `FAILED` plus provider metadata where available.
+
+## `record_agent_decision`
+
+This is **SYSTEM_ONLY**. The preferred implementation is server-generated audit logging for agent runs and tool invocations rather than allowing the LLM to self-authorize or self-write audit identity.
+
+Conceptual audit fields: `agentRunId`, `salonId`, `actorType`, `mode`, `action`, `toolCalls`, `outcome`, `correlationId`, `createdAt`.
