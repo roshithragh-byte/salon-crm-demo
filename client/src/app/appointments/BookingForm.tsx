@@ -3,7 +3,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { useEffect, useState, useTransition } from "react";
 import { BookingApi } from "@/lib/api/services";
-import { ApiClient } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,10 +32,6 @@ export interface Staff {
   name: string;
 }
 
-interface WebhookResponse {
-  received: boolean;
-}
-
 export interface BookingFormProps {
   initialServices?: Service[];
   initialStaff?: Staff[];
@@ -53,11 +48,14 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
 
   const [services, setServices] = useState<Service[]>(initialServices);
   const [staff, setStaff] = useState<Staff[]>(initialStaff);
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<Array<{ starts_at: string }>>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(
     initialServices.length === 0 && initialStaff.length === 0
   );
+
+  const slotRequestSeqRef = useState(() => ({ current: 0 }))[0];
+  const isSubmittingState = useState(() => ({ current: false }))[0];
 
   const watchedServiceId = watch("serviceId");
   const watchedStaffId = watch("staffId");
@@ -78,52 +76,82 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
   }, [initialServices.length, initialStaff.length]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const currentSeq = ++slotRequestSeqRef.current;
+
     if (watchedDate && watchedServiceId) {
       setIsLoadingSlots(true);
-      BookingApi.getAvailability('hq', watchedDate, watchedServiceId, watchedStaffId === "any" ? undefined : watchedStaffId)
-        .then(res => setAvailableSlots(res.data.slots || []))
-        .catch(console.error)
-        .finally(() => setIsLoadingSlots(false));
+      BookingApi.getAvailability(
+        'hq',
+        watchedDate,
+        watchedServiceId,
+        watchedStaffId === "any" ? undefined : watchedStaffId,
+        { signal: controller.signal }
+      )
+        .then(res => {
+          if (!controller.signal.aborted && currentSeq === slotRequestSeqRef.current) {
+            setAvailableSlots(res?.data?.slots || []);
+          }
+        })
+        .catch(err => {
+          if (err?.name !== 'AbortError' && currentSeq === slotRequestSeqRef.current) {
+            console.error('Availability fetch error:', err);
+            setAvailableSlots([]);
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted && currentSeq === slotRequestSeqRef.current) {
+            setIsLoadingSlots(false);
+          }
+        });
     } else {
       setAvailableSlots([]);
     }
-  }, [watchedDate, watchedServiceId, watchedStaffId]);
+    return () => {
+      controller.abort();
+    };
+  }, [watchedDate, watchedServiceId, watchedStaffId, slotRequestSeqRef]);
 
   const onSubmit = (data: BookingFormData) => {
+    if (isSubmittingState.current) return;
+    isSubmittingState.current = true;
     setResult(null);
+
     startTransition(async () => {
       try {
-        const bookingJson = await BookingApi.createBooking('hq', {
-          customerName: data.customerName,
-          customerPhone: data.customerPhone,
-          customerEmail: data.customerEmail || null,
-          serviceId: data.serviceId,
-          stylistId: data.staffId === "any" ? null : (data.staffId || null),
-          startsAt: data.startsAt,
-          notes: data.notes || null,
-        });
+        const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `idemp_${Date.now()}_${Math.random()}`;
+
+        const bookingJson = await BookingApi.createBooking(
+          'hq',
+          {
+            customerName: data.customerName,
+            customerPhone: data.customerPhone,
+            customerEmail: data.customerEmail || null,
+            serviceId: data.serviceId,
+            stylistId: data.staffId === "any" ? null : (data.staffId || null),
+            startsAt: data.startsAt,
+            notes: data.notes || null,
+          },
+          idempotencyKey
+        );
         const bookingId = bookingJson.data.id;
 
-        const paymentJson = await BookingApi.initializePayment('hq', bookingId);
-        
-        await ApiClient.post<WebhookResponse>('/payments/webhook/razorpay', {
-          order_id: paymentJson.data.providerOrderId
-        }, false);
+        // Initialize server-authoritative payment order
+        await BookingApi.initializePayment('hq', bookingId, `pay_${idempotencyKey}`);
 
         setResult({ success: true });
         reset();
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          console.error("Failed to create booking", err);
-          if (err.message === 'Unauthorized') {
-            router.push('/admin/login');
-          } else {
-            setResult({ success: false, message: 'Failed to create booking' });
-          }
+        console.error("Failed to create booking", err);
+        if (err instanceof Error && err.message === 'Unauthorized') {
+          router.push('/admin/login');
+        } else if (err instanceof Error) {
+          setResult({ success: false, message: err.message });
         } else {
-          console.error("Failed to create booking", err);
           setResult({ success: false, message: 'Failed to create booking' });
         }
+      } finally {
+        isSubmittingState.current = false;
       }
     });
   };
@@ -328,7 +356,7 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
       <div className="flex items-start gap-3 bg-muted/30 rounded-xl p-5 border">
         <input type="checkbox" {...register("consent")} className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary" />
         <label className="text-sm text-muted-foreground leading-relaxed">
-          I consent to being contacted regarding this appointment and agree to the salon's booking policies.
+          I consent to being contacted regarding this appointment and agree to the salon&apos;s booking policies.
         </label>
       </div>
 

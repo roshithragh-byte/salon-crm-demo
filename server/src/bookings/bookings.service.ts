@@ -90,14 +90,24 @@ export class BookingsService {
        }
     }
 
-    // --- CONCURRENCY PROTECTION ---
-    // We execute this in an interactive transaction to ensure no overlapping bookings
-    // Handle Idempotency
+    // --- IDEMPOTENCY & CONCURRENCY PROTECTION ---
     if (idempotencyKey) {
       const existing = await this.prisma.client.appointment.findUnique({
-        where: { idempotencyKey }
+        where: { idempotencyKey },
       });
       if (existing) {
+        // Validate request parameters match the existing appointment
+        const isSameSalon = existing.salonId === salon.id;
+        const isSameService = existing.serviceId === serviceId;
+        const isSameCustomer = existing.customerPhone === customerPhone;
+        const isSameTime = new Date(existing.startsAt).getTime() === start.getTime();
+
+        if (!isSameSalon || !isSameService || !isSameCustomer || !isSameTime) {
+          throw new ConflictException({
+            code: 'IDEMPOTENCY_CONFLICT',
+            message: 'Idempotency key has already been used with different booking parameters',
+          });
+        }
         return { data: existing };
       }
     }

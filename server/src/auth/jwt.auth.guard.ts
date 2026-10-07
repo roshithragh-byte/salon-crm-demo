@@ -4,38 +4,36 @@ import {
   CanActivate,
   ExecutionContext,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
-import { ConfigService } from '@nestjs/config';
+import { JwtStrategy } from './jwt.strategy';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private configService: ConfigService) {}
+  constructor(private readonly jwtStrategy: JwtStrategy) {}
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authorization = request.headers['authorization'];
 
-    let token = null;
-    if (authorization) {
+    let token: string | null = null;
+    if (authorization && typeof authorization === 'string') {
       if (authorization.startsWith('Bearer ')) {
-        token = authorization.slice(7, authorization.length);
+        token = authorization.slice(7).trim();
       }
     }
 
-    // If no token in header, try to get from cookie
+    // Fallback: check session cookie if authorization header is absent
     if (!token) {
       const cookieName = process.env.NODE_ENV === 'production'
         ? '__Secure-next-auth.session-token'
         : 'next-auth.session-token';
       const cookieHeader = request.headers['cookie'];
-      if (cookieHeader) {
+      if (cookieHeader && typeof cookieHeader === 'string') {
         const cookies = cookieHeader.split(';').map(c => c.trim()).reduce((acc, c) => {
-          const [key, value] = c.split('=');
-          acc[key] = value;
+          const [key, ...vals] = c.split('=');
+          acc[key] = vals.join('=');
           return acc;
         }, {} as Record<string, string>);
-        token = cookies[cookieName];
+        token = cookies[cookieName] || null;
       }
     }
 
@@ -43,29 +41,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Authorization header missing or cookie not found');
     }
 
-    const expectedSecret = this.configService.get<string>('NEXTAUTH_SECRET');
-    const secretsToTry = Array.from(new Set([
-      expectedSecret,
-      'salondebea-auth-secret-change-in-production-2026',
-      'salondebea-auth-secret-change-in-production',
-      'default-secret'
-    ])).filter(Boolean) as string[];
-
-    let payload: any = null;
-    let lastError: any = null;
-    for (const sec of secretsToTry) {
-      try {
-        payload = this.jwtService.verify(token, { secret: sec });
-        break;
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    if (!payload) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-
+    const payload = await this.jwtStrategy.verify(token);
     request.user = payload;
     return true;
   }

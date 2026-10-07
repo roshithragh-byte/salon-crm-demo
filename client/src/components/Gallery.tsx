@@ -46,7 +46,7 @@ export default async function Gallery() {
       if (fsImages.length > 0) images = fsImages;
       if (fsVideos.length > 0) videos = fsVideos;
     }
-  } catch (err) {
+  } catch {
     // Graceful fallback to static list
   }
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BookingApi } from "@/lib/api/services";
+import { useEffect, useState, useCallback } from "react";
+import { BookingApi, Staff } from "@/lib/api/services";
 import { UserCheck, Sparkles, Plus, Loader2 } from "lucide-react";
 
 export default function StaffPage() {
-  const [staff, setStaff] = useState<any[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   
@@ -13,17 +13,16 @@ export default function StaffPage() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchStaff = () => {
-    setLoading(true);
+  const fetchStaff = useCallback(() => {
     BookingApi.getAvailableStaff("hq")
       .then((res) => setStaff(res.data || []))
-      .catch((err) => console.error("Failed to load staff", err))
+      .catch((err: unknown) => console.error("Failed to load staff", err))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     fetchStaff();
-  }, []);
+  }, [fetchStaff]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +33,8 @@ export default function StaffPage() {
       setFormData({ name: "", email: "", password: "" });
       setShowForm(false);
       fetchStaff();
-    } catch (err: any) {
-      setError(err.message || "Failed to create staff account");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create staff account");
     } finally {
       setCreating(false);
     }
@@ -45,8 +44,8 @@ export default function StaffPage() {
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-serif font-bold tracking-tight text-foreground">Team & Stylists</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage your salon's professional staff members.</p>
+          <h1 className="text-2xl font-serif font-bold tracking-tight text-foreground">Team &amp; Stylists</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Manage your salon&apos;s professional staff members.</p>
         </div>
         <button 
           onClick={() => setShowForm(!showForm)}

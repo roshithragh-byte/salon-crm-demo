@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookingApi } from "@/lib/api/services";
-import { Scissors, Clock, IndianRupee } from "lucide-react";
+import { BookingApi, Service } from "@/lib/api/services";
+import { Scissors, Clock } from "lucide-react";
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ export default function ServicesPage() {
       .then((res) => {
         setServices(res.data || []);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error("Failed to load services", err);
       })
       .finally(() => {

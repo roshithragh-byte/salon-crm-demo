@@ -6,9 +6,32 @@ import { Loader2, Calendar as CalendarIcon, Clock, CheckCircle, XCircle } from "
 import { ProfileForm } from "./ProfileForm";
 import { format } from "date-fns";
 
+interface AppointmentItem {
+  id: string;
+  startsAt: string;
+  status: string;
+  service?: {
+    name?: string;
+    durationMinutes?: number;
+  };
+}
+
+interface CustomerDashboardProfile {
+  user?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+  };
+  customerProfiles?: Array<{
+    visitCount?: number;
+    loyaltyPoints?: number;
+  }>;
+}
+
 export function CustomerDashboard() {
-  const [appointments, setAppointments] = useState<{ upcoming: any[]; history: any[] }>({ upcoming: [], history: [] });
-  const [profile, setProfile] = useState<any>(null);
+  const [appointments, setAppointments] = useState<{ upcoming: AppointmentItem[]; history: AppointmentItem[] }>({ upcoming: [], history: [] });
+  const [profile, setProfile] = useState<CustomerDashboardProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -19,10 +42,10 @@ export function CustomerDashboard() {
           CustomerApi.getAppointments(),
           ProfileApi.getProfile()
         ]);
-        setAppointments(apptsData);
-        setProfile(profileData);
-      } catch (err: any) {
-        setError(err.message || "Failed to load dashboard data");
+        setAppointments(apptsData as { upcoming: AppointmentItem[]; history: AppointmentItem[] });
+        setProfile(profileData as CustomerDashboardProfile);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }

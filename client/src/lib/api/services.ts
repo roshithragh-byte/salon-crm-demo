@@ -1,6 +1,6 @@
 import { ApiClient } from './client';
 
-interface DashboardData {
+export interface DashboardData {
   totalRevenue: number;
   totalBookings: number;
   upcomingAppointments: Array<{
@@ -15,7 +15,7 @@ interface DashboardData {
   }>;
 }
 
-interface BookingData {
+export interface BookingData {
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
@@ -25,18 +25,36 @@ interface BookingData {
   notes: string | null;
 }
 
-interface Service {
+export interface BookingRecord {
+  id: string;
+  customerName: string;
+  customerPhone?: string;
+  customerEmail?: string | null;
+  serviceId: string;
+  serviceName?: string;
+  service?: { id?: string; name: string };
+  staffId?: string | null;
+  staff?: { user?: { firstName?: string; lastName?: string } };
+  startsAt: string;
+  endsAt?: string;
+  status: string;
+  payments?: Array<{ id: string; status: string; amount: number }>;
+}
+
+export interface Service {
   id: string;
   name: string;
   durationMinutes: number | null;
+  basePrice?: number;
+  offerPrice?: number | null;
 }
 
-interface Staff {
+export interface Staff {
   id: string;
   name: string;
 }
 
-interface AvailabilityResponse {
+export interface AvailabilityResponse {
   data: {
     slots: Array<{
       starts_at: string;
@@ -44,14 +62,13 @@ interface AvailabilityResponse {
   };
 }
 
-interface PaymentResponse {
+export interface PaymentResponse {
   data: {
     providerOrderId: string;
-    // Add other payment response fields as needed
   };
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   user: {
     id: string;
     name: string;
@@ -59,6 +76,43 @@ interface AuthResponse {
     role: string;
     salonId: string;
   };
+}
+
+export interface CustomerRecord {
+  id: string;
+  firstName: string;
+  lastName?: string | null;
+  phoneNumber?: string;
+  email?: string | null;
+  visitCount?: number;
+  loyaltyPoints?: number;
+  createdAt: string;
+}
+
+export interface ReviewRecord {
+  id: string;
+  authorName: string;
+  rating: number;
+  content: string;
+  source?: string;
+  aiTopic?: string | null;
+  aiSentiment?: number | null;
+  aiConfidence?: number | null;
+  createdAt?: string;
+}
+
+export interface ReviewSummary {
+  avgSentiment?: number;
+  totalAnalysed?: number;
+  topicBreakdown?: Record<string, number>;
+}
+
+export interface UserProfileRecord {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
 }
 
 export const ServicesApi = {
@@ -69,15 +123,27 @@ export const ServicesApi = {
 export const BookingApi = {
   getAvailableServices: (salonId = 'hq') => ApiClient.get<{ data: Service[] }>(`/salons/${salonId}/services`, false, { cache: 'no-store' }),
   getAvailableStaff: (salonId = 'hq') => ApiClient.get<{ data: Staff[] }>(`/salons/${salonId}/staff`, false, { cache: 'no-store' }),
-  createBooking: (salonId: string, data: BookingData) => ApiClient.post<{ data: BookingData & { id: string } }>(`/salons/${salonId}/bookings`, data, false),
-  getAvailability: (salonId: string, date: string, serviceId: string, stylistId?: string) => {
+  createBooking: (salonId: string, data: BookingData, idempotencyKey?: string) =>
+    ApiClient.post<{ data: BookingData & { id: string } }>(
+      `/salons/${salonId}/bookings`,
+      data,
+      false,
+      idempotencyKey ? { headers: { 'idempotency-key': idempotencyKey } } : undefined
+    ),
+  getAvailability: (salonId: string, date: string, serviceId: string, stylistId?: string, options?: { signal?: AbortSignal }) => {
     const params = new URLSearchParams({ date, service_id: serviceId });
     if (stylistId) params.append('stylist_id', stylistId);
-    return ApiClient.get<AvailabilityResponse>(`/salons/${salonId}/availability?${params.toString()}`, false);
+    return ApiClient.get<AvailabilityResponse>(`/salons/${salonId}/availability?${params.toString()}`, false, options);
   },
-  initializePayment: (salonId: string, bookingId: string) => ApiClient.post<PaymentResponse>(`/salons/${salonId}/bookings/${bookingId}/payment`, {}),
-  getBookings: (salonId: string, date?: string) => ApiClient.get<{ data: any[] }>(`/salons/${salonId}/bookings${date ? '?date=' + date : ''}`, true),
-  createStaff: (salonId: string, data: any) => ApiClient.post<{ data: any }>(`/salons/${salonId}/staff`, data, true),
+  initializePayment: (salonId: string, bookingId: string, idempotencyKey?: string) =>
+    ApiClient.post<PaymentResponse>(
+      `/salons/${salonId}/bookings/${bookingId}/payment`,
+      {},
+      false,
+      idempotencyKey ? { headers: { 'idempotency-key': idempotencyKey } } : undefined
+    ),
+  getBookings: (salonId: string, date?: string) => ApiClient.get<{ data: BookingRecord[] }>(`/salons/${salonId}/bookings${date ? '?date=' + date : ''}`, true),
+  createStaff: (salonId: string, data: { name: string; email: string; password?: string }) => ApiClient.post<{ data: Staff }>(`/salons/${salonId}/staff`, data, true),
 };
 
 export const DashboardApi = {
@@ -89,24 +155,23 @@ export const AuthApi = {
 };
 
 export const ProfileApi = {
-  getProfile: () => ApiClient.get<{ user: any; roles: string[]; salonMembers: any[]; customerProfiles: any[] }>('/me/profile', true, { cache: 'no-store' }),
-  updateProfile: (data: { firstName?: string; lastName?: string; phoneNumber?: string }) => ApiClient.patch<{ success: boolean; user: any }>('/me/profile', data, true),
+  getProfile: () => ApiClient.get<{ user: UserProfileRecord; roles: string[]; salonMembers: unknown[]; customerProfiles: Array<{ visitCount?: number; loyaltyPoints?: number }> }>('/me/profile', true, { cache: 'no-store' }),
+  updateProfile: (data: { firstName?: string; lastName?: string; phoneNumber?: string }) => ApiClient.patch<{ success: boolean; user: UserProfileRecord }>('/me/profile', data, true),
 };
 
 export const CustomerApi = {
-  getAppointments: () => ApiClient.get<{ upcoming: any[]; history: any[] }>('/me/appointments', true, { cache: 'no-store' }),
+  getAppointments: () => ApiClient.get<{ upcoming: BookingRecord[]; history: BookingRecord[] }>('/me/appointments', true, { cache: 'no-store' }),
 };
 
-
 export const AdminCustomerApi = {
-  getCustomers: (salonId = 'hq') => ApiClient.get<{ data: any[] }>(`/salons/${salonId}/customers`, true, { cache: 'no-store' }),
+  getCustomers: (salonId = 'hq') => ApiClient.get<{ data: CustomerRecord[] }>(`/salons/${salonId}/customers`, true, { cache: 'no-store' }),
 };
 
 export const ReviewApi = {
   getReviews: (salonId = 'hq') =>
-    ApiClient.get<{ data: any[] }>(`/salons/${salonId}/reviews`, true, { cache: 'no-store' }),
+    ApiClient.get<{ data: ReviewRecord[] }>(`/salons/${salonId}/reviews`, true, { cache: 'no-store' }),
   getSentimentSummary: (salonId = 'hq') =>
-    ApiClient.get<{ data: any }>(`/salons/${salonId}/reviews/summary`, true, { cache: 'no-store' }),
-  createReview: (salonId: string, data: any) =>
-    ApiClient.post<{ data: any }>(`/salons/${salonId}/reviews`, data),
+    ApiClient.get<{ data: ReviewSummary }>(`/salons/${salonId}/reviews/summary`, true, { cache: 'no-store' }),
+  createReview: (salonId: string, data: { authorName: string; rating: number; content: string; source?: string }) =>
+    ApiClient.post<{ data: ReviewRecord }>(`/salons/${salonId}/reviews`, data),
 };

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminCustomerApi } from "@/lib/api/services";
-import { Users, Search, MoreHorizontal, User } from "lucide-react";
+import { AdminCustomerApi, CustomerRecord } from "@/lib/api/services";
+import { Users, Search } from "lucide-react";
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<CustomerRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -14,7 +14,7 @@ export default function CustomersPage() {
       .then((res) => {
         setCustomers(res.data || []);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error("Failed to load customers", err);
       })
       .finally(() => {

@@ -9,13 +9,36 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+interface ServiceAddonItem {
+  addonService: {
+    id: string;
+    name: string;
+    description?: string;
+    basePrice?: number;
+    offerPrice?: number;
+  };
+}
+
+interface ServiceDetail {
+  id: string;
+  name: string;
+  description?: string;
+  durationMinutes: number;
+  basePrice: number;
+  offerPrice?: number;
+  category?: {
+    name?: string;
+  };
+  addonsAsBase: ServiceAddonItem[];
+}
+
 export default async function ServiceDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
   
-  let service = null;
+  let service: ServiceDetail | null = null;
   try {
-    const json: any = await ServicesApi.getServiceDetails(resolvedParams.id);
-    service = json.data;
+    const json = await ServicesApi.getServiceDetails(resolvedParams.id) as { data?: ServiceDetail };
+    service = json?.data || null;
   } catch (e) {
     console.error(e);
   }
@@ -99,7 +122,7 @@ export default async function ServiceDetailPage({ params }: PageProps) {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {service.addonsAsBase.map((addon: any) => (
+              {service.addonsAsBase.map((addon: ServiceAddonItem) => (
                 <div key={addon.addonService.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                   <div>
                     <h3 className="font-bold text-lg text-purple-900 mb-2">{addon.addonService.name}</h3>

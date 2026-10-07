@@ -1,4 +1,4 @@
-import { ReviewApi } from '@/lib/api/services';
+import { ReviewApi, ReviewRecord, ReviewSummary } from '@/lib/api/services';
 
 const TOPIC_LABELS: Record<string, string> = {
   service_quality: 'Service Quality',
@@ -39,8 +39,8 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default async function ReviewsPage() {
-  let reviews: any[] = [];
-  let summary: any = null;
+  let reviews: ReviewRecord[] = [];
+  let summary: ReviewSummary | null = null;
 
   try {
     const [reviewsRes, summaryRes] = await Promise.all([

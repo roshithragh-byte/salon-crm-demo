@@ -4,7 +4,7 @@ import { DashboardApi } from '@/lib/api/services';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { IndianRupee, Calendar as CalendarIcon, Clock, Users, ArrowUpRight, TrendingUp } from 'lucide-react';
+import { IndianRupee, Calendar as CalendarIcon, Clock, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface DashboardData {
@@ -84,7 +84,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif font-medium tracking-tight text-foreground">Overview</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Welcome back. Here is what's happening at the salon today.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Welcome back. Here is what&apos;s happening at the salon today.</p>
         </div>
         <div className="text-sm font-medium text-muted-foreground bg-white px-4 py-2 border rounded-full shadow-sm">
           {format(new Date(), 'EEEE, MMMM do yyyy')}
@@ -208,6 +208,7 @@ export default function DashboardPage() {
                     <Tooltip 
                       cursor={{ fill: 'var(--color-muted)', opacity: 0.5 }}
                       contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
                       formatter={(value: any) => [`${value} bookings`, 'Count']}
                     />
                     <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={24}>

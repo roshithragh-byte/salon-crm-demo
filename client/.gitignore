@@ -40,3 +40,5 @@ yarn-error.log*
 # scratch scripts
 patch*.js
 fix*.js
+.vercel
+.env*

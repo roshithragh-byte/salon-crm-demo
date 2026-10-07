@@ -8,7 +8,7 @@ import { AppModule } from './app.module';
 import { logger } from './logger/winston.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   app.use((req, res, next) => {
     logger.info(`${req.method} ${req.url} - IP: ${req.ip}`);
     res.locals.requestId = req.headers['x-request-id'] || require('crypto').randomUUID();

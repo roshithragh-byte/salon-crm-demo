@@ -1,14 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ProfileApi } from "@/lib/api/services";
+import { ProfileApi, UserProfileRecord } from "@/lib/api/services";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
+interface UserProfile {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  password?: string;
+  passwordHash?: string;
+}
+
+interface ProfileData {
+  user: UserProfile;
+  roles?: string[];
+  salonMembers?: unknown[];
+  customerProfiles?: Array<{
+    visitCount?: number;
+    loyaltyPoints?: number;
+  }>;
+}
+
 export function ProfileForm() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -24,16 +44,17 @@ export function ProfileForm() {
     const fetchProfile = async () => {
       try {
         const data = await ProfileApi.getProfile();
-        if (data?.user?.password) delete data.user.password;
-        if (data?.user?.passwordHash) delete data.user.passwordHash;
-        setProfile(data);
+        const rawUser = data?.user as (UserProfileRecord & { password?: string; passwordHash?: string }) | undefined;
+        if (rawUser?.password) delete rawUser.password;
+        if (rawUser?.passwordHash) delete rawUser.passwordHash;
+        setProfile(data as ProfileData);
         setFormData({
-          firstName: data.user.firstName || "",
-          lastName: data.user.lastName || "",
-          phoneNumber: data.user.phoneNumber || "",
+          firstName: data.user?.firstName || "",
+          lastName: data.user?.lastName || "",
+          phoneNumber: data.user?.phoneNumber || "",
         });
-      } catch (err: any) {
-        setError(err.message || "Failed to load profile");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Failed to load profile");
       } finally {
         setLoading(false);
       }
@@ -57,10 +78,10 @@ export function ProfileForm() {
       const res = await ProfileApi.updateProfile(formData);
       if (res.success) {
         setSuccess(true);
-        setProfile((prev: any) => ({ ...prev, user: res.user }));
+        setProfile((prev) => (prev ? { ...prev, user: { ...prev.user, ...res.user } } : null));
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to save profile");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setSaving(false);
     }

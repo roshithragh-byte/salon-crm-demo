@@ -61,3 +61,5 @@ fix-ts*.js
 
 # Antigravity agent task files
 .agent-tasks/
+.vercel
+.env*

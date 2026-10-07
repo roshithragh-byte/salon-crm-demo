@@ -1,6 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { getEffectiveBackendUrl } from "./lib/api/client";
+import { CANONICAL_JWT_ISSUER, CANONICAL_JWT_AUDIENCE, CANONICAL_JWT_ALGORITHM } from "./lib/auth";
 
 export default withAuth(
   async function middleware(req) {
@@ -65,10 +66,13 @@ export default withAuth(
         try {
           const { jwtVerify } = await import("jose");
           const secretKey = new TextEncoder().encode(secret as string);
-          const { payload } = await jwtVerify(token, secretKey);
+          const { payload } = await jwtVerify(token, secretKey, {
+            issuer: CANONICAL_JWT_ISSUER,
+            audience: CANONICAL_JWT_AUDIENCE,
+            algorithms: [CANONICAL_JWT_ALGORITHM],
+          });
           return payload as any;
         } catch (e) {
-          console.error("JWT VERIFY ERROR", e);
           return null;
         }
       }
@@ -76,7 +80,7 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
-    secret: process.env.NEXTAUTH_SECRET || "salondebea-auth-secret-change-in-production"
+    secret: process.env.NEXTAUTH_SECRET,
   }
 );
 

@@ -1,12 +1,11 @@
-import { Controller, Post, Param, Body, Headers, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Body, Headers, Req, RawBodyRequest } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { JwtAuthGuard } from '../auth/jwt.auth.guard';
+import { Request } from 'express';
 
 @Controller()
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  // Removed JwtAuthGuard to allow customers to initialize payments
   @Post('salons/:salonId/bookings/:bookingId/payment')
   async createPayment(
     @Param('salonId') salonId: string,
@@ -16,12 +15,14 @@ export class PaymentsController {
     return this.paymentsService.createPaymentOrder(salonId, bookingId, idempotencyKey);
   }
 
-  // Removed JwtAuthGuard to allow webhooks to hit it anonymously
   @Post('payments/webhook/:provider')
   async handleWebhook(
     @Param('provider') provider: string,
     @Body() payload: any,
+    @Headers('x-razorpay-signature') razorpaySignature: string | undefined,
+    @Req() req: RawBodyRequest<Request>,
   ) {
-    return this.paymentsService.handleWebhook(provider, payload);
+    const rawBody = req?.rawBody || Buffer.from(JSON.stringify(payload), 'utf8');
+    return this.paymentsService.handleWebhook(provider, payload, razorpaySignature, rawBody);
   }
 }

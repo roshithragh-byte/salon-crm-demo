@@ -1,25 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookingApi } from "@/lib/api/services";
-import { Calendar as CalendarIcon, Clock, Search, ChevronDown, CheckCircle2, XCircle } from "lucide-react";
+import { BookingApi, BookingRecord } from "@/lib/api/services";
+import { Calendar as CalendarIcon, Clock, Search } from "lucide-react";
 import { format } from "date-fns";
 
 export default function BookingsPage() {
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<BookingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     BookingApi.getBookings('hq')
-      .then((res: any) => {
+      .then((res) => {
         if (Array.isArray(res)) {
           setAppointments(res);
         } else {
           setAppointments(res.data || []);
         }
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         console.error("Failed to load appointments", err);
       })
       .finally(() => {
