@@ -17,6 +17,7 @@ import { MeModule } from './me/me.module';
 import { StaffModule } from './staff/staff.module';
 import { TypeSafeModule } from './typesafe/typesafe.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { AgentModule } from './agent/agent.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     StaffModule,
     TypeSafeModule,
     ReviewsModule,
+    AgentModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: 'LOGGER', useValue: logger }],
