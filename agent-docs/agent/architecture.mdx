@@ -1,0 +1,93 @@
+---
+title: "Agent Architecture"
+description: "Runtime boundaries and trust model for the PilotWave Agent."
+---
+
+# Agent Architecture
+
+## Logical architecture
+
+```
+                    ┌──────────────────────┐
+                    │   PilotWave Agent    │
+                    │                      │
+                    │ Observe → Decide     │
+                    │ → Act → Verify      │
+                    └──────────┬───────────┘
+                               │
+                         Tool Calls
+                               │
+              ┌────────────────▼────────────────┐
+              │        Agent Tool Gateway       │
+              │                                 │
+              │ Auth • RBAC • Tenant • Policy   │
+              │ Validation • Audit • Rate Limit │
+              └────────────────┬────────────────┘
+                               │
+                         NestJS API
+                               │
+                         PostgreSQL
+```
+
+## Trust boundaries
+
+### LLM boundary
+
+The LLM is an untrusted reasoning component.
+
+It may choose among registered tools, but it does not define its own permissions.
+
+### Tool Gateway boundary
+
+The Gateway is the security boundary between model output and application behavior.
+
+It validates:
+
+- authenticated identity;
+- tenant;
+- role;
+- tool arguments;
+- resource ownership;
+- policy eligibility;
+- correlation ID;
+- rate limits.
+
+### CRM boundary
+
+The existing NestJS business logic remains authoritative for:
+
+- booking transactions;
+- idempotency;
+- slot concurrency;
+- payment state;
+- loyalty state;
+- database integrity.
+
+The Agent must reuse these operations rather than reproduce them.
+
+## Execution context
+
+The server derives security context:
+
+```typescript
+interface AgentContext {
+  authenticatedUserId: string;
+  salonId: string;
+  role: "OWNER" | "ADMIN" | "STAFF";
+  mode: "COPILOT" | "AUTOPILOT";
+  correlationId: string;
+}
+```
+
+These values are not trusted when supplied by the model.
+
+## Business-state rule
+
+The Agent may reason about business state, but it cannot redefine business state.
+
+For example:
+
+- availability comes from the availability service;
+- booking state comes from the booking service;
+- payment state comes from the payment service;
+- customer identity comes from the CRM.
