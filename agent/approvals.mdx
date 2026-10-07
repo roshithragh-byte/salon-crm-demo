@@ -1,0 +1,57 @@
+---
+title: "Step 4B — Approval State Machine"
+sidebarTitle: "Step 4B — Approval State Machine"
+description: "Human-in-the-loop state machine for sensitive Agent actions."
+---
+
+# Approval State Machine
+
+Approval is a first-class persisted workflow, not a prompt convention.
+
+```text
+                 ┌──────────────┐
+                 │    PENDING   │
+                 └──────┬───────┘
+                        │
+              ┌─────────┼─────────┐
+              ▼         ▼         ▼
+          APPROVED   REJECTED   EXPIRED
+              │
+              ▼
+          EXECUTING
+           /      \
+          ▼        ▼
+      SUCCEEDED   FAILED
+
+PENDING -> CANCELLED is also allowed before execution.
+```
+
+## Pending
+
+Created when policy returns `APPROVAL_REQUIRED`. The associated tool event and AgentRun move to `WAITING_APPROVAL`.
+
+## Approved
+
+An authorized human approves the exact action payload represented by the approval record. Approval cannot be reused for a materially different request.
+
+## Rejected
+
+The action is not executed. The AgentRun may continue with a safe alternative or finish with the rejection outcome.
+
+## Expired
+
+Approval automatically expires after its policy-defined TTL. Expired approvals cannot execute.
+
+## Cancelled
+
+Cancellation is permitted before execution when the run is abandoned or superseded.
+
+## Executing
+
+The server revalidates authorization, tenant ownership, current resource state, and policy immediately before execution. This prevents stale approvals from bypassing current policy.
+
+## Execution guarantees
+
+Approval is not a substitute for authorization. Even an approved action must pass the final server-side policy and resource checks.
+
+For booking and messaging, execution must retain the relevant idempotency key so duplicate approval clicks cannot produce duplicate business effects.

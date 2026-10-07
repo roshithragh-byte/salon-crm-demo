@@ -1,0 +1,62 @@
+---
+title: "Step 4B — Deployment Topology"
+sidebarTitle: "Step 4B — Deployment Topology"
+description: "Production deployment topology and operational boundaries for the Agent."
+---
+
+# Deployment Topology
+
+```text
+                        Internet
+                           |
+                  ┌────────▼────────┐
+                  │     Vercel      │
+                  │ Next.js / UI    │
+                  └────────┬────────┘
+                           |
+                           v
+                  ┌─────────────────┐
+                  │ Railway         │
+                  │ NestJS API      │
+                  │ Agent Runtime   │
+                  │ Policy Engine   │
+                  │ Tool Registry   │
+                  └───────┬─────────┘
+                          |
+             ┌────────────┼────────────┐
+             v            v            v
+       PostgreSQL       Redis       Providers
+       CRM + Agent     Queue/Lock   WhatsApp/etc.
+```
+
+## Vercel
+
+Hosts the Next.js application and Agent UI. It must not hold privileged provider credentials or perform direct business database operations.
+
+## Railway — API
+
+Hosts NestJS, the Agent Runtime, Policy Engine, tool registry, approval API, and audit services. This is the authoritative execution boundary.
+
+## PostgreSQL
+
+Hosts existing CRM data plus the agent persistence tables. One database remains the source of truth; do not introduce a second agent database.
+
+## Redis
+
+Provides transient coordination, distributed locks, rate limiting, and BullMQ-backed asynchronous work. Redis data must be treated as disposable state.
+
+## External providers
+
+WhatsApp, messaging, email, or future provider integrations are accessed through server-side adapters. Credentials remain in deployment secrets and never enter model context.
+
+## Worker process
+
+Long-running or delayed work should execute through a dedicated NestJS worker process consuming BullMQ jobs from Redis. Web/API requests should not wait for long-running agent jobs.
+
+## Network rules
+
+Only the NestJS service may reach privileged CRM/provider resources. Agent model calls receive tool schemas, not network credentials. Database access is private to the API/worker network boundary.
+
+## Environment separation
+
+Development, staging, and production require separate database credentials, provider credentials, Redis namespaces, and model configuration. Production agent Autopilot must be disabled by default until policy and evaluation gates pass.

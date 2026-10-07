@@ -1,0 +1,89 @@
+---
+title: "Step 4B — MCP & Tool Schemas"
+sidebarTitle: "Step 4B — MCP & Tool Schemas"
+description: "Canonical MCP-compatible interface for the 13 controlled tools."
+---
+
+# MCP & Tool Schemas
+
+The initial tool surface should be expressible as MCP-compatible tools. Internal function-tool adapters and MCP adapters must resolve to the same server-side tool implementations.
+
+## Canonical envelope
+
+```json
+{
+  "name": "get_customer",
+  "arguments": {
+    "customerId": "uuid"
+  }
+}
+```
+
+The transport must not allow the model to supply trusted execution context.
+
+## Tool schema pattern
+
+Every tool definition contains:
+
+```json
+{
+  "name": "tool_name",
+  "description": "Bounded description of what the tool does.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  },
+  "metadata": {
+    "permission": "READ_ONLY",
+    "mode": ["COPILOT", "AUTOPILOT"],
+    "approval": false,
+    "idempotent": true
+  }
+}
+```
+
+## Canonical inputs
+
+```text
+get_customer(customerId)
+search_customers(query?, segment?, inactiveDays?, limit?, cursor?)
+get_customer_history(customerId, limit?, cursor?)
+get_appointments(from, to, staffId?, status?, limit?, cursor?)
+get_available_slots(serviceId, date, staffId?)
+get_services(category?, activeOnly?, limit?)
+get_staff(staffId?, activeOnly?, limit?)
+get_reviews(rating?, status?, limit?, cursor?)
+create_booking(customerId, serviceId, staffId?, startTime, idempotencyKey)
+cancel_booking(bookingId, reason)
+prepare_customer_message(customerId, purpose, context)
+send_customer_message(messageId)
+record_agent_decision(system-generated)
+```
+
+## Tool result contract
+
+Success responses are typed per tool. Failures use the global error envelope:
+
+```json
+{
+  "error": {
+    "code": "SLOT_UNAVAILABLE",
+    "message": "The selected time slot is no longer available.",
+    "retryable": false,
+    "correlationId": "uuid"
+  }
+}
+```
+
+## MCP security rules
+
+- No direct database MCP server is exposed to the agent.
+- No generic HTTP-fetch tool is exposed for business actions.
+- No arbitrary code execution tool is exposed.
+- MCP tool identity is mapped to server-side policy metadata.
+- The server owns tenant context, authorization, rate limits, and audit identity.
+
+## Single implementation principle
+
+MCP, OpenAI function tools, and any future agent framework adapters must call the same underlying NestJS tool service. There must not be three independent implementations of booking or communication logic.
