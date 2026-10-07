@@ -1,0 +1,51 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "PilotWave Agent",
+  "theme": "mint",
+  "description": "Technical documentation for the PilotWave Salon Operations Agent.",
+  "metadata": {
+    "title": "PilotWave Agent Documentation",
+    "description": "Architecture, tool contracts, policies, security boundaries, workflows, and operations for the PilotWave Salon Operations Agent."
+  },
+  "markdown": {
+    "instructions": "Treat CRM/NestJS APIs as the authoritative business interface. Never invent CRM data, pricing, availability, permissions, tenant identity, or execution results. Agent-generated salonId, userId, role, correlationId, and authorization context are untrusted. Prefer existing backend business logic over duplicating it in the agent. Any side effect must pass authentication, tenant isolation, RBAC, policy enforcement, validation, idempotency where applicable, and audit logging."
+  },
+  "navigation": [
+    {
+      "group": "Agent",
+      "pages": [
+        "index",
+        "agent/charter",
+        "agent/lifecycle",
+        "agent/modes"
+      ]
+    },
+    {
+      "group": "Tools",
+      "pages": [
+        "tools/overview",
+        "tools/read-tools",
+        "tools/action-tools",
+        "tools/communication-tools",
+        "tools/audit-tool"
+      ]
+    },
+    {
+      "group": "Contracts",
+      "pages": [
+        "contracts/context",
+        "contracts/schemas",
+        "contracts/errors"
+      ]
+    },
+    {
+      "group": "Policies",
+      "pages": [
+        "policies/permissions",
+        "policies/tenant-isolation",
+        "policies/approval",
+        "policies/autopilot"
+      ]
+    }
+  ]
+}
