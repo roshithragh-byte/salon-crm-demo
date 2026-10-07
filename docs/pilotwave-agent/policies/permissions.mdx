@@ -1,0 +1,30 @@
+---
+title: Permissions
+description: Tool-level permission model
+---
+
+# Permissions
+
+Permission classes:
+
+- `READ_ONLY`: automatic after authentication and RBAC.
+- `APPROVAL_REQUIRED`: human approval required in Copilot mode.
+- `AUTOPILOT_SAFE`: automatic only when explicit policy conditions pass.
+- `SYSTEM_ONLY`: invoked by the execution infrastructure.
+
+## Principle
+
+The LLM proposes an action. It does not authorize the action.
+
+The Policy Engine evaluates:
+
+- authenticated role;
+- salon tenant;
+- tool permission;
+- action eligibility;
+- salon configuration;
+- customer eligibility;
+- consent requirements;
+- rate limits;
+- idempotency requirements;
+- risk level.
