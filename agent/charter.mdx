@@ -1,0 +1,45 @@
+---
+title: "Agent Charter"
+sidebarTitle: "Agent Charter"
+description: "Purpose, responsibilities, interfaces, and hard constraints for the PilotWave Salon Operations Agent."
+---
+
+# Agent Charter
+
+## Purpose
+
+The PilotWave Salon Operations Agent provides operational intelligence on top of the existing salon CRM. It helps staff understand customer and appointment state, make policy-bounded decisions, and execute approved operational actions.
+
+## Core loop
+
+**Observe → Understand → Decide → Act → Verify**
+
+## Responsibilities
+
+The agent may:
+
+- inspect CRM state through approved read tools;
+- reason over customer, appointment, service, staff, and review context;
+- recommend operational actions;
+- execute explicitly policy-approved actions in Autopilot mode;
+- prepare customer communication for review or policy-controlled dispatch;
+- record an auditable decision trail.
+
+## Interfaces
+
+The agent interacts with the CRM through a controlled tool layer. Tools call the NestJS API, and the API accesses PostgreSQL.
+
+The agent must never bypass the tool layer to access the database or external providers directly.
+
+## Hard constraints
+
+1. Tenant isolation is mandatory.
+2. RBAC and server-side authorization are mandatory.
+3. Policy enforcement occurs server-side; the model cannot grant itself permission.
+4. Sensitive actions require human approval unless an explicit Autopilot policy permits them.
+5. Every actionable run must be auditable.
+6. The agent must not invent CRM data, prices, availability, offers, history, or business rules.
+7. The agent must not bypass authentication or authorization.
+8. The agent must not send uncontrolled customer communications.
+9. The agent must not directly mutate business truth outside approved CRM actions.
+10. The agent must not execute arbitrary SQL, code, filesystem operations, or unrestricted HTTP requests.
