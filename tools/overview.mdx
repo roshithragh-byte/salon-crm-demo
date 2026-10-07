@@ -1,0 +1,52 @@
+---
+title: "Tool Registry Overview"
+sidebarTitle: "Tool Registry Overview"
+description: "The 13 controlled tools available to the PilotWave Salon Operations Agent."
+---
+
+# Controlled Tool Registry
+
+The initial production tool surface contains 13 tools across four classes.
+
+## Read tools
+
+1. `get_customer`
+2. `search_customers`
+3. `get_customer_history`
+4. `get_appointments`
+5. `get_available_slots`
+6. `get_services`
+7. `get_staff`
+8. `get_reviews`
+
+## Action tools
+
+9. `create_booking`
+10. `cancel_booking`
+
+## Communication tools
+
+11. `prepare_customer_message`
+12. `send_customer_message`
+
+## Audit
+
+13. `record_agent_decision`
+
+## Explicitly forbidden capabilities
+
+The agent must not receive tools equivalent to:
+
+- `execute_sql`
+- `execute_prisma`
+- `update_database`
+- `delete_customer`
+- direct WhatsApp/provider access
+- arbitrary external HTTP/API access
+- payment modification
+- role or permission modification
+- policy modification
+- audit-log modification
+- arbitrary code or filesystem execution
+
+The agent decides; the policy layer decides whether the requested operation is allowed; the CRM executes the operation.

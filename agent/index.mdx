@@ -1,0 +1,27 @@
+---
+title: "PilotWave Salon Operations Agent"
+sidebarTitle: "PilotWave Salon Operations Agent"
+description: "The production specification for the PilotWave Salon Operations Agent. Covers the agent charter, architecture, operating modes, controlled tools, policy model, and error contract."
+---
+
+# PilotWave Salon Operations Agent
+
+This documentation defines the production contract for the PilotWave Salon Operations Agent before implementation begins.
+
+The agent is an operational intelligence layer above the salon CRM. Its core loop is **Observe → Understand → Decide → Act → Verify**.
+
+## Source of truth
+
+PostgreSQL remains the system of record through the NestJS CRM API. The agent does not access PostgreSQL directly and does not own business truth.
+
+## Documentation status
+
+Steps 1–3 of the agent design are formalized here:
+
+- Agent charter and boundaries
+- Runtime architecture and execution modes
+- Controlled tool registry and contracts
+- Permission states and policy decision flow
+- Standard error envelope
+
+Implementation should follow these contracts rather than inventing parallel interfaces.

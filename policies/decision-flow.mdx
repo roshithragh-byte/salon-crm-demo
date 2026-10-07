@@ -1,0 +1,45 @@
+---
+title: "Policy Decision Flow"
+sidebarTitle: "Policy Decision Flow"
+description: "Server-side sequence for evaluating every tool request before execution."
+---
+
+# Policy Decision Flow
+
+```text
+Agent proposes tool call
+        |
+        v
+Validate schema
+        |
+        v
+Resolve authenticated tenant + actor context
+        |
+        v
+Check resource ownership / tenant isolation
+        |
+        v
+Evaluate RBAC and policy
+        |
+        +---- FORBIDDEN ------------> deny
+        |
+        +---- APPROVAL_REQUIRED ----> create approval request / stop
+        |
+        +---- AUTOPILOT_SAFE -------> execute server action
+        |
+        +---- READ_ONLY ------------> execute read
+        |
+        v
+Record outcome + correlation ID
+        |
+        v
+Return sanitized result to agent
+```
+
+## Required controls
+
+Every action request must be validated against authenticated tenant context, actor role, resource ownership, active mode, policy eligibility, rate limits, and dependency health.
+
+External communication must additionally pass communication purpose, recipient eligibility, opt-in/applicable rules, and provider availability.
+
+The final authorization decision is made by the server. The LLM receives the result and cannot override it.

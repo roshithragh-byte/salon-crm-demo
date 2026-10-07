@@ -1,0 +1,57 @@
+---
+title: "Error Contract"
+sidebarTitle: "Error Contract"
+description: "Canonical error envelope and recommended error codes for agent and CRM tool calls."
+---
+
+# Error Contract
+
+All tool and API failures should use one machine-readable envelope.
+
+```json
+{
+  "error": {
+    "code": "SLOT_UNAVAILABLE",
+    "message": "The selected time slot is no longer available.",
+    "retryable": false,
+    "correlationId": "uuid"
+  }
+}
+```
+
+## Recommended codes
+
+`UNAUTHENTICATED`
+
+`FORBIDDEN`
+
+`TENANT_ACCESS_DENIED`
+
+`RESOURCE_NOT_FOUND`
+
+`VALIDATION_ERROR`
+
+`POLICY_DENIED`
+
+`APPROVAL_REQUIRED`
+
+`SLOT_UNAVAILABLE`
+
+`IDEMPOTENCY_CONFLICT`
+
+`RATE_LIMITED`
+
+`DEPENDENCY_UNAVAILABLE`
+
+`PROVIDER_ERROR`
+
+`INTERNAL_ERROR`
+
+## Requirements
+
+- `code` is stable and machine-readable.
+- `message` is safe to expose to the agent and client.
+- `retryable` determines whether the client/agent may safely retry.
+- `correlationId` links the failure to logs and the agent audit trail.
+
+The agent must not convert an error into fabricated success or substitute invented CRM data.

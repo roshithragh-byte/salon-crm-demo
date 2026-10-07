@@ -1,0 +1,36 @@
+---
+title: "Permission Model"
+sidebarTitle: "Permission Model"
+description: "Authoritative permission states and the tool-by-mode matrix."
+---
+
+# Permission Model
+
+## Permission states
+
+| State | Meaning |
+|---|---|
+| READ_ONLY | Read data only. No business mutation. |
+| APPROVAL_REQUIRED | Action can be prepared but a human must approve execution. |
+| AUTOPILOT_SAFE | Server policy permits execution without interactive approval when all conditions pass. |
+| FORBIDDEN | The capability is unavailable to the agent. |
+
+## Tool matrix
+
+| Tool | Copilot | Autopilot | State |
+|---|---|---|---|
+| `get_customer` | Allowed | Allowed | READ_ONLY |
+| `search_customers` | Allowed | Allowed | READ_ONLY |
+| `get_customer_history` | Allowed | Allowed | READ_ONLY |
+| `get_appointments` | Allowed | Allowed | READ_ONLY |
+| `get_available_slots` | Allowed | Allowed | READ_ONLY |
+| `get_services` | Allowed | Allowed | READ_ONLY |
+| `get_staff` | Allowed | Allowed | READ_ONLY |
+| `get_reviews` | Allowed | Allowed | READ_ONLY |
+| `create_booking` | Approval | Policy-controlled | APPROVAL_REQUIRED / AUTOPILOT_SAFE when policy permits |
+| `cancel_booking` | Approval | Policy-controlled | APPROVAL_REQUIRED / AUTOPILOT_SAFE when policy permits |
+| `prepare_customer_message` | Allowed | Allowed | READ / PREPARATION |
+| `send_customer_message` | Approval | Policy-controlled | APPROVAL_REQUIRED / AUTOPILOT_SAFE when policy permits |
+| `record_agent_decision` | System-generated | System-generated | SYSTEM_ONLY |
+
+Server-side policy is authoritative. Prompt instructions cannot elevate permissions.

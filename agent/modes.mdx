@@ -1,0 +1,34 @@
+---
+title: "Agent Operating Modes"
+sidebarTitle: "Agent Operating Modes"
+description: "Defines Copilot and Autopilot behavior and the boundary between recommendation and execution."
+---
+
+# Agent Operating Modes
+
+## Copilot
+
+Copilot is the default operating mode for actions that can affect bookings or customer communications.
+
+The agent can inspect CRM data, reason about the situation, prepare a recommendation, and prepare communication. Execution of approval-required actions pauses for human approval.
+
+## Autopilot
+
+Autopilot can execute only actions explicitly permitted by server-side policy. The model does not decide whether an action is safe enough to bypass approval.
+
+Policy determines:
+
+- which tool may execute;
+- which purpose or action types are permitted;
+- eligibility and rate limits;
+- tenant and role requirements;
+- whether the specific context requires approval.
+
+## Permission states
+
+- **READ_ONLY** — informational access only.
+- **APPROVAL_REQUIRED** — action may be prepared but requires approval.
+- **AUTOPILOT_SAFE** — action can execute when policy conditions are satisfied.
+- **FORBIDDEN** — action is unavailable to the agent.
+
+The permission matrix is documented separately and is authoritative.
