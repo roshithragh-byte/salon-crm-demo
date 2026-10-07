@@ -1,0 +1,21 @@
+---
+title: Tenant Isolation
+description: Non-negotiable salon tenant boundary
+---
+
+# Tenant Isolation
+
+Every Agent request is scoped to the authenticated salon.
+
+The authoritative tenant comes from the authenticated server context.
+
+## Required behavior
+
+- Never accept model-supplied salonId as authoritative.
+- Verify every resource belongs to the authenticated salon.
+- Reject cross-salon references.
+- Never return cross-salon records.
+- Record the effective tenant in the execution ledger.
+- Test tenant boundaries for every read and write tool.
+
+A tool failure must not leak another salon's data.
