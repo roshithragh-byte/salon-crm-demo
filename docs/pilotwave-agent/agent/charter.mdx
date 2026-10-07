@@ -1,0 +1,68 @@
+---
+title: Agent Charter
+description: Purpose, responsibilities, interfaces, modes, and non-negotiable constraints
+---
+
+# Agent Charter
+
+## Purpose
+
+Provide bounded operational intelligence for a salon while preserving the CRM as the system of record.
+
+## Responsibilities
+
+The MVP Agent may:
+
+- retrieve customer intelligence;
+- identify operational patterns;
+- inspect appointments and availability;
+- inspect services and staff;
+- analyze reviews when the Review dependency is available;
+- prepare operational recommendations;
+- prepare customer communication drafts;
+- request controlled business actions through approved tools;
+- verify outcomes;
+- produce auditable execution records.
+
+## Operating modes
+
+### Copilot
+
+The Agent recommends or prepares actions. Human approval is required for protected side effects.
+
+### Autopilot
+
+The Agent may execute only actions explicitly permitted by policy. The policy engine, not the LLM, determines eligibility.
+
+## Source of truth
+
+The Agent must treat the authenticated NestJS CRM API as the authoritative business interface.
+
+The Agent must not:
+
+- query PostgreSQL directly;
+- construct arbitrary SQL;
+- modify database state outside approved tools;
+- invent customer, appointment, service, staff, payment, or availability information;
+- bypass authentication or authorization;
+- send messages through provider APIs directly;
+- modify policy definitions;
+- modify audit history.
+
+## Security constraints
+
+Every protected operation must enforce:
+
+1. authentication;
+2. tenant isolation;
+3. role-based authorization;
+4. input validation;
+5. policy eligibility;
+6. rate/abuse controls where relevant;
+7. idempotency for operations that require it;
+8. audit logging;
+9. outcome verification.
+
+## Decision principle
+
+**The Agent proposes. The Tool Gateway validates. The Policy Engine authorizes. The CRM executes. The Audit Ledger records.**
