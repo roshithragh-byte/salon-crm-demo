@@ -1,0 +1,78 @@
+---
+title: "Step 5 — Test Strategy & Gates"
+sidebarTitle: "Step 5 — Test Strategy & Gates"
+description: "Test architecture and release gates for the Agent implementation."
+---
+
+# Step 5 — Test Strategy & Gates
+
+The Agent is implemented test-first around the security and business invariants from Steps 1–4B.
+
+## Unit tests
+
+### Policy
+
+- tenant mismatch → denied
+- forbidden tool → denied
+- approval-required action → suspended
+- Autopilot policy satisfied → allowed
+- Autopilot policy predicate fails → denied
+- stale approval → denied
+
+### Tool validation
+
+- invalid schema rejected
+- unknown fields rejected
+- missing required IDs rejected
+- pagination/date bounds enforced
+
+### Context security
+
+- model cannot override salon ID
+- model cannot override role
+- model cannot inject privileged user ID
+
+## Integration tests
+
+- customer tool reads only same-salon records
+- booking tool uses CRM booking transaction
+- booking idempotency survives repeated tool calls
+- concurrent slot requests cannot double-book
+- communication tool never exposes raw provider credentials
+- Review dependency failure returns `DEPENDENCY_UNAVAILABLE`
+- approval resumes the exact approved action
+
+## API tests
+
+Cover every Agent endpoint for authentication, RBAC, tenant isolation, validation, approval transitions, idempotency, and error envelopes.
+
+## MCP contract tests
+
+For all 13 tools:
+
+- schema matches canonical contract;
+- invalid arguments fail safely;
+- tool metadata matches permission matrix;
+- MCP adapter invokes the same underlying implementation as the native adapter.
+
+## Agent evaluation suite
+
+Use deterministic scenarios with expected tool sequences and policy outcomes, for example:
+
+1. "Find customers inactive 60 days" → read tools only.
+2. "Book customer X tomorrow at 4 PM" → availability must be checked before booking.
+3. "Cancel this booking" → approval required in MVP.
+4. "Send this discount" → agent must not invent discount data.
+5. Cross-salon customer ID → denied.
+6. Slot becomes unavailable between read and booking → `SLOT_UNAVAILABLE`.
+7. Duplicate approval click → one business effect.
+
+## Release gates
+
+**P0:** tenant isolation, authorization, approval enforcement, booking idempotency, communication safety.
+
+**P1:** tool contract completeness, audit coverage, retries, queue behavior, observability.
+
+**P2:** evaluation quality, latency optimization, prompt refinement, cost optimization.
+
+No Autopilot production enablement until all P0 tests pass and representative Agent evaluations meet the agreed acceptance threshold.

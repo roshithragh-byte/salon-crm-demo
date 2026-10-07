@@ -1,0 +1,48 @@
+---
+title: "Step 5 — Agents SDK Integration"
+sidebarTitle: "Step 5 — Agents SDK Integration"
+description: "Concrete integration boundary for the TypeScript Agent Runtime."
+---
+
+# Step 5 — Agents SDK Integration
+
+The initial runtime uses the OpenAI Agents SDK for TypeScript behind a local `ModelAdapter` interface. This keeps the application independent of one SDK implementation.
+
+## Adapter boundary
+
+```ts
+export interface AgentModelAdapter {
+  run(input: {
+    systemInstructions: string;
+    userMessage: string;
+    tools: AgentToolDefinition[];
+    context: AgentRuntimeContext;
+  }): Promise<AgentModelResult>;
+}
+```
+
+The implementation adapts the canonical Tool Registry into the SDK's tool format.
+
+## Runtime responsibilities
+
+The runtime must:
+
+- create and close AgentRun records;
+- provide only approved tool definitions;
+- pass minimal tenant-scoped context;
+- process tool calls sequentially or concurrently only when safe;
+- stop for approval-required actions;
+- resume from persisted approval state;
+- enforce run timeouts and maximum tool-call budgets;
+- normalize provider/SDK errors into the global error contract;
+- record usage and safe execution metadata.
+
+## Model context rules
+
+Never place passwords, API keys, access tokens, provider credentials, raw database connection strings, or unrestricted tenant records in model context.
+
+The model receives business data only through tool responses and only at the minimum required granularity.
+
+## Provider abstraction
+
+The Agent Runtime should not import OpenAI SDK types outside the model adapter. This permits later support for another model provider without rewriting the Tool Registry or Policy Engine.

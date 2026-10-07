@@ -1,0 +1,73 @@
+---
+title: "Step 5 — Approval APIs"
+sidebarTitle: "Step 5 — Approval APIs"
+description: "REST API contract for human approval and Agent-run control."
+---
+
+# Step 5 — Approval APIs
+
+Approval APIs live under the authenticated NestJS Agent API.
+
+## Start a run
+
+`POST /api/v1/agent/runs`
+
+Request:
+
+```json
+{
+  "message": "Find customers inactive for 60 days and prepare reactivation messages.",
+  "mode": "COPILOT"
+}
+```
+
+The server derives user, salon, role, and correlation ID.
+
+Response returns `agentRunId`, status, and safe response content.
+
+## Get run
+
+`GET /api/v1/agent/runs/:runId`
+
+Returns run status and user-safe execution summary. Tenant isolation is mandatory.
+
+## List pending approvals
+
+`GET /api/v1/agent/approvals?status=PENDING`
+
+Only authorized users for the salon may view approvals.
+
+## Approve
+
+`POST /api/v1/agent/approvals/:approvalId/approve`
+
+The server:
+
+1. authenticates reviewer;
+2. checks reviewer authorization;
+3. loads exact approval payload;
+4. verifies approval is still pending and unexpired;
+5. rechecks tenant/resource ownership;
+6. re-evaluates policy;
+7. marks approval approved;
+8. resumes execution using the persisted action payload.
+
+## Reject
+
+`POST /api/v1/agent/approvals/:approvalId/reject`
+
+Request:
+
+```json
+{ "reason": "Do not contact this customer today." }
+```
+
+## Cancel run
+
+`POST /api/v1/agent/runs/:runId/cancel`
+
+Cancels a waiting or queued run where policy permits.
+
+## Security
+
+Approval IDs are opaque UUIDs, but UUID secrecy is not treated as authorization. Every endpoint performs tenant and role checks. Approval execution must be idempotent so repeated clicks cannot create duplicate bookings or messages.

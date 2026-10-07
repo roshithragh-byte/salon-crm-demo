@@ -1,0 +1,113 @@
+---
+title: "Step 5 — Prisma Schema & Migrations"
+sidebarTitle: "Step 5 — Prisma Schema & Migrations"
+description: "Concrete PostgreSQL/Prisma implementation for Agent persistence."
+---
+
+# Step 5 — Prisma Schema & Migrations
+
+Add Agent persistence to the existing PostgreSQL Prisma schema. Do not create a second database or introduce a NoSQL store.
+
+## Models
+
+```prisma
+model AgentRun {
+  id              String   @id @default(uuid()) @db.Uuid
+  salonId         String   @db.Uuid
+  userId          String?  @db.Uuid
+  mode            AgentMode
+  status          AgentRunStatus
+  intent          String   @db.Text
+  modelProvider   String
+  modelName       String
+  correlationId   String   @unique @db.Uuid
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  tokenInput     Int?
+  tokenOutput    Int?
+  finalOutcome   String?  @db.Text
+  errorCode      String?
+  metadata       Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  toolEvents     AgentToolEvent[]
+  approvals      AgentApproval[]
+
+  @@index([salonId, createdAt])
+  @@index([salonId, status])
+  @@map("agent_runs")
+}
+
+model AgentToolEvent {
+  id               String   @id @default(uuid()) @db.Uuid
+  agentRunId       String   @db.Uuid
+  salonId          String   @db.Uuid
+  toolName         String
+  sequence         Int
+  request          Json
+  policyState      AgentPermissionState
+  policyReason     String?
+  approvalId       String?  @db.Uuid
+  status           AgentToolStatus
+  resultMetadata   Json?
+  errorCode        String?
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  createdAt        DateTime @default(now())
+
+  agentRun         AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@unique([agentRunId, sequence])
+  @@index([salonId, createdAt])
+  @@index([agentRunId])
+  @@map("agent_tool_events")
+}
+
+model AgentApproval {
+  id                 String   @id @default(uuid()) @db.Uuid
+  agentRunId         String   @db.Uuid
+  agentToolEventId   String   @db.Uuid
+  salonId            String   @db.Uuid
+  requestedByUserId  String?  @db.Uuid
+  reviewedByUserId   String?  @db.Uuid
+  action             String
+  status             AgentApprovalStatus
+  reason             String?
+  expiresAt          DateTime
+  createdAt          DateTime @default(now())
+  reviewedAt        DateTime?
+
+  agentRun           AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([salonId, status, expiresAt])
+  @@index([agentRunId])
+  @@map("agent_approvals")
+}
+
+model AgentIdempotencyKey {
+  id               String   @id @default(uuid()) @db.Uuid
+  salonId          String   @db.Uuid
+  scope            String
+  idempotencyKey   String
+  requestHash      String
+  resultReference  String?
+  status           AgentIdempotencyStatus
+  expiresAt        DateTime?
+  createdAt        DateTime @default(now())
+
+  @@unique([salonId, scope, idempotencyKey])
+  @@index([expiresAt])
+  @@map("agent_idempotency_keys")
+}
+```
+
+Enums should be generated in the Prisma schema for `AgentMode`, `AgentRunStatus`, `AgentPermissionState`, `AgentToolStatus`, `AgentApprovalStatus`, and `AgentIdempotencyStatus`.
+
+## Migration rules
+
+Generate one reviewed Prisma migration for the Agent tables. Run migration against a disposable database first, then staging, then production under the normal deployment process.
+
+Never use `prisma db push` as the production migration mechanism.
+
+The migration must be backward-compatible with the existing CRM schema and must not modify frozen authentication/security paths.
