@@ -361,3 +361,96 @@ model AuditLog {
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+
+enum AgentMode { COPILOT AUTOPILOT }
+enum AgentRunStatus { RUNNING WAITING_APPROVAL COMPLETED FAILED CANCELLED }
+enum AgentPermissionState { READ_ONLY APPROVAL_REQUIRED AUTOPILOT_SAFE FORBIDDEN SYSTEM_ONLY }
+enum AgentToolStatus { REQUESTED APPROVED REJECTED EXECUTING SUCCEEDED FAILED }
+enum AgentApprovalStatus { PENDING APPROVED REJECTED EXPIRED CANCELLED }
+enum AgentIdempotencyStatus { IN_PROGRESS COMPLETED FAILED }
+
+model AgentRun {
+  id String @id @default(uuid())
+  salonId String
+  userId String?
+  mode AgentMode
+  status AgentRunStatus
+  intent String
+  modelProvider String
+  modelName String
+  correlationId String @unique
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  tokenInput Int?
+  tokenOutput Int?
+  finalOutcome String?
+  errorCode String?
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  toolEvents AgentToolEvent[]
+  approvals AgentApproval[]
+  @@index([salonId, createdAt])
+  @@index([salonId, status])
+  @@map("agent_runs")
+}
+
+model AgentToolEvent {
+  id String @id @default(uuid())
+  agentRunId String
+  salonId String
+  toolName String
+  sequence Int
+  request Json
+  policyState AgentPermissionState
+  policyReason String?
+  approvalId String?
+  status AgentToolStatus
+  resultMetadata Json?
+  errorCode String?
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  approval AgentApproval? @relation(fields: [approvalId], references: [id], onDelete: SetNull)
+  @@unique([agentRunId, sequence])
+  @@index([salonId, createdAt])
+  @@index([agentRunId])
+  @@map("agent_tool_events")
+}
+
+model AgentApproval {
+  id String @id @default(uuid())
+  agentRunId String
+  agentToolEventId String
+  salonId String
+  requestedByUserId String?
+  reviewedByUserId String?
+  action String
+  status AgentApprovalStatus
+  reason String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  agentToolEvent AgentToolEvent @relation(fields: [agentToolEventId], references: [id], onDelete: Cascade)
+  @@index([salonId, status, expiresAt])
+  @@index([agentRunId])
+  @@map("agent_approvals")
+}
+
+model AgentIdempotencyKey {
+  id String @id @default(uuid())
+  salonId String
+  scope String
+  idempotencyKey String
+  requestHash String
+  resultReference String?
+  status AgentIdempotencyStatus
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  @@unique([salonId, scope, idempotencyKey])
+  @@index([expiresAt])
+  @@map("agent_idempotency_keys")
+}
