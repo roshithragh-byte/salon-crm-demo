@@ -1,0 +1,14 @@
+{
+  "name": "pilotwave-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PilotWave Salon Management & Operations SaaS Platform",
+  "scripts": {
+    "release-gate": "node scripts/release-gate.mjs",
+    "test:server": "npm --prefix server test",
+    "test:client": "npm --prefix client test",
+    "typecheck:client": "tsc -p client/tsconfig.json --noEmit",
+    "build:client": "npm --prefix client run build",
+    "build:server": "npm --prefix server run build"
+  }
+}

@@ -60,4 +60,12 @@
   4. Client `BookingForm.tsx` is completely disconnected from webhook endpoints and passes client-scoped `idempotencyKey` headers.
 * **Status:** Accepted & Verified (13/13 Payment Security Tests PASS).
 
+---
+
+## ADR-008: Deterministic 10-Stage Release Gate & Absolute Application Code Freeze
+* **Context:** Non-deterministic deployment iterations (*deploy ➔ smoke test ➔ discover issue ➔ modify environment ➔ redeploy*) introduce operational risk. Declaring "production ready" based solely on ad-hoc status code checks is unreliable.
+* **Decision:** Enforce an absolute application code freeze and implement a deterministic 10-stage release gate script ([`scripts/release-gate.mjs`](file:///home/machinerg/SourceCode/de-salon-bea/scripts/release-gate.mjs)). The pipeline validates Git SHA cleanliness, PostgreSQL schema/migrations, environment secret entropy, 36/36 backend tests, frontend Turbopack build, live URL reachability, timing-safe unauthenticated security rejection, canonical HS256 authenticated E2E journeys, raw-body HMAC-SHA256 payment webhooks, and writes an immutable certification record (`docs/releases/CERTIFICATE_<GIT_SHA>.json`).
+* **Status:** Accepted & Live Implemented (All 10 Stages PASS).
+
+
 
