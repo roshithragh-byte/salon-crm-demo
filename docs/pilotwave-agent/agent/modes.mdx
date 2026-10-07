@@ -1,0 +1,38 @@
+---
+title: Agent Modes
+description: Copilot and Autopilot behavior
+---
+
+# Agent Modes
+
+## Copilot
+
+Default mode for MVP.
+
+Read-only tools execute automatically. Protected mutations require explicit human approval.
+
+| Operation | Copilot |
+| --- | --- |
+| CRM reads | Automatic |
+| Prepare customer message | Automatic |
+| Create booking | Approval |
+| Cancel booking | Approval |
+| Send customer message | Approval |
+| Audit recording | System |
+
+## Autopilot
+
+Autopilot is not unrestricted autonomy.
+
+A tool can execute automatically only when:
+
+- the tool is explicitly classified as Autopilot-safe;
+- the authenticated role permits it;
+- the salon policy permits it;
+- all eligibility conditions pass;
+- rate limits pass;
+- required consent/communication rules pass;
+- idempotency requirements pass;
+- the execution is auditable.
+
+The LLM cannot change any of these conditions.
