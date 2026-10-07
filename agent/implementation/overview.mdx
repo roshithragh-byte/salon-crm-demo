@@ -1,0 +1,38 @@
+---
+title: "Step 5 — Implementation Specification"
+sidebarTitle: "Step 5 — Implementation Specification"
+description: "Implementation-ready blueprint for building the PilotWave Agent runtime."
+---
+
+# Step 5 — Implementation Specification
+
+Step 5 converts the Step 4B runtime architecture into an implementation contract. The implementation must preserve the existing PilotWave security, tenant, booking, idempotency, and CRM domain boundaries.
+
+## Implementation stack
+
+- NestJS + TypeScript for the Agent API and runtime boundary
+- PostgreSQL + Prisma for Agent persistence
+- Redis + BullMQ for asynchronous execution, locks, and transient coordination
+- OpenAI Agents SDK for TypeScript as the initial Agent Runtime
+- MCP-compatible adapters for the controlled tool surface
+- Next.js for Agent UI and approval surfaces
+- Jest for unit/integration tests and an explicit Agent evaluation suite
+
+## Build order
+
+1. Database schema and migration
+2. Agent persistence repositories
+3. Policy engine and execution context
+4. Tool registry and tool schemas
+5. Native tool adapters
+6. MCP server adapter
+7. Agents SDK runtime adapter
+8. Approval API and UI contract
+9. Queue/worker execution
+10. Audit and observability
+11. Integration tests
+12. Agent evaluations
+
+## Definition of done
+
+The Agent is not implementation-complete until tenant isolation, policy enforcement, approval semantics, idempotency, tool contracts, auditability, and failure handling are covered by automated tests.

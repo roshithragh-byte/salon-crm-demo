@@ -1,0 +1,61 @@
+---
+title: "Step 5 — Tool & MCP Implementation"
+sidebarTitle: "Step 5 — Tool & MCP Implementation"
+description: "Implementation contract for the controlled tool registry and MCP adapters."
+---
+
+# Step 5 — Tool & MCP Implementation
+
+## Canonical tool interface
+
+```ts
+export interface AgentToolContext {
+  userId: string;
+  salonId: string;
+  role: string;
+  mode: 'COPILOT' | 'AUTOPILOT';
+  correlationId: string;
+  agentRunId: string;
+}
+
+export interface AgentTool<I, O> {
+  name: string;
+  permission: AgentPermissionState;
+  inputSchema: unknown;
+  execute(context: AgentToolContext, input: I): Promise<O>;
+}
+```
+
+The registry owns tool lookup and metadata. Tool implementations own input validation plus delegation to CRM services.
+
+## Adapter model
+
+```text
+                Tool Registry
+                 /         \
+                /           \
+      OpenAI adapter       MCP adapter
+             \               /
+              \             /
+              Same Tool implementation
+                       |
+                 Policy Engine
+                       |
+                 CRM Services
+```
+
+No adapter may contain a second booking, customer, or communication implementation.
+
+## MCP server
+
+Expose only the 13 approved tools. Each MCP request is converted into an `AgentToolContext` from the authenticated server session. The client cannot submit `salonId`, role, or user identity as trusted context.
+
+MCP transport authentication and session handling must terminate at the NestJS boundary.
+
+## Tool metadata
+
+Every registered tool must declare permission state, supported modes, approval behavior, idempotency behavior, timeout, and data-sensitivity classification.
+
+## Sensitive tools
+
+`create_booking`, `cancel_booking`, and `send_customer_message` require explicit policy evaluation before execution. `record_agent_decision` is server-generated and not an LLM-callable mutation tool.

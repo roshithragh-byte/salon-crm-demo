@@ -1,0 +1,71 @@
+---
+title: "Step 5 — NestJS Module Structure"
+sidebarTitle: "Step 5 — NestJS Module Structure"
+description: "Concrete NestJS module boundaries and dependency rules."
+---
+
+# Step 5 — NestJS Module Structure
+
+Recommended server structure:
+
+```text
+server/src/
+├── agent/
+│   ├── agent.module.ts
+│   ├── agent.controller.ts
+│   ├── agent.service.ts
+│   ├── runtime/
+│   │   ├── agent-runtime.service.ts
+│   │   ├── model-adapter.ts
+│   │   ├── context-builder.ts
+│   │   └── response-builder.ts
+│   ├── tools/
+│   │   ├── tool.registry.ts
+│   │   ├── tool-context.ts
+│   │   ├── customer.tools.ts
+│   │   ├── appointment.tools.ts
+│   │   ├── service.tools.ts
+│   │   ├── staff.tools.ts
+│   │   ├── review.tools.ts
+│   │   ├── booking.tools.ts
+│   │   └── communication.tools.ts
+│   ├── policy/
+│   │   ├── policy.engine.ts
+│   │   ├── permission.resolver.ts
+│   │   ├── tenant.policy.ts
+│   │   ├── booking.policy.ts
+│   │   └── communication.policy.ts
+│   ├── approval/
+│   │   ├── approval.controller.ts
+│   │   ├── approval.service.ts
+│   │   └── approval.repository.ts
+│   ├── audit/
+│   │   ├── agent-run.service.ts
+│   │   └── tool-event.service.ts
+│   ├── persistence/
+│   │   ├── agent-run.repository.ts
+│   │   ├── tool-event.repository.ts
+│   │   ├── approval.repository.ts
+│   │   └── idempotency.repository.ts
+│   ├── mcp/
+│   │   ├── mcp.module.ts
+│   │   ├── mcp.server.ts
+│   │   └── mcp.tool-adapter.ts
+│   └── queue/
+│       ├── agent.processor.ts
+│       ├── agent.queue.ts
+│       └── agent.worker.module.ts
+└── existing CRM modules...
+```
+
+## Dependency rules
+
+`AgentRuntimeService` may depend on the Tool Registry, Policy Engine, persistence, and model adapter.
+
+Tool implementations may depend on existing CRM domain services and the Policy Engine.
+
+CRM domain services must not depend on Agent Runtime.
+
+Repositories must not contain authorization decisions; authorization is evaluated before repository/domain execution.
+
+The MCP adapter and OpenAI tool adapter must call the same Tool Registry implementation.
