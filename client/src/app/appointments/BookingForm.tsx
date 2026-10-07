@@ -296,28 +296,40 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
             <Controller
               control={control}
               name="startsAt"
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDate || !watchedServiceId || isLoadingSlots}>
-                  <SelectTrigger className="h-12 bg-muted/30">
-                    <SelectValue placeholder={isLoadingSlots ? "Loading slots..." : "Select a time"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableSlots.length === 0 && !isLoadingSlots ? (
-                      <SelectItem value="__none" disabled>No slots for this date</SelectItem>
-                    ) : (
-                      availableSlots.map(slot => {
-                        const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                          timeZone: "Asia/Kolkata",
-                        });
-                        return <SelectItem key={slot.starts_at} value={slot.starts_at}>{timeString}</SelectItem>;
-                      })
-                    )}
-                  </SelectContent>
-                </Select>
-              )}
+              render={({ field }) => {
+                const placeholderText = isLoadingSlots
+                  ? "Loading slots..."
+                  : !watchedServiceId
+                  ? "Select a service first"
+                  : !watchedDate
+                  ? "Select a date first"
+                  : availableSlots.length === 0
+                  ? "No slots for this date"
+                  : "Select a time slot";
+
+                return (
+                  <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDate || !watchedServiceId || isLoadingSlots || availableSlots.length === 0}>
+                    <SelectTrigger className="h-12 bg-muted/30">
+                      <SelectValue placeholder={placeholderText} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableSlots.length === 0 ? (
+                        <SelectItem value="__none" disabled>No slots available for this date</SelectItem>
+                      ) : (
+                        availableSlots.map(slot => {
+                          const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                            timeZone: "Asia/Kolkata",
+                          });
+                          return <SelectItem key={slot.starts_at} value={slot.starts_at}>{timeString}</SelectItem>;
+                        })
+                      )}
+                    </SelectContent>
+                  </Select>
+                );
+              }}
             />
           </div>
         </div>

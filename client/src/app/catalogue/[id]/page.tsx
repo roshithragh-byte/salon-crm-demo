@@ -63,9 +63,15 @@ export default async function ServiceDetailPage({ params }: PageProps) {
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-purple-950 mb-6">
             {service.name}
           </h1>
-          <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-8 leading-relaxed">
-            {service.description}
-          </p>
+          {service.description ? (
+            <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-8 leading-relaxed">
+              {service.description}
+            </p>
+          ) : (
+            <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed italic">
+              Experience bespoke care, rejuvenation, and wellness crafted by our master stylists.
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600 mb-10">
             {service.durationMinutes > 0 && (

@@ -136,8 +136,18 @@ export function CustomerDashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-slate-500 bg-slate-50 rounded-xl">
-                No upcoming appointments.
+              <div className="text-center py-10 px-4 text-slate-500 bg-slate-50 rounded-xl space-y-3">
+                <CalendarIcon className="w-8 h-8 mx-auto text-slate-300" />
+                <p className="font-medium text-slate-700">No upcoming appointments scheduled</p>
+                <p className="text-xs text-slate-500">Ready for your next luxury wellness session?</p>
+                <div>
+                  <a
+                    href="/appointments"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-purple-900 text-white rounded-lg text-xs font-semibold hover:bg-purple-800 transition-colors shadow-sm"
+                  >
+                    Book New Appointment
+                  </a>
+                </div>
               </div>
             )}
           </div>

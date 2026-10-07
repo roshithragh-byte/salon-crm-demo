@@ -1,0 +1,24 @@
+{
+  "certificationId": "CERT-PW-1791414463050",
+  "status": "PRODUCTION_READY",
+  "timestamp": "2026-10-07T23:07:43.050Z",
+  "git": {
+    "sha": "4cb5b87a91765c9805f0e7bc5997cff089a2eee5",
+    "branch": "master"
+  },
+  "verificationGates": {
+    "gitCleanliness": "PASS",
+    "databaseSchemaIntegrity": "PASS",
+    "environmentSecretsValidation": "PASS",
+    "backendSecuritySuite": "36/36 PASS",
+    "frontendTurbopackBuild": "PASS",
+    "liveDeploymentReachability": "PASS",
+    "unauthenticatedSecurityGuards": "PASS",
+    "authenticatedE2EJourneys": "PASS",
+    "paymentWebhookCryptographicSignatures": "PASS"
+  },
+  "urls": {
+    "frontend": "https://salon-crm-demo-theta.vercel.app",
+    "backend": "https://salon-crm-demo-production.up.railway.app"
+  }
+}

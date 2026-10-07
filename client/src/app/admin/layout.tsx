@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, Users, Scissors, UserCheck, Settings, LogOut, Menu } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, UserCheck, Settings, LogOut, Menu, MessageSquareQuote } from 'lucide-react';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Customers', href: '/admin/customers', icon: Users, adminOnly: true },
     { name: 'Services', href: '/admin/services', icon: Scissors, adminOnly: true },
     { name: 'Staff', href: '/admin/staff', icon: UserCheck, adminOnly: true },
+    { name: 'Reviews', href: '/admin/reviews', icon: MessageSquareQuote, adminOnly: true },
   ];
 
   const navigation = allNavigation.filter(item => !item.adminOnly || userRole === 'ADMIN' || userRole === 'OWNER');
