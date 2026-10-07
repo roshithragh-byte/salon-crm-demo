@@ -259,7 +259,7 @@ export default function Home() {
           <p>© {new Date().getFullYear()} {businessConfig.name}. All rights reserved.</p>
           <div className="flex gap-8 uppercase font-medium">
             <Link href="/admin/login" className="hover:text-white transition-colors">Admin Login</Link>
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
           </div>
         </div>
       </footer>
