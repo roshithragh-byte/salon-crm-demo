@@ -1,0 +1,92 @@
+---
+title: Communication Tools
+description: Customer-message preparation and sending contracts
+---
+
+# Communication Tools
+
+## prepare_customer_message
+
+Classification: draft generation; no external side effect.
+
+Permission: automatic in both Copilot and Autopilot.
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "purpose": "appointment_reminder | rebooking | reactivation | review_followup | promotion",
+  "context": {
+    "bookingId": "string|null",
+    "serviceId": "string|null",
+    "offerId": "string|null",
+    "additionalInstructions": "string|null"
+  }
+}
+```
+
+### Output
+
+```json
+{
+  "message": {
+    "id": "string",
+    "customerId": "string",
+    "channel": "WHATSAPP",
+    "purpose": "reactivation",
+    "content": "string",
+    "status": "DRAFT",
+    "createdAt": "ISO-8601"
+  }
+}
+```
+
+The Agent must not invent discounts, pricing, appointments, services, or customer history.
+
+## send_customer_message
+
+Classification: external side effect.
+
+Copilot: approval required.
+
+Autopilot: allowed only under explicit communication policy.
+
+### Input
+
+```json
+{
+  "messageId": "string"
+}
+```
+
+The Agent does not submit a raw phone number and arbitrary message to the provider.
+
+### Output
+
+```json
+{
+  "message": {
+    "id": "string",
+    "status": "QUEUED | SENT | FAILED",
+    "providerMessageId": "string|null",
+    "sentAt": "ISO-8601|null"
+  }
+}
+```
+
+Mandatory policy chain:
+
+```
+Message exists
+→ belongs to salon
+→ customer belongs to salon
+→ purpose permitted
+→ communication eligibility
+→ consent/communication rules
+→ rate limit
+→ provider
+→ audit
+```
+
+Provider credentials are never exposed to the Agent.
