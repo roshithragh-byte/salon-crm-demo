@@ -1,0 +1,291 @@
+---
+title: Read Tools
+description: Exact schemas and permissions for read-only tools
+---
+
+# Read Tools
+
+All read tools are tenant-scoped and automatically permitted after authentication and RBAC.
+
+## get_customer
+
+### Input
+
+```json
+{
+  "customerId": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "customer": {
+    "id": "string",
+    "name": "string",
+    "phone": "string",
+    "email": "string|null",
+    "visitCount": 0,
+    "lastVisitAt": "ISO-8601|null",
+    "totalSpend": 0,
+    "segment": "string|null",
+    "rewardStatus": "string|null"
+  }
+}
+```
+
+Permission: `READ_ONLY`.
+
+## search_customers
+
+### Input
+
+```json
+{
+  "query": "string|null",
+  "segment": "string|null",
+  "inactiveDays": 60,
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+Constraints: `limit 1–100`, `inactiveDays 0–3650`, query maximum 200 characters.
+
+### Output
+
+```json
+{
+  "customers": [
+    {
+      "id": "string",
+      "name": "string",
+      "phone": "string",
+      "visitCount": 0,
+      "lastVisitAt": "ISO-8601|null",
+      "segment": "string|null",
+      "rewardStatus": "string|null"
+    }
+  ],
+  "nextCursor": "string|null",
+  "total": 0
+}
+```
+
+Permission: `READ_ONLY`.
+
+## get_customer_history
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "customerId": "string",
+  "appointments": [
+    {
+      "id": "string",
+      "serviceId": "string",
+      "serviceName": "string",
+      "staffId": "string|null",
+      "startTime": "ISO-8601",
+      "status": "string"
+    }
+  ],
+  "loyaltyTransactions": [
+    {
+      "id": "string",
+      "type": "string",
+      "points": 0,
+      "createdAt": "ISO-8601"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "string",
+      "rating": 0,
+      "comment": "string|null",
+      "createdAt": "ISO-8601"
+    }
+  ]
+}
+```
+
+Permission: `READ_ONLY`. Apply data minimization.
+
+## get_appointments
+
+### Input
+
+```json
+{
+  "from": "ISO-8601",
+  "to": "ISO-8601",
+  "staffId": "string|null",
+  "status": "string|null",
+  "limit": 100,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "appointments": [
+    {
+      "id": "string",
+      "customerId": "string",
+      "customerName": "string",
+      "serviceId": "string",
+      "serviceName": "string",
+      "staffId": "string|null",
+      "startTime": "ISO-8601",
+      "endTime": "ISO-8601",
+      "status": "string"
+    }
+  ],
+  "nextCursor": "string|null"
+}
+```
+
+Policy: enforce a bounded date range, recommended maximum 90 days per request.
+
+## get_available_slots
+
+### Input
+
+```json
+{
+  "serviceId": "string",
+  "date": "YYYY-MM-DD",
+  "staffId": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "date": "YYYY-MM-DD",
+  "serviceId": "string",
+  "slots": [
+    {
+      "staffId": "string",
+      "startTime": "ISO-8601",
+      "endTime": "ISO-8601",
+      "available": true
+    }
+  ]
+}
+```
+
+Policy: availability is authoritative. The Agent must never infer a slot when the tool returns no availability.
+
+## get_services
+
+### Input
+
+```json
+{
+  "category": "string|null",
+  "activeOnly": true,
+  "limit": 100
+}
+```
+
+### Output
+
+```json
+{
+  "services": [
+    {
+      "id": "string",
+      "name": "string",
+      "category": "string",
+      "price": 0,
+      "durationMinutes": 0,
+      "revenueTier": "string|null",
+      "offerPrice": "number|null",
+      "targetCustomer": "string|null",
+      "benefits": ["string"],
+      "recommendedFrequency": "string|null"
+    }
+  ]
+}
+```
+
+Policy: authoritative source for service facts and pricing.
+
+## get_staff
+
+### Input
+
+```json
+{
+  "staffId": "string|null",
+  "activeOnly": true,
+  "limit": 100
+}
+```
+
+### Output
+
+```json
+{
+  "staff": [
+    {
+      "id": "string",
+      "name": "string",
+      "role": "string",
+      "active": true
+    }
+  ]
+}
+```
+
+Permission: `READ_ONLY`; return only staff belonging to the authenticated salon.
+
+## get_reviews
+
+### Input
+
+```json
+{
+  "rating": 1,
+  "status": "string|null",
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "reviews": [
+    {
+      "id": "string",
+      "customerId": "string|null",
+      "rating": 5,
+      "comment": "string|null",
+      "createdAt": "ISO-8601"
+    }
+  ],
+  "nextCursor": "string|null"
+}
+```
+
+Permission: `READ_ONLY`.
+
+Dependency rule: if the Review database migration is unavailable, return `DEPENDENCY_UNAVAILABLE`; never fabricate review data.
