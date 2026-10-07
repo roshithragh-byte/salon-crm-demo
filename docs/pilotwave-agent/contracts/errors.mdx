@@ -1,0 +1,37 @@
+---
+title: Common Error Contract
+description: Standard error envelope and error codes
+---
+
+# Common Error Contract
+
+All tools use a common error envelope.
+
+```json
+{
+  "error": {
+    "code": "SLOT_UNAVAILABLE",
+    "message": "The selected time slot is no longer available.",
+    "retryable": false,
+    "correlationId": "uuid"
+  }
+}
+```
+
+Recommended codes:
+
+- `UNAUTHENTICATED`
+- `FORBIDDEN`
+- `TENANT_ACCESS_DENIED`
+- `RESOURCE_NOT_FOUND`
+- `VALIDATION_ERROR`
+- `POLICY_DENIED`
+- `APPROVAL_REQUIRED`
+- `SLOT_UNAVAILABLE`
+- `IDEMPOTENCY_CONFLICT`
+- `RATE_LIMITED`
+- `DEPENDENCY_UNAVAILABLE`
+- `PROVIDER_ERROR`
+- `INTERNAL_ERROR`
+
+Sensitive stack traces, SQL errors, provider credentials, and infrastructure secrets must never be exposed to the model.
