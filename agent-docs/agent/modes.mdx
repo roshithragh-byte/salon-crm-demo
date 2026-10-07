@@ -1,0 +1,77 @@
+---
+title: "Operating Modes"
+description: "Copilot and Autopilot execution boundaries."
+---
+
+# Operating Modes
+
+The Agent has two operating modes.
+
+## Copilot
+
+Copilot is the default safety mode.
+
+```
+Observe
+  ↓
+Reason
+  ↓
+Recommend
+  ↓
+Human approval
+  ↓
+Execute
+  ↓
+Verify
+```
+
+The Agent may automatically execute read-only tools and prepare non-sending artifacts.
+
+Side-effecting operations require approval unless explicitly classified otherwise.
+
+## Autopilot
+
+Autopilot permits execution only when a deterministic policy explicitly authorizes the action.
+
+```
+Observe
+  ↓
+Reason
+  ↓
+Policy evaluation
+  ↓
+Allowed?
+  ├── No → Deny / request approval
+  └── Yes
+       ↓
+     Execute
+       ↓
+     Verify
+       ↓
+     Audit
+```
+
+The LLM cannot promote itself from Copilot to Autopilot.
+
+## Permission classes
+
+| Class | Meaning |
+|---|---|
+| READ_ONLY | No business-state mutation |
+| APPROVAL_REQUIRED | Human approval required in Copilot |
+| AUTOPILOT_SAFE | Automatically executable only when policy conditions pass |
+| SYSTEM_ONLY | Only the platform can invoke it |
+
+## Default policy
+
+| Tool | Copilot | Autopilot |
+|---|---|---|
+| Customer reads | Allowed | Allowed |
+| Appointment reads | Allowed | Allowed |
+| Availability | Allowed | Allowed |
+| Service/staff/review reads | Allowed | Allowed |
+| Create booking | Approval | Policy-gated |
+| Cancel booking | Approval | Policy-gated |
+| Prepare message | Allowed | Allowed |
+| Send message | Approval | Policy-gated |
+| Execution ledger | System | System |

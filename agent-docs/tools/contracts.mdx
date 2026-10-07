@@ -1,0 +1,474 @@
+---
+title: "Tool JSON Contracts"
+description: "Exact initial input and output schemas for all 13 Agent tools."
+---
+
+# Tool JSON Contracts
+
+Security context is injected by the server. The model must not be trusted to provide `salonId`, `authenticatedUserId`, role, or authorization context.
+
+## 1. get_customer
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "customerId": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "customer": {
+    "id": "string",
+    "name": "string",
+    "phone": "string",
+    "email": "string|null",
+    "visitCount": 0,
+    "lastVisitAt": "ISO-8601|null",
+    "totalSpend": 0,
+    "segment": "string|null",
+    "rewardStatus": "string|null"
+  }
+}
+```
+
+---
+
+## 2. search_customers
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "query": "string|null",
+  "segment": "string|null",
+  "inactiveDays": 60,
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+Constraints: `limit=1..100`, `inactiveDays=0..3650`, query maximum 200 characters.
+
+### Output
+
+```json
+{
+  "customers": [
+    {
+      "id": "string",
+      "name": "string",
+      "phone": "string",
+      "visitCount": 0,
+      "lastVisitAt": "ISO-8601|null",
+      "segment": "string|null",
+      "rewardStatus": "string|null"
+    }
+  ],
+  "nextCursor": "string|null",
+  "total": 0
+}
+```
+
+---
+
+## 3. get_customer_history
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "customerId": "string",
+  "appointments": [
+    {
+      "id": "string",
+      "serviceId": "string",
+      "serviceName": "string",
+      "staffId": "string|null",
+      "startTime": "ISO-8601",
+      "status": "string"
+    }
+  ],
+  "loyaltyTransactions": [
+    {
+      "id": "string",
+      "type": "string",
+      "points": 0,
+      "createdAt": "ISO-8601"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "string",
+      "rating": 0,
+      "comment": "string|null",
+      "createdAt": "ISO-8601"
+    }
+  ]
+}
+```
+
+---
+
+## 4. get_appointments
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "from": "ISO-8601",
+  "to": "ISO-8601",
+  "staffId": "string|null",
+  "status": "string|null",
+  "limit": 100,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "appointments": [
+    {
+      "id": "string",
+      "customerId": "string",
+      "customerName": "string",
+      "serviceId": "string",
+      "serviceName": "string",
+      "staffId": "string|null",
+      "startTime": "ISO-8601",
+      "endTime": "ISO-8601",
+      "status": "string"
+    }
+  ],
+  "nextCursor": "string|null"
+}
+```
+
+The API should enforce a maximum query window.
+
+---
+
+## 5. get_available_slots
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "serviceId": "string",
+  "date": "YYYY-MM-DD",
+  "staffId": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "date": "YYYY-MM-DD",
+  "serviceId": "string",
+  "slots": [
+    {
+      "staffId": "string",
+      "startTime": "ISO-8601",
+      "endTime": "ISO-8601",
+      "available": true
+    }
+  ]
+}
+```
+
+**Agent rule:** Never infer availability when this tool returns no slots.
+
+---
+
+## 6. get_services
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "category": "string|null",
+  "activeOnly": true,
+  "limit": 100
+}
+```
+
+### Output
+
+```json
+{
+  "services": [
+    {
+      "id": "string",
+      "name": "string",
+      "category": "string",
+      "price": 0,
+      "durationMinutes": 0,
+      "revenueTier": "string|null",
+      "offerPrice": "number|null",
+      "targetCustomer": "string|null",
+      "benefits": ["string"],
+      "recommendedFrequency": "string|null"
+    }
+  ]
+}
+```
+
+Service facts must come from the CRM.
+
+---
+
+## 7. get_staff
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "staffId": "string|null",
+  "activeOnly": true,
+  "limit": 100
+}
+```
+
+### Output
+
+```json
+{
+  "staff": [
+    {
+      "id": "string",
+      "name": "string",
+      "role": "string",
+      "active": true
+    }
+  ]
+}
+```
+
+---
+
+## 8. get_reviews
+
+**Permission:** READ_ONLY
+
+### Input
+
+```json
+{
+  "rating": 1,
+  "status": "string|null",
+  "limit": 50,
+  "cursor": "string|null"
+}
+```
+
+### Output
+
+```json
+{
+  "reviews": [
+    {
+      "id": "string",
+      "customerId": "string|null",
+      "rating": 5,
+      "comment": "string|null",
+      "createdAt": "ISO-8601"
+    }
+  ],
+  "nextCursor": "string|null"
+}
+```
+
+If the Review dependency is unavailable, return a controlled dependency error; never fabricate review data.
+
+---
+
+## 9. create_booking
+
+**Permission:** APPROVAL_REQUIRED in Copilot; AUTOPILOT_SAFE only under explicit booking policy.
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "serviceId": "string",
+  "staffId": "string|null",
+  "startTime": "ISO-8601",
+  "idempotencyKey": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "booking": {
+    "id": "string",
+    "customerId": "string",
+    "serviceId": "string",
+    "staffId": "string|null",
+    "startTime": "ISO-8601",
+    "endTime": "ISO-8601",
+    "status": "PENDING | CONFIRMED"
+  },
+  "created": true
+}
+```
+
+Mandatory checks: customer, service, staff and slot tenant ownership; slot availability; idempotency; policy; transactional creation.
+
+---
+
+## 10. cancel_booking
+
+**Permission:** APPROVAL_REQUIRED in Copilot; AUTOPILOT_SAFE only under explicit cancellation policy.
+
+### Input
+
+```json
+{
+  "bookingId": "string",
+  "reason": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "booking": {
+    "id": "string",
+    "status": "CANCELLED"
+  },
+  "cancelled": true
+}
+```
+
+---
+
+## 11. prepare_customer_message
+
+**Permission:** READ/GENERATE; no external side effect.
+
+### Input
+
+```json
+{
+  "customerId": "string",
+  "purpose": "appointment_reminder | rebooking | reactivation | review_followup | promotion",
+  "context": {
+    "bookingId": "string|null",
+    "serviceId": "string|null",
+    "offerId": "string|null",
+    "additionalInstructions": "string|null"
+  }
+}
+```
+
+### Output
+
+```json
+{
+  "message": {
+    "id": "string",
+    "customerId": "string",
+    "channel": "WHATSAPP",
+    "purpose": "reactivation",
+    "content": "string",
+    "status": "DRAFT",
+    "createdAt": "ISO-8601"
+  }
+}
+```
+
+The Agent cannot invent prices, discounts, appointments, services, guarantees, or customer history.
+
+---
+
+## 12. send_customer_message
+
+**Permission:** APPROVAL_REQUIRED in Copilot; AUTOPILOT_SAFE only under explicit communication policy.
+
+### Input
+
+```json
+{
+  "messageId": "string"
+}
+```
+
+### Output
+
+```json
+{
+  "message": {
+    "id": "string",
+    "status": "QUEUED | SENT | FAILED",
+    "providerMessageId": "string|null",
+    "sentAt": "ISO-8601|null"
+  }
+}
+```
+
+The tool sends an existing message artifact. The Agent does not supply arbitrary phone numbers or raw provider credentials.
+
+---
+
+## 13. record_agent_decision
+
+**Permission:** SYSTEM_ONLY
+
+The LLM must not be trusted to write its own audit record. The platform records the execution event automatically.
+
+### Conceptual record
+
+```json
+{
+  "agentRunId": "string",
+  "salonId": "string",
+  "actorType": "AGENT",
+  "mode": "COPILOT | AUTOPILOT",
+  "action": "string",
+  "toolCalls": [
+    {
+      "tool": "string",
+      "status": "SUCCESS | FAILED | DENIED"
+    }
+  ],
+  "outcome": "string",
+  "correlationId": "string",
+  "createdAt": "ISO-8601"
+}
+```
+
+The server generates identity, tenant, timestamp, correlation ID and execution results.

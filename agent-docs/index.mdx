@@ -1,0 +1,60 @@
+---
+title: "PilotWave Salon Operations Agent"
+description: "Canonical technical documentation for the PilotWave Agent before implementation."
+---
+
+# PilotWave Salon Operations Agent
+
+The PilotWave Salon Operations Agent is an operational intelligence layer above the existing salon CRM.
+
+Its responsibility is to **observe verified CRM state, reason over that state, propose or execute bounded operational actions, and verify the result**.
+
+<Note>
+This documentation is the pre-implementation contract. Agent runtime code must conform to these boundaries rather than redefining them.
+</Note>
+
+## Core loop
+
+```
+Observe → Understand → Decide → Act → Verify
+```
+
+## System boundary
+
+```
+LLM
+  ↓
+Agent Tool Gateway
+  ↓
+Authentication / RBAC / Tenant Isolation / Policy / Audit
+  ↓
+NestJS CRM API
+  ↓
+PostgreSQL
+```
+
+The Agent does not access PostgreSQL directly.
+
+## Frozen decisions
+
+| Area | Decision |
+|---|---|
+| Business truth | PostgreSQL/CRM remains authoritative |
+| Agent access | Tool-mediated only |
+| Direct database access | Forbidden |
+| Tenant isolation | Server-enforced |
+| Copilot | Recommendations and approval-gated actions |
+| Autopilot | Only policy-approved actions |
+| Communication | Prepared message artifact before sending |
+| Audit | System-generated execution ledger |
+| Booking | Existing transactional/idempotency controls remain authoritative |
+
+## Current scope
+
+Steps 1–3 are documented here:
+
+1. Agent Charter
+2. Exact Agent Tool Boundary
+3. JSON Schemas and Permission Policy
+
+Agent implementation begins only after the policy contract is approved.

@@ -1,0 +1,52 @@
+---
+title: "Common Error Contract"
+description: "Normalized error envelope for Agent tools."
+---
+
+# Common Error Contract
+
+All tools should expose a normalized error envelope.
+
+## Schema
+
+```json
+{
+  "error": {
+    "code": "SLOT_UNAVAILABLE",
+    "message": "The selected time slot is no longer available.",
+    "retryable": false,
+    "correlationId": "uuid"
+  }
+}
+```
+
+## Error codes
+
+| Code | Meaning |
+|---|---|
+| UNAUTHENTICATED | No valid authenticated context |
+| FORBIDDEN | Authenticated actor lacks permission |
+| TENANT_ACCESS_DENIED | Resource belongs to another salon |
+| RESOURCE_NOT_FOUND | Requested resource does not exist |
+| VALIDATION_ERROR | Input violates tool schema |
+| POLICY_DENIED | Policy explicitly prohibits action |
+| APPROVAL_REQUIRED | Action needs human approval |
+| SLOT_UNAVAILABLE | Requested appointment slot is unavailable |
+| IDEMPOTENCY_CONFLICT | Idempotency key conflicts with an existing request |
+| RATE_LIMITED | Tool/provider rate limit reached |
+| DEPENDENCY_UNAVAILABLE | Required CRM/provider dependency is unavailable |
+| PROVIDER_ERROR | External provider returned an operational failure |
+| INTERNAL_ERROR | Unexpected server failure |
+
+## Information disclosure
+
+Tool errors must not expose:
+
+- SQL statements;
+- database credentials;
+- provider secrets;
+- stack traces;
+- internal filesystem paths;
+- unrelated tenant data.
+
+The correlation ID is safe for operational troubleshooting and should connect the user-visible failure to server-side logs.
