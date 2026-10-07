@@ -405,7 +405,6 @@ model AgentToolEvent {
   request Json
   policyState AgentPermissionState
   policyReason String?
-  approvalId String?
   status AgentToolStatus
   resultMetadata Json?
   errorCode String?
@@ -413,7 +412,6 @@ model AgentToolEvent {
   completedAt DateTime?
   createdAt DateTime @default(now())
   agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
-  approval AgentApproval? @relation(fields: [approvalId], references: [id], onDelete: SetNull)
   @@unique([agentRunId, sequence])
   @@index([salonId, createdAt])
   @@index([agentRunId])
