@@ -1,0 +1,39 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "PilotWave Salon Operations Agent",
+  "description": "Technical specification and implementation contract for the PilotWave Salon Operations Agent.",
+  "theme": "mint",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Agent",
+        "groups": [
+          {
+            "group": "Foundation",
+            "pages": [
+              "agent-docs/index",
+              "agent-docs/agent/charter",
+              "agent-docs/agent/architecture",
+              "agent-docs/agent/modes"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "agent-docs/tools/overview",
+              "agent-docs/tools/contracts"
+            ]
+          },
+          {
+            "group": "Policy & Security",
+            "pages": [
+              "agent-docs/policies/permissions",
+              "agent-docs/policies/decision-flow",
+              "agent-docs/schemas/error-contract"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

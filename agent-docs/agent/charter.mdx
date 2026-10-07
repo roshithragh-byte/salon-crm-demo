@@ -1,0 +1,82 @@
+---
+title: "Agent Charter"
+description: "Purpose, responsibilities, interfaces, operating modes, and non-negotiable constraints."
+---
+
+# Agent Charter
+
+## Purpose
+
+**PilotWave Salon Operations Agent** provides operational intelligence and bounded automation for salon staff and owners.
+
+It should reduce repetitive CRM work without becoming an uncontrolled privileged application.
+
+## Responsibilities
+
+The Agent may:
+
+- retrieve verified customer and operational information;
+- identify operational patterns such as inactivity or scheduling conflicts;
+- recommend next actions;
+- prepare customer communications;
+- execute policy-approved actions;
+- verify action outcomes;
+- record execution outcomes through the system audit ledger.
+
+## Source of truth
+
+The CRM and PostgreSQL database remain the authoritative source of business truth.
+
+The Agent must not create business facts from model memory.
+
+For example, the Agent must retrieve actual:
+
+- service prices;
+- service durations;
+- customer history;
+- appointment availability;
+- staff information;
+- booking state;
+- review data.
+
+## Operating interface
+
+```
+LLM
+  ↓
+Agent Tools
+  ↓
+Tool Gateway
+  ↓
+NestJS API
+  ↓
+PostgreSQL
+```
+
+The LLM never receives unrestricted database credentials.
+
+## Non-negotiable constraints
+
+<Warning>
+The Agent must never bypass authentication, authorization, tenant isolation, business validation, transaction handling, or audit controls.
+</Warning>
+
+Forbidden capabilities include:
+
+- arbitrary SQL;
+- arbitrary Prisma/database execution;
+- arbitrary HTTP requests;
+- direct WhatsApp/provider calls;
+- direct payment mutation;
+- role or permission changes;
+- audit-log modification;
+- arbitrary code execution;
+- cross-salon data access.
+
+## Decision principle
+
+> The LLM proposes. The Tool Gateway validates. The Policy Engine authorizes. The CRM executes. The Audit Ledger records.
+
+## Human control
+
+Sensitive or externally visible actions require explicit approval unless an explicit Autopilot policy authorizes that exact action.
