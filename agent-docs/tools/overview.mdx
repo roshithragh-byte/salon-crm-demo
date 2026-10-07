@@ -1,0 +1,54 @@
+---
+title: "Tool Registry"
+description: "The complete initial PilotWave Agent tool boundary."
+---
+
+# Tool Registry
+
+The MVP Agent is limited to **13 controlled tools**.
+
+## Read-only
+
+1. `get_customer`
+2. `search_customers`
+3. `get_customer_history`
+4. `get_appointments`
+5. `get_available_slots`
+6. `get_services`
+7. `get_staff`
+8. `get_reviews`
+
+## Actions
+
+9. `create_booking`
+10. `cancel_booking`
+
+## Communication
+
+11. `prepare_customer_message`
+12. `send_customer_message`
+
+## Audit
+
+13. `record_agent_decision`
+
+## Explicitly forbidden
+
+The registry must not expose:
+
+- `execute_sql`
+- `execute_prisma`
+- `update_database`
+- `delete_customer`
+- arbitrary HTTP tools
+- arbitrary filesystem tools
+- direct provider credentials
+- payment mutation tools
+- role-management tools
+- audit-log mutation tools
+
+## Registry principle
+
+Each tool represents a narrow business capability.
+
+A tool must not become a generic escape hatch around the CRM API.
