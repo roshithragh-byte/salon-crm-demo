@@ -27,36 +27,36 @@ export default async function AppointmentsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-24 md:pb-0">
+    <main className="min-h-screen bg-[#FBF9FC] pb-24 md:pb-12">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 py-4 flex items-center gap-3 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#EADBEE] px-6 py-4 flex items-center gap-3 shadow-sm">
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-slate-500 hover:text-purple-900 transition-colors"
+          className="flex items-center gap-2 text-xs font-semibold text-[#6B5E70] hover:text-[#681A8C] transition-colors"
           aria-label="Back to home"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
-        <div className="h-5 w-px bg-slate-200" />
-        <div className="font-serif font-bold text-purple-950">
-          {businessConfig.name !== "[BUSINESS_NAME]" ? businessConfig.name : "Book Appointment"}
+        <div className="h-4 w-px bg-[#EADBEE]" />
+        <div className="font-bold text-sm text-[#2E1033]">
+          {businessConfig.name} • Kottakkal
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-3xl mx-auto px-4 py-10">
         {/* Intro */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-purple-950 mb-2">
-            Book Your Appointment
+        <div className="mb-8 text-center sm:text-left">
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#2E1033] mb-2">
+            Book an Appointment
           </h1>
-          <p className="text-slate-500">
-            Fill in your details below and we&apos;ll confirm your booking as soon as possible.
+          <p className="text-sm text-[#6B5E70]">
+            Select your preferred treatment, date, and time. We&apos;ll confirm your booking immediately.
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
+        <div className="bg-white rounded-3xl shadow-sm border border-[#EADBEE] p-6 md:p-10">
           <BookingForm initialServices={services} initialStaff={staff} />
         </div>
 

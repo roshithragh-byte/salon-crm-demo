@@ -64,133 +64,135 @@ export default function Home() {
       </header>
 
       {/* ── HERO ── */}
-      <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black">
-        {/* Background Video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity"
-          poster="/gallery/SaveClip.App_742267988_18064408028720091_204410455176690846_n.jpg"
-        >
-          <source src="/gallery/SaveClip.App_AQNA3rEOxlgy0ApDQ-j_OAt6OQ6enxZVMuhB0bkAXihskR2Z9x65z6QbeheccQ2W-AK_kwoKxq_FNSkkeL8lLeaG-Z89-2VB6QIzOvo.mp4" type="video/mp4" />
-        </video>
+      <section className="relative min-h-[92vh] md:min-h-[85vh] w-full flex items-center justify-center overflow-hidden bg-[#2E1033] text-white pt-24 pb-20">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#230E28] via-[#2E1033] to-[#2E1033] opacity-95" />
 
-        {/* Cinematic Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
-
-        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-          {/* Subtle Entrance Animation Sequence */}
-
-          {/* 1. Logo */}
-          <div className="animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-both relative w-72 h-36 md:w-96 md:h-44 mb-2">
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 flex flex-col items-center text-center">
+          {/* 1. Naturals Logo */}
+          <div className="relative w-80 h-40 md:w-96 md:h-48 mb-8 flex items-center justify-center">
             <Image
               src="/logo-white.svg"
               alt="Natural's Salon - India's No.1 Hair & Beauty Salon • Kottakkal"
               fill
-              className="object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+              className="object-contain"
               priority
             />
           </div>
 
-          {/* 2. Headline */}
-          <h1 className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-700 fill-mode-both text-4xl md:text-5xl lg:text-6xl font-serif font-medium text-white tracking-wide mb-6 leading-tight">
-            Where Beauty Becomes <br /> <span className="italic text-ring">Confidence.</span>
-          </h1>
-
-          {/* 3. Supporting Text */}
-          <p className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-1000 fill-mode-both text-lg md:text-xl text-white/70 max-w-2xl font-light tracking-wide mb-10">
-            Experience bespoke grooming and precision-led skincare in a space designed for complete rejuvenation.
-          </p>
-
-          {/* 4. CTAs */}
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-1000 fill-mode-both flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto">
+          {/* 2. Dual Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
             <Link
               href="/appointments"
-              className="w-full sm:w-auto bg-ring text-black px-10 py-4 rounded-none font-medium tracking-widest uppercase text-sm hover:bg-white transition-colors"
+              className="w-full sm:w-auto bg-[#681A8C] hover:bg-[#7D22A7] text-white px-8 py-3.5 rounded-xl font-medium tracking-wide text-sm transition-all shadow-lg shadow-[#681A8C]/30 active:scale-95"
             >
-              Book An Appointment
+              Book an appointment
             </Link>
             <a
               href="#services"
-              className="w-full sm:w-auto text-white border border-white/30 px-10 py-4 rounded-none font-medium tracking-widest uppercase text-sm hover:bg-white/10 hover:border-white transition-colors"
+              className="w-full sm:w-auto bg-white text-[#2E1033] hover:bg-[#FBF9FC] px-8 py-3.5 rounded-xl font-medium tracking-wide text-sm transition-all shadow-md active:scale-95"
             >
-              Explore Services
+              Explore services
             </a>
           </div>
         </div>
       </section>
 
-      {/* ── ABOUT / ETHOS ── */}
-      <section id="about" className="bg-background text-foreground px-6 py-32 lg:py-40 border-b">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 lg:gap-24 items-center">
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-            <div className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase text-ring">
-              Our Ethos
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif font-medium leading-[1.15]">
-              A Space Built <br /><span className="text-ring italic">Exclusively</span> for You.
-            </h2>
-            <div className="space-y-6 text-muted-foreground text-lg font-light leading-relaxed">
-              <p>
-                Nestled in the heart of {businessConfig.address.city}, we are an independent luxury wellness studio dedicated to making every guest feel genuinely seen, cared for, and transformed.
-              </p>
-              <p>
-                From precision-led skincare to bespoke grooming rituals, our therapists blend science with artistry — giving you results that last well beyond your visit.
-              </p>
-            </div>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6 lg:gap-8">
+      {/* ── CURATED SERVICE CATEGORIES ── */}
+      <section id="services" className="px-6 py-24 bg-[#FBF9FC]">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Expert Therapists", desc: "Certified & experienced professionals." },
-              { label: "Premium Products", desc: "Curated luxury skincare brands." },
-              { label: "Personalised Care", desc: "Every session is bespoke to your needs." },
-              { label: "Serene Ambiance", desc: "A private, distraction-free environment." },
-            ].map((item, i) => (
-              <div key={i} className="group bg-secondary/30 p-8 rounded-none border border-border/50 hover:border-ring/50 transition-colors duration-500">
-                <CheckCircle2 className="w-5 h-5 text-ring mb-6 opacity-70 group-hover:opacity-100 transition-opacity" />
-                <h3 className="font-serif text-lg mb-2 text-foreground">{item.label}</h3>
-                <p className="text-muted-foreground text-sm font-light leading-relaxed">{item.desc}</p>
+              {
+                title: "Hair",
+                subtitle: "Cut • Style • Colour",
+                category: "hair",
+              },
+              {
+                title: "Skin",
+                subtitle: "Facials • Cleanup • Care",
+                category: "skin",
+              },
+              {
+                title: "Beauty",
+                subtitle: "Makeup • Nails • Brows",
+                category: "beauty",
+              },
+              {
+                title: "Packages",
+                subtitle: "Curated experiences",
+                category: "packages",
+              },
+            ].map((cat, i) => (
+              <div
+                key={i}
+                className="bg-white p-6 rounded-2xl border border-[#EADBEE] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="w-16 h-16 rounded-xl bg-[#E8D1F0] flex items-center justify-center mb-5">
+                    <span className="text-xl font-bold text-[#681A8C]">{cat.title.charAt(0)}</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-[#29232D] mb-1">{cat.title}</h3>
+                  <p className="text-xs text-[#6B5E70] mb-6">{cat.subtitle}</p>
+                </div>
+                <Link
+                  href={`/appointments`}
+                  className="w-full text-center bg-[#2E1033] hover:bg-[#3F1845] text-white py-2.5 rounded-xl text-xs font-medium tracking-wide transition-colors"
+                >
+                  View
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          {/* ── 4 TRUST PILLARS ── */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-12 border-t border-[#EADBEE]">
+            {[
+              { num: "01", text: "Verified service menu" },
+              { num: "02", text: "Personalized recommendations" },
+              { num: "03", text: "Appointment reminders" },
+              { num: "04", text: "Loyalty & offers" },
+            ].map((pillar, i) => (
+              <div key={i} className="space-y-1">
+                <span className="text-xs font-bold text-[#681A8C] tracking-wider block">{pillar.num}</span>
+                <p className="text-sm font-medium text-[#29232D]">{pillar.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── SERVICES TEASER ── */}
-      <section id="services" className="px-6 py-32 lg:py-40 bg-secondary/10">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-serif font-medium mb-6">Our Curated Services</h2>
-          <div className="w-12 h-[1px] bg-ring mx-auto mb-8" />
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg mb-20 font-light">
-            A carefully selected collection of treatments designed to enhance your natural beauty and provide deep relaxation.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12 text-left">
+      {/* ── ABOUT / ETHOS ── */}
+      <section id="about" className="bg-white text-[#29232D] px-6 py-24 border-b border-[#EADBEE]">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-[#681A8C]">
+              Our Ethos
+            </div>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-[#2E1033] leading-tight">
+              A Space Built <br /><span className="text-[#681A8C] italic">Exclusively</span> for You.
+            </h2>
+            <div className="space-y-4 text-[#6B5E70] text-base leading-relaxed">
+              <p>
+                Nestled in the heart of {businessConfig.address.city}, Natural&apos;s Salon is dedicated to making every guest feel genuinely seen, cared for, and transformed.
+              </p>
+              <p>
+                From precision cuts and bespoke coloring to advanced skincare rituals, our certified stylists and therapists blend artistry with premium care.
+              </p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-5">
             {[
-              { title: "Hair Styling", price: "From ₹800", desc: "Precision cuts, bespoke coloring, and deep conditioning treatments tailored to your features." },
-              { title: "Skin Care", price: "From ₹1500", desc: "Advanced clinical facials and rejuvenating treatments for a radiant, lasting glow." },
-              { title: "Wellness Rituals", price: "From ₹2500", desc: "Holistic massages and luxury spa therapies crafted to restore your inner balance." }
-            ].map((s, i) => (
-              <div key={i} className="group relative bg-background p-10 border hover:border-ring/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-ring to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-2xl font-serif font-medium">{s.title}</h3>
-                  <span className="text-xs tracking-wider uppercase font-medium text-ring">{s.price}</span>
-                </div>
-                <p className="text-muted-foreground mb-10 font-light leading-relaxed">{s.desc}</p>
-                <Link href="/appointments" className="inline-flex items-center gap-3 text-xs tracking-widest uppercase font-medium hover:text-ring transition-colors">
-                  Book Service <ArrowRight className="w-4 h-4" />
-                </Link>
+              { label: "Expert Stylists", desc: "Certified and experienced beauty professionals." },
+              { label: "Premium Products", desc: "Curated luxury hair and skincare products." },
+              { label: "Personalised Care", desc: "Every appointment is customized to your needs." },
+              { label: "Serene Ambiance", desc: "Private, hygienic, distraction-free salon space." },
+            ].map((item, i) => (
+              <div key={i} className="bg-[#FBF9FC] p-6 rounded-xl border border-[#EADBEE]">
+                <CheckCircle2 className="w-5 h-5 text-[#681A8C] mb-4" />
+                <h3 className="font-bold text-base mb-1 text-[#29232D]">{item.label}</h3>
+                <p className="text-xs text-[#6B5E70] leading-relaxed">{item.desc}</p>
               </div>
             ))}
-          </div>
-
-          <div className="mt-20">
-            <Link href="/appointments" className="inline-flex items-center justify-center gap-3 border border-foreground text-foreground px-10 py-4 font-medium tracking-widest uppercase text-sm hover:bg-foreground hover:text-background transition-colors">
-              View Full Menu
-            </Link>
           </div>
         </div>
       </section>

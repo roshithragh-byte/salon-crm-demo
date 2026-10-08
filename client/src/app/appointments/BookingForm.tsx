@@ -112,6 +112,8 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
     };
   }, [watchedDate, watchedServiceId, watchedStaffId, slotRequestSeqRef]);
 
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
+
   const onSubmit = (data: BookingFormData) => {
     if (isSubmittingState.current) return;
     isSubmittingState.current = true;
@@ -159,8 +161,8 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
   if (isFetchingMetadata) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground font-medium">Loading salon services...</p>
+        <Loader2 className="w-8 h-8 animate-spin text-[#681A8C]" />
+        <p className="text-[#6B5E70] font-medium text-sm">Loading salon services...</p>
       </div>
     );
   }
@@ -170,221 +172,379 @@ export function BookingForm({ initialServices = [], initialStaff = [] }: Booking
     const phone = getValues('customerPhone');
     return (
       <div className="flex flex-col items-center text-center py-12 px-4 gap-6 animate-in fade-in zoom-in duration-500">
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center">
-          <CheckCircle2 className="w-10 h-10 text-green-600" />
+        <div className="w-20 h-20 bg-[#DCFCE7] rounded-full flex items-center justify-center">
+          <CheckCircle2 className="w-10 h-10 text-[#15803D]" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-3xl font-serif font-medium text-foreground">Booking Confirmed</h2>
-          <p className="text-muted-foreground max-w-sm text-sm mx-auto">
-            Your appointment has been successfully scheduled. We look forward to seeing you.
+          <h2 className="text-3xl font-serif font-bold text-[#2E1033]">Booking Confirmed</h2>
+          <p className="text-[#6B5E70] max-w-sm text-sm mx-auto">
+            Your appointment has been successfully scheduled at Natural&apos;s Salon Kottakkal. We look forward to seeing you.
           </p>
         </div>
         
-        <div className="bg-muted/50 border rounded-2xl w-full max-w-md p-6 text-left space-y-4 mt-2">
-          <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Confirmation Details</h3>
-          <div className="flex justify-between items-center border-b border-border pb-3">
-            <span className="text-muted-foreground">Phone / WhatsApp</span>
-            <span className="font-medium text-foreground">{phone}</span>
+        <div className="bg-[#FBF9FC] border border-[#EADBEE] rounded-2xl w-full max-w-md p-6 text-left space-y-4 mt-2">
+          <h3 className="font-bold text-xs text-[#6B5E70] uppercase tracking-wider mb-2">Confirmation Details</h3>
+          <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3 text-sm">
+            <span className="text-[#6B5E70]">Phone / WhatsApp</span>
+            <span className="font-medium text-[#29232D]">{phone}</span>
           </div>
           {email && (
-            <div className="flex justify-between items-center border-b border-border pb-3">
-              <span className="text-muted-foreground">Email</span>
-              <span className="font-medium text-foreground">{email}</span>
+            <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3 text-sm">
+              <span className="text-[#6B5E70]">Email</span>
+              <span className="font-medium text-[#29232D]">{email}</span>
             </div>
           )}
-          <div className="flex justify-between items-center pb-1">
-            <span className="text-muted-foreground">Payment</span>
-            <span className="inline-flex items-center gap-1 text-sm font-medium text-green-700 bg-green-50 px-2.5 py-0.5 rounded-full">
+          <div className="flex justify-between items-center pb-1 text-sm">
+            <span className="text-[#6B5E70]">Status</span>
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#15803D] bg-[#DCFCE7] px-2.5 py-1 rounded-full">
               <CheckCircle2 className="w-3 h-3" />
-              Verified
+              CONFIRMED
             </span>
           </div>
         </div>
         
-        <Button size="lg" onClick={() => router.push('/')} className="mt-6 w-full max-w-md h-12 text-base">
+        <Button size="lg" onClick={() => router.push('/')} className="mt-6 w-full max-w-md h-12 bg-[#681A8C] hover:bg-[#7D22A7] text-white rounded-xl text-sm font-medium">
           Return to Homepage
         </Button>
       </div>
     );
   }
 
+  // Predefined service catalog prices fallback for display cards
+  const getServicePrice = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes("haircut") || lower.includes("hair styling")) return "₹800";
+    if (lower.includes("skin") || lower.includes("facial")) return "From ₹1500";
+    if (lower.includes("signature") || lower.includes("package")) return "From ₹2500";
+    return "From ₹600";
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-8">
+      {/* 4-STEP LINEAR STEPPER */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {[
+          { step: 1, label: "Service" },
+          { step: 2, label: "Date & time" },
+          { step: 3, label: "Details" },
+          { step: 4, label: "Confirm" },
+        ].map((s) => {
+          const isActive = currentStep === s.step;
+          const isPassed = currentStep > s.step;
+          return (
+            <button
+              type="button"
+              key={s.step}
+              onClick={() => {
+                if (s.step < currentStep || (s.step === 2 && watchedServiceId) || (s.step === 3 && watchedDate && watch("startsAt"))) {
+                  setCurrentStep(s.step as 1 | 2 | 3 | 4);
+                }
+              }}
+              className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-semibold transition-all text-left ${
+                isActive
+                  ? "bg-[#E8D1F0] text-[#681A8C] shadow-sm"
+                  : isPassed
+                  ? "bg-[#F3E8F7] text-[#681A8C]"
+                  : "bg-[#FBF9FC] text-[#6B5E70] border border-[#EADBEE]"
+              }`}
+            >
+              <span className="font-bold">{s.step}</span>
+              <span>{s.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {result && !result.success && (
-        <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-4 text-sm text-destructive animate-in slide-in-from-top-2">
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-4 text-sm text-red-700 animate-in slide-in-from-top-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span className="font-medium">{result.message ?? "Something went wrong. Please try again."}</span>
         </div>
       )}
 
-      <div className="space-y-6">
-        <div className="border-b pb-2">
-          <h3 className="text-lg font-serif font-medium text-foreground">Appointment Details</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Scissors className="w-4 h-4 text-muted-foreground" /> Service *
-            </label>
-            <Controller
-              control={control}
-              name="serviceId"
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-12 bg-muted/30">
-                    <SelectValue placeholder="Select a service">
-                      {services.find((s: Service) => s.id === field.value)?.name || "Select a service"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {services.map((s: Service) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}
-            />
+      {/* STEP 1: SERVICE SELECTION */}
+      {currentStep === 1 && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between border-b border-[#EADBEE] pb-3">
+            <h3 className="text-lg font-bold text-[#2E1033]">Select Service</h3>
+            <span className="text-xs text-[#6B5E70]">{services.length} options available</span>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-muted-foreground" /> Stylist (optional)
-            </label>
-            <Controller
-              control={control}
-              name="staffId"
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-12 bg-muted/30">
-                    <SelectValue placeholder="Any Available Stylist">
-                      {field.value === "any" ? "Any Available Stylist" : staff.find((s: Staff) => s.id === field.value)?.name || "Any Available Stylist"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any Available Stylist</SelectItem>
-                    {staff.map((s: Staff) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-muted-foreground" /> Date *
-            </label>
-            <Controller
-              control={control}
-              name="preferredDate"
-              render={({ field }) => (
-                <input 
-                  type="date" 
-                  className="flex w-full rounded-md border border-input bg-muted/30 h-12 px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" 
-                  value={field.value || ""} 
-                  min={new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })} 
-                  onChange={(evt) => field.onChange(evt.target.value)} 
-                />
-              )}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {services.map((s: Service) => {
+              const isSelected = watchedServiceId === s.id;
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => control._fields.serviceId?._f && control.register("serviceId").onChange({ target: { value: s.id } })}
+                  className={`p-5 rounded-2xl border cursor-pointer transition-all duration-200 flex justify-between items-center ${
+                    isSelected
+                      ? "bg-[#E8D1F0] border-[#681A8C] shadow-sm"
+                      : "bg-white border-[#EADBEE] hover:border-[#681A8C]/50 hover:bg-[#FBF9FC]"
+                  }`}
+                >
+                  <div className="pr-4">
+                    <h4 className="text-sm font-bold text-[#29232D] mb-1">{s.name}</h4>
+                    <p className="text-xs text-[#6B5E70]">
+                      {s.durationMinutes ? `${s.durationMinutes} mins` : "Approx 45 mins"}
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold text-[#681A8C] whitespace-nowrap bg-white/80 px-2.5 py-1 rounded-lg border border-[#EADBEE]">
+                    {getServicePrice(s.name)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground flex items-center gap-2">
-              <Clock className="w-4 h-4 text-muted-foreground" /> Time *
-            </label>
-            <Controller
-              control={control}
-              name="startsAt"
-              render={({ field }) => {
-                const placeholderText = isLoadingSlots
-                  ? "Loading slots..."
-                  : !watchedServiceId
-                  ? "Select a service first"
-                  : !watchedDate
-                  ? "Select a date first"
-                  : availableSlots.length === 0
-                  ? "No slots for this date"
-                  : "Select a time slot";
+          <Controller
+            control={control}
+            name="serviceId"
+            render={({ field }) => (
+              <input type="hidden" value={field.value || ""} />
+            )}
+          />
 
-                return (
-                  <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDate || !watchedServiceId || isLoadingSlots || availableSlots.length === 0}>
-                    <SelectTrigger className="h-12 bg-muted/30">
-                      <SelectValue placeholder={placeholderText} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSlots.length === 0 ? (
-                        <SelectItem value="__none" disabled>No slots available for this date</SelectItem>
-                      ) : (
-                        availableSlots.map(slot => {
-                          const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                            timeZone: "Asia/Kolkata",
-                          });
-                          return <SelectItem key={slot.starts_at} value={slot.starts_at}>{timeString}</SelectItem>;
-                        })
-                      )}
-                    </SelectContent>
-                  </Select>
-                );
-              }}
-            />
+          <div className="pt-4 flex justify-end">
+            <Button
+              type="button"
+              disabled={!watchedServiceId}
+              onClick={() => setCurrentStep(2)}
+              className="bg-[#681A8C] hover:bg-[#7D22A7] text-white px-8 h-12 rounded-xl text-sm font-medium shadow-md disabled:opacity-50"
+            >
+              Continue
+            </Button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="space-y-6 pt-4 border-t">
-        <div className="border-b pb-2">
-          <h3 className="text-lg font-serif font-medium text-foreground">Your Information</h3>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Full Name *</label>
-            <Input {...register("customerName")} placeholder="Your full name" className="h-12 bg-muted/30" />
+      {/* STEP 2: DATE & TIME */}
+      {currentStep === 2 && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="border-b border-[#EADBEE] pb-3 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-[#2E1033]">Choose Date & Time</h3>
+            <button type="button" onClick={() => setCurrentStep(1)} className="text-xs text-[#681A8C] hover:underline font-medium">
+              Change Service
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Phone Number *</label>
-              <Input {...register("customerPhone")} placeholder="10-digit mobile number" type="tel" className="h-12 bg-muted/30" />
+              <label className="text-xs font-bold uppercase tracking-wider text-[#29232D] flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-[#681A8C]" /> Date *
+              </label>
+              <Controller
+                control={control}
+                name="preferredDate"
+                render={({ field }) => (
+                  <input 
+                    type="date" 
+                    className="flex w-full rounded-xl border border-[#EADBEE] bg-[#FBF9FC] h-12 px-4 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#681A8C]" 
+                    value={field.value || ""} 
+                    min={new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })} 
+                    onChange={(evt) => field.onChange(evt.target.value)} 
+                  />
+                )}
+              />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Email <span className="text-muted-foreground font-normal">(optional)</span></label>
-              <Input {...register("customerEmail")} placeholder="you@example.com" type="email" className="h-12 bg-muted/30" />
+              <label className="text-xs font-bold uppercase tracking-wider text-[#29232D] flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-[#681A8C]" /> Stylist (optional)
+              </label>
+              <Controller
+                control={control}
+                name="staffId"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="h-12 bg-[#FBF9FC] border-[#EADBEE] rounded-xl text-sm">
+                      <SelectValue placeholder="Any Available Stylist" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any Available Stylist</SelectItem>
+                      {staff.map((s: Staff) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Notes <span className="text-muted-foreground font-normal">(optional)</span></label>
-            <Input {...register("notes")} placeholder="Any special requests?" className="h-12 bg-muted/30" />
+          <div className="space-y-3 pt-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#29232D] flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#681A8C]" /> Available Time Slots *
+            </label>
+            
+            {isLoadingSlots ? (
+              <div className="py-8 flex items-center justify-center text-xs text-[#6B5E70] gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-[#681A8C]" /> Loading available slots...
+              </div>
+            ) : !watchedDate ? (
+              <p className="text-xs text-[#6B5E70] bg-[#FBF9FC] p-4 rounded-xl border border-[#EADBEE]">
+                Please select a date above to view available time slots.
+              </p>
+            ) : availableSlots.length === 0 ? (
+              <p className="text-xs text-amber-700 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                No open slots available for this date. Please try another date.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {availableSlots.map(slot => {
+                  const isSelected = watch("startsAt") === slot.starts_at;
+                  const timeString = new Date(slot.starts_at).toLocaleTimeString("en-IN", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  });
+                  return (
+                    <button
+                      type="button"
+                      key={slot.starts_at}
+                      onClick={() => control._fields.startsAt?._f && control.register("startsAt").onChange({ target: { value: slot.starts_at } })}
+                      className={`p-3 rounded-xl text-xs font-semibold border transition-all text-center ${
+                        isSelected
+                          ? "bg-[#681A8C] text-white border-[#681A8C] shadow-sm"
+                          : "bg-white border-[#EADBEE] text-[#29232D] hover:border-[#681A8C]/50 hover:bg-[#FBF9FC]"
+                      }`}
+                    >
+                      {timeString}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="pt-4 flex justify-between items-center">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(1)}
+              className="border-[#EADBEE] h-12 rounded-xl text-xs text-[#29232D]"
+            >
+              Back
+            </Button>
+            <Button
+              type="button"
+              disabled={!watchedDate || !watch("startsAt")}
+              onClick={() => setCurrentStep(3)}
+              className="bg-[#681A8C] hover:bg-[#7D22A7] text-white px-8 h-12 rounded-xl text-sm font-medium shadow-md disabled:opacity-50"
+            >
+              Continue
+            </Button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="flex items-start gap-3 bg-muted/30 rounded-xl p-5 border">
-        <input type="checkbox" {...register("consent")} className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary accent-primary" />
-        <label className="text-sm text-muted-foreground leading-relaxed">
-          I consent to being contacted regarding this appointment and agree to the salon&apos;s booking policies.
-        </label>
-      </div>
+      {/* STEP 3: CUSTOMER DETAILS */}
+      {currentStep === 3 && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="border-b border-[#EADBEE] pb-3 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-[#2E1033]">Contact Information</h3>
+            <button type="button" onClick={() => setCurrentStep(2)} className="text-xs text-[#681A8C] hover:underline font-medium">
+              Change Date/Time
+            </button>
+          </div>
 
-      <Button type="submit" disabled={isPending} className="w-full h-14 text-base font-medium shadow-md">
-        {isPending ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Processing Booking...
-          </>
-        ) : (
-          <>
-            <CreditCard className="mr-2 h-5 w-5" />
-            Confirm & Pay Securely
-          </>
-        )}
-      </Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#29232D]">Full Name *</label>
+              <Input {...register("customerName")} placeholder="Enter your full name" className="h-12 bg-[#FBF9FC] border-[#EADBEE] rounded-xl text-sm" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#29232D]">Mobile Phone *</label>
+                <Input {...register("customerPhone")} placeholder="10-digit phone number" type="tel" className="h-12 bg-[#FBF9FC] border-[#EADBEE] rounded-xl text-sm" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#29232D]">Email <span className="text-[#6B5E70] font-normal">(optional)</span></label>
+                <Input {...register("customerEmail")} placeholder="you@example.com" type="email" className="h-12 bg-[#FBF9FC] border-[#EADBEE] rounded-xl text-sm" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#29232D]">Special Requests <span className="text-[#6B5E70] font-normal">(optional)</span></label>
+              <Input {...register("notes")} placeholder="Any specific requirements or notes" className="h-12 bg-[#FBF9FC] border-[#EADBEE] rounded-xl text-sm" />
+            </div>
+          </div>
+
+          <div className="pt-4 flex justify-between items-center">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCurrentStep(2)}
+              className="border-[#EADBEE] h-12 rounded-xl text-xs text-[#29232D]"
+            >
+              Back
+            </Button>
+            <Button
+              type="button"
+              disabled={!watch("customerName") || !watch("customerPhone")}
+              onClick={() => setCurrentStep(4)}
+              className="bg-[#681A8C] hover:bg-[#7D22A7] text-white px-8 h-12 rounded-xl text-sm font-medium shadow-md disabled:opacity-50"
+            >
+              Review Booking
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 4: CONFIRM & SUBMIT */}
+      {currentStep === 4 && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="border-b border-[#EADBEE] pb-3">
+            <h3 className="text-lg font-bold text-[#2E1033]">Confirm Booking Details</h3>
+          </div>
+
+          <div className="bg-[#FBF9FC] border border-[#EADBEE] rounded-2xl p-6 space-y-4 text-sm">
+            <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3">
+              <span className="text-[#6B5E70]">Service</span>
+              <span className="font-bold text-[#2E1033]">{services.find(s => s.id === watchedServiceId)?.name || "Selected Service"}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3">
+              <span className="text-[#6B5E70]">Date</span>
+              <span className="font-medium text-[#29232D]">{watchedDate}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3">
+              <span className="text-[#6B5E70]">Time</span>
+              <span className="font-medium text-[#29232D]">
+                {watch("startsAt") ? new Date(watch("startsAt")).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }) : ""}
+              </span>
+            </div>
+            <div className="flex justify-between items-center border-b border-[#EADBEE] pb-3">
+              <span className="text-[#6B5E70]">Guest</span>
+              <span className="font-medium text-[#29232D]">{watch("customerName")} ({watch("customerPhone")})</span>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 bg-[#FBF9FC] rounded-xl p-4 border border-[#EADBEE]">
+            <input type="checkbox" {...register("consent")} defaultChecked className="mt-1 h-4 w-4 rounded text-[#681A8C] focus:ring-[#681A8C] accent-[#681A8C]" />
+            <label className="text-xs text-[#6B5E70] leading-relaxed">
+              I agree to the salon&apos;s booking and privacy terms.
+            </label>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Button type="submit" disabled={isPending} className="w-full h-14 bg-[#681A8C] hover:bg-[#7D22A7] text-white text-sm font-bold tracking-wide rounded-xl shadow-lg shadow-[#681A8C]/25">
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Scheduling Appointment...
+                </>
+              ) : (
+                "Confirm & Reserve"
+              )}
+            </Button>
+            
+            <p className="text-center text-xs text-[#6B5E70] pt-1">
+              Secure booking • No payment required to reserve
+            </p>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

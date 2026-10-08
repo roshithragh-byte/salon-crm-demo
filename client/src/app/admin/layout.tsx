@@ -14,12 +14,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const userRole = session?.user?.role || '';
 
   const allNavigation = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Appointments', href: '/admin/bookings', icon: Calendar },
     { name: 'Customers', href: '/admin/customers', icon: Users, adminOnly: true },
     { name: 'Services', href: '/admin/services', icon: Scissors, adminOnly: true },
+    { name: 'Offers & Loyalty', href: '/admin/bookings', icon: MessageSquareQuote, adminOnly: true },
     { name: 'Staff', href: '/admin/staff', icon: UserCheck, adminOnly: true },
-    { name: 'Reviews', href: '/admin/reviews', icon: MessageSquareQuote, adminOnly: true },
+    { name: 'Reports', href: '/admin/dashboard', icon: LayoutDashboard, adminOnly: true },
+    { name: 'Settings', href: '/admin/profile', icon: Settings, adminOnly: true },
   ];
 
   const navigation = allNavigation.filter(item => !item.adminOnly || userRole === 'ADMIN' || userRole === 'OWNER');
