@@ -36,11 +36,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-20 flex items-center justify-center border-b border-sidebar-border relative">
-          <Link href="/admin/dashboard" className="block relative w-40 h-12 mix-blend-screen overflow-hidden mt-2">
+        <div className="h-20 flex items-center justify-center border-b border-sidebar-border relative px-4">
+          <Link href="/admin/dashboard" className="block relative w-44 h-12 overflow-hidden mt-1">
             <Image
-              src="/logo.svg"
-              alt="de salon bea CRM"
+              src="/logo-white.svg"
+              alt="Natural's Salon CRM"
               fill
               className="object-contain"
             />

@@ -1,8 +1,8 @@
 export const businessConfig = {
-  name: "SALON DE BEAUTÉ",
+  name: "Natural's Salon",
   phone: "+91 87142 29297",
   whatsapp: "+91 87142 29297",
-  email: "hello@salondebea.com", // Placeholder until provided
+  email: "hello@naturalssalon.com",
   address: {
     street: "1st Floor, Al Wahad Complex, Changuvetty",
     landmark: "Opposite PWD Rest House",

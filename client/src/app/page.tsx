@@ -4,24 +4,24 @@ import { ArrowRight, MapPin, Phone, Globe, CheckCircle2 } from "lucide-react";
 import Gallery from "@/components/Gallery";
 
 const businessConfig = {
-  name: "de salon bea",
+  name: "Natural's Salon",
   phone: "+91 87142 29297",
-  email: "hello@desalonbea.com",
+  email: "hello@naturalssalon.com",
   address: {
-    street: "123 Elegance Avenue",
-    landmark: "Near Central Square",
+    street: "1st Floor, Al Wahad Complex, Changuvetty",
+    landmark: "Opposite PWD Rest House",
     city: "Kottakkal",
     district: "Malappuram",
     state: "Kerala",
-    postalCode: "676503",
+    postalCode: "676501",
   },
   hours: {
-    weekdays: "9:00 AM - 8:00 PM",
-    weekends: "10:00 AM - 7:00 PM",
+    weekdays: "10:00 AM - 9:00 PM",
+    weekends: "09:00 AM - 9:00 PM",
   },
   social: {
-    instagram: "https://instagram.com/desalonbea",
-    facebook: "https://facebook.com/desalonbea",
+    instagram: "https://instagram.com/naturals_kottakkal",
+    facebook: "https://facebook.com/naturalskottakkal",
   },
   maps: "https://maps.google.com/?q=Kottakkal",
 };
@@ -33,13 +33,12 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/10 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            {/* Nav logo with mix-blend-mode for the black background */}
-            <div className="relative w-32 h-10 mix-blend-screen overflow-hidden flex items-center">
+            <div className="relative w-40 h-12 overflow-hidden flex items-center">
               <Image
-                src="/logo.svg"
-                alt="de salon bea"
+                src="/logo-white.svg"
+                alt="Natural's Salon Kottakkal"
                 fill
-                className="object-cover object-center"
+                className="object-contain object-left"
                 priority
               />
             </div>
@@ -84,13 +83,13 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
           {/* Subtle Entrance Animation Sequence */}
 
-          {/* 1. Logo (mix-blend-screen makes the black background disappear, leaving gold over the cinematic video) */}
-          <div className="animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-both relative w-64 h-64 md:w-80 md:h-80 mix-blend-screen mb-2">
+          {/* 1. Logo */}
+          <div className="animate-in fade-in zoom-in duration-1000 delay-300 fill-mode-both relative w-72 h-36 md:w-96 md:h-44 mb-2">
             <Image
-              src="/logo.svg"
-              alt="de salon bea - Beauty. Confidence. You."
+              src="/logo-white.svg"
+              alt="Natural's Salon - India's No.1 Hair & Beauty Salon • Kottakkal"
               fill
-              className="object-contain"
+              className="object-contain drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
               priority
             />
           </div>
@@ -203,10 +202,10 @@ export default function Home() {
       <footer id="contact" className="bg-primary text-primary-foreground pt-32 pb-12 px-6">
         <div className="max-w-7xl mx-auto grid md:grid-cols-12 gap-16 lg:gap-24 mb-32">
           <div className="md:col-span-5 space-y-10">
-            <div className="relative w-48 h-20 mix-blend-screen opacity-90 hover:opacity-100 transition-opacity">
+            <div className="relative w-52 h-20 opacity-95 hover:opacity-100 transition-opacity">
               <Image
-                src="/logo.svg"
-                alt="de salon bea"
+                src="/logo-white.svg"
+                alt="Natural's Salon Kottakkal"
                 fill
                 className="object-contain object-left"
               />

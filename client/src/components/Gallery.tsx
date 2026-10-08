@@ -66,7 +66,7 @@ export default async function Gallery() {
           </h2>
           <div className="w-12 h-[1px] bg-ring mx-auto mb-8" />
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg font-light leading-relaxed">
-            Real moments, bespoke cuts, styling, and radiant bridal glow crafted for our guests at de salon bea.
+            Real moments, bespoke cuts, styling, and radiant bridal glow crafted for our guests at Natural&apos;s Salon Kottakkal.
           </p>
         </div>
 
@@ -98,14 +98,14 @@ export default async function Gallery() {
                 >
                   <Image 
                     src={`/gallery/${img}`} 
-                    alt={`de salon bea customer showcase ${index + 1}`} 
+                    alt={`Natural's Salon customer showcase ${index + 1}`} 
                     width={500} 
                     height={600} 
                     className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" 
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                    <span className="text-xs font-serif tracking-wider text-white/90">de salon bea · client artistry</span>
+                    <span className="text-xs font-serif tracking-wider text-white/90">Natural&apos;s Salon · client artistry</span>
                   </div>
                 </div>
               ))}

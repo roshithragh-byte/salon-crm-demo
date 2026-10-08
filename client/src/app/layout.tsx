@@ -19,22 +19,28 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Luxury Skincare & Wellness Studio | Kottakkal",
+  title: "Natural's Salon | India's No.1 Hair & Beauty Salon • Kottakkal",
   description:
-    "Kottakkal's premier independent luxury salon & wellness studio. Book your personalised skincare, beauty, and grooming appointment online.",
+    "Natural's Salon Kottakkal — premier hair, beauty, skincare, and bridal salon. Book your personalised salon appointment online.",
   keywords: [
+    "Natural's Salon",
+    "Naturals Kottakkal",
+    "hair salon",
+    "beauty parlour",
     "skincare",
-    "salon",
-    "beauty",
-    "wellness",
+    "bridal makeup",
     "Kottakkal",
-    "appointment",
     "Kerala",
   ],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
-    title: "Luxury Skincare & Wellness Studio | Kottakkal",
+    title: "Natural's Salon | India's No.1 Hair & Beauty Salon • Kottakkal",
     description:
-      "Book a luxury skincare or wellness appointment in Kottakkal, Kerala.",
+      "Book a premier hair, beauty, or skincare appointment at Natural's Salon Kottakkal, Kerala.",
     type: "website",
   },
 };

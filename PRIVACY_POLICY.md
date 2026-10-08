@@ -7,7 +7,7 @@
 
 ## 1. Introduction & Scope
 
-Welcome to **PilotWave Salon Management Platform** ("PilotWave", "we", "our", or "us"). We provide salon operations, appointment scheduling, customer relationship management (CRM), and AI-driven business intelligence for luxury wellness studios and independent salons, including our flagship partner studio **Salon De Bea** (located in Kottakkal, Kerala, India).
+Welcome to **Natural's Salon Kottakkal** ("we", "our", or "us") and the **PilotWave Salon Management Platform**. We provide salon operations, appointment scheduling, customer relationship management (CRM), and AI-driven business intelligence for luxury wellness studios and premier salons, including our flagship studio **Natural's Salon** (located in Kottakkal, Kerala, India).
 
 This Privacy Policy explains how we collect, use, process, disclose, and safeguard your personal data when you visit our website ([salon-crm-demo-theta.vercel.app](https://salon-crm-demo-theta.vercel.app)), book appointments, interact with our customer portals, or use our salon management platform.
 
@@ -106,9 +106,9 @@ If you have questions, feedback, or wish to exercise your privacy rights, please
 
 **Grievance Officer:**  
 Privacy & Compliance Team  
-PilotWave Platform / Salon De Bea  
-Kottakkal, Malappuram District, Kerala, India — 676503  
-**Email:** `privacy@pilotwave.io` / `dpo@pilotwave.io`  
+Natural's Salon Kottakkal / PilotWave Platform  
+1st Floor, Al Wahad Complex, Changuvetty, Kottakkal, Malappuram, Kerala, India — 676501  
+**Email:** `privacy@naturalssalon.com`  
 **Website:** [https://salon-crm-demo-theta.vercel.app](https://salon-crm-demo-theta.vercel.app)  
 
 ---

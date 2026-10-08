@@ -12,15 +12,17 @@ async function main() {
   // 1. Create Salon
   const salon = await prisma.salon.upsert({
     where: { slug: 'hq' },
-    update: {},
+    update: {
+      name: "Natural's Salon Kottakkal",
+    },
     create: {
-      name: 'Salon De Bea',
+      name: "Natural's Salon Kottakkal",
       slug: 'hq',
-      phone: '+919876543210',
-      addressLine1: '123 Beauty Lane',
-      city: 'Mumbai',
-      state: 'MH',
-      postalCode: '400001',
+      phone: '+91 87142 29297',
+      addressLine1: '1st Floor, Al Wahad Complex, Changuvetty',
+      city: 'Kottakkal',
+      state: 'Kerala',
+      postalCode: '676501',
     },
   });
 

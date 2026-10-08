@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { ChevronLeft, ShieldCheck, Lock, Eye, FileText, Database, UserCheck } from 'lucide-react';
 
 export const metadata = {
-  title: 'Privacy Policy | PilotWave Luxury Salon Platform',
-  description: 'Learn how PilotWave and Salon De Bea collect, protect, and process your personal data in compliance with DPDPA and global standards.',
+  title: 'Privacy Policy | Natural\'s Salon Kottakkal',
+  description: 'Learn how Natural\'s Salon Kottakkal and PilotWave collect, protect, and process your personal data in compliance with DPDPA and global standards.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Your trust is our highest priority. Learn how PilotWave and Salon De Bea safeguard your personal data, appointment details, and digital footprint.
+            Your trust is our highest priority. Learn how Natural&apos;s Salon Kottakkal and PilotWave safeguard your personal data, appointment details, and digital footprint.
           </p>
           <div className="mt-6 text-xs text-slate-400">
             Effective Date: October 8, 2026 • Last Updated: October 8, 2026
@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-2xl font-serif font-bold">1. Overview & Scope</h2>
           </div>
           <p className="text-slate-600 leading-relaxed">
-            This Privacy Policy applies to the <strong>PilotWave Salon Management Platform</strong> and its flagship wellness studio <strong>Salon De Bea</strong> (Kottakkal, Kerala, India). It details our procedures regarding the collection, storage, use, and protection of personal data across our public booking wizard, client portals, and administrative operations.
+            This Privacy Policy applies to <strong>Natural&apos;s Salon</strong> (Kottakkal, Kerala, India) and the underlying <strong>PilotWave Salon Management Platform</strong>. It details our procedures regarding the collection, storage, use, and protection of personal data across our public booking wizard, client portals, and administrative operations.
           </p>
           <p className="text-slate-600 leading-relaxed">
             We adhere to the <strong>Digital Personal Data Protection Act, 2023 (DPDPA - India)</strong> and recognized international standards (including <strong>GDPR</strong> principles) to respect your privacy rights.
@@ -167,9 +167,9 @@ export default function PrivacyPolicyPage() {
           </p>
           <div className="text-sm space-y-1 text-purple-100">
             <p><strong>Data Protection Officer:</strong> Compliance & Privacy Desk</p>
-            <p><strong>Studio:</strong> Salon De Bea / PilotWave Platform</p>
-            <p><strong>Location:</strong> Kottakkal, Malappuram, Kerala, India — 676503</p>
-            <p><strong>Email:</strong> <a href="mailto:privacy@pilotwave.io" className="text-amber-400 underline">privacy@pilotwave.io</a></p>
+            <p><strong>Studio:</strong> Natural&apos;s Salon / PilotWave Platform</p>
+            <p><strong>Location:</strong> Kottakkal, Malappuram, Kerala, India — 676501</p>
+            <p><strong>Email:</strong> <a href="mailto:privacy@naturalssalon.com" className="text-amber-400 underline">privacy@naturalssalon.com</a></p>
           </div>
         </section>
       </div>
