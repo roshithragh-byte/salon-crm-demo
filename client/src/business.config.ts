@@ -21,8 +21,8 @@ export const businessConfig = {
     weekends: "09:00 AM - 9:00 PM",
   },
   social: {
-    instagram: "https://instagram.com/placeholder", // Needs actual independent handle
-    facebook: "https://facebook.com/placeholder",
+    instagram: "https://www.instagram.com/naturals_kottakkal/?hl=en",
+    facebook: "https://www.facebook.com/naturalskottakkal07/",
   },
   maps: "https://maps.google.com/?q=10.99497357,75.9923958",
 };
