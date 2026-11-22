@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, Users, Scissors, UserCheck, Settings, LogOut, Menu, MessageSquareQuote } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, UserCheck, Settings, LogOut, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -14,44 +14,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const userRole = session?.user?.role || '';
 
   const allNavigation = [
-    { name: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Appointments', href: '/admin/bookings', icon: Calendar },
-    { name: 'Customers', href: '/admin/customers', icon: Users, adminOnly: true },
-    { name: 'Services', href: '/admin/services', icon: Scissors, adminOnly: true },
-    { name: 'Offers & Loyalty', href: '/admin/bookings', icon: MessageSquareQuote, adminOnly: true },
-    { name: 'Staff', href: '/admin/staff', icon: UserCheck, adminOnly: true },
-    { name: 'Reports', href: '/admin/dashboard', icon: LayoutDashboard, adminOnly: true },
-    { name: 'Settings', href: '/admin/profile', icon: Settings, adminOnly: true },
+    { name: 'Clients CRM', href: '/admin/customers', icon: Users, adminOnly: true },
+    { name: 'Treatments Menu', href: '/admin/services', icon: Scissors, adminOnly: true },
+    { name: 'Master Staff', href: '/admin/staff', icon: UserCheck, adminOnly: true },
+    { name: 'Salon Settings', href: '/admin/profile', icon: Settings, adminOnly: true },
   ];
 
   const navigation = allNavigation.filter(item => !item.adminOnly || userRole === 'ADMIN' || userRole === 'OWNER');
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-[#FAFAF8] text-[#1E1822] overflow-hidden selection:bg-[#5E127E]/10 selection:text-[#5E127E]">
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-20 flex items-center justify-center border-b border-sidebar-border relative px-4">
-          <Link href="/admin/dashboard" className="block relative w-44 h-12 overflow-hidden mt-1">
+      {/* Luxury Plum Brand Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#230B29] border-r border-[#3D1947] transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="h-20 flex items-center justify-between border-b border-[#3D1947]/70 px-6">
+          <Link href="/admin/dashboard" className="block relative w-36 h-10">
             <Image
               src="/logo-white.svg"
               alt="Natural's Salon CRM"
               fill
-              className="object-contain"
+              className="object-contain object-left"
             />
           </Link>
+          <span className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded-full">
+            CRM
+          </span>
         </div>
 
         <div className="flex flex-col h-[calc(100vh-5rem)] justify-between pb-6">
-          <nav className="p-4 space-y-1 overflow-y-auto">
-            <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-4 px-2 mt-4">Menu</div>
+          <nav className="p-4 space-y-1.5 overflow-y-auto">
+            <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-3 px-3 mt-3">
+              Operations Menu
+            </div>
             {navigation.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
@@ -59,64 +62,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${isActive
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    }`}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                    isActive
+                      ? 'bg-[#5E127E] text-white shadow-md shadow-[#5E127E]/30'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  }`}
                 >
-                  <item.icon className={`w-4 h-4 ${isActive ? 'text-sidebar-primary-foreground/80' : 'text-sidebar-foreground/50'}`} />
-                  {item.name}
+                  <item.icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-white/50'}`} />
+                  <span>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="px-4 space-y-1">
-            {(userRole === 'ADMIN' || userRole === 'OWNER') && (
-              <>
-                <div className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-4 px-2">Settings</div>
-                <Link
-                  href="/admin/profile"
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${pathname === '/admin/profile'
-                      ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm'
-                      : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    }`}
-                >
-                  <Settings className="w-4 h-4 text-sidebar-foreground/50" />
-                  Salon Profile
-                </Link>
-              </>
-            )}
+          <div className="px-4 space-y-2 border-t border-[#3D1947]/70 pt-4">
+            <Link
+              href="/"
+              target="_blank"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <span>View Public Website</span>
+            </Link>
+
             <button
               onClick={() => {
                 sessionStorage.removeItem('accessToken');
                 signOut({ callbackUrl: '/admin/login' });
               }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors mt-4"
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-300 hover:bg-rose-950/40 transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              Sign Out
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header (Mobile only) */}
-        <header className="h-16 flex items-center justify-between px-4 border-b bg-background lg:hidden shrink-0">
-          <div className="font-serif text-lg tracking-tight font-medium">BeaSalon CRM</div>
+        {/* Mobile Header Bar */}
+        <header className="h-16 flex items-center justify-between px-6 border-b border-[#EFECE6] bg-white lg:hidden shrink-0">
+          <div className="font-serif text-sm font-semibold text-[#230B29]">Natural&apos;s Salon CRM</div>
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 -mr-2 text-muted-foreground hover:text-foreground"
+            className="p-2 -mr-2 text-[#615668] hover:text-[#1E1822]"
+            aria-label="Toggle navigation"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5" />
           </button>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-muted/30">
-          <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+        {/* Page Shell */}
+        <main className="flex-1 overflow-auto bg-[#FAFAF8]">
+          <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
             {children}
           </div>
         </main>
