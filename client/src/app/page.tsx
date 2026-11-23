@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
   ServiceItem,
 } from "@/lib/editorialData";
 import { businessConfig } from "@/business.config";
+import { BookingApi } from "@/lib/api/services";
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -23,10 +24,15 @@ export default function HomePage() {
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     return new Date().toISOString().split("T")[0];
   });
-  const [selectedTime, setSelectedTime] = useState<string>("10:30 AM");
+  const [selectedStartsAt, setSelectedStartsAt] = useState<string>("");
+  const [availableSlots, setAvailableSlots] = useState<Array<{ starts_at: string; label: string }>>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [customerName, setCustomerName] = useState<string>("");
   const [customerPhone, setCustomerPhone] = useState<string>("");
+  const [customerEmail, setCustomerEmail] = useState<string>("");
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   const displayedServices =
     activeCategory === "all"
@@ -37,18 +43,101 @@ export default function HomePage() {
     EDITORIAL_SERVICES.find((s) => s.id === selectedServiceId) ||
     EDITORIAL_SERVICES[0];
 
+  // Fetch available slots when modal is open and date/service change
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const backendId = selectedService.backendServiceId || "64c6d423-a55c-490d-a407-d5f5c24d02b0";
+    if (!selectedDate || !backendId) return;
+
+    setIsLoadingSlots(true);
+    BookingApi.getAvailability("hq", selectedDate, backendId)
+      .then((res) => {
+        const slots = res?.data?.slots || [];
+        const formatted = slots.map((s: { starts_at: string }) => {
+          const dt = new Date(s.starts_at);
+          const timeStr = dt.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          });
+          return { starts_at: s.starts_at, label: timeStr };
+        });
+        setAvailableSlots(formatted);
+        if (formatted.length > 0) {
+          setSelectedStartsAt(formatted[0].starts_at);
+        } else {
+          setSelectedStartsAt("");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load availability slots:", err);
+        setAvailableSlots([]);
+        setSelectedStartsAt("");
+      })
+      .finally(() => {
+        setIsLoadingSlots(false);
+      });
+  }, [isModalOpen, selectedDate, selectedService.backendServiceId]);
+
   const handleOpenModal = (serviceId?: string) => {
     if (serviceId) {
       setSelectedServiceId(serviceId);
     }
     setBookingConfirmed(false);
+    setBookingError(null);
     setIsModalOpen(true);
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !customerPhone.trim()) return;
-    setBookingConfirmed(true);
+
+    setIsSubmittingBooking(true);
+    setBookingError(null);
+
+    try {
+      const backendId = selectedService.backendServiceId || "64c6d423-a55c-490d-a407-d5f5c24d02b0";
+      const idempotencyKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `idemp_${Date.now()}_${Math.random()}`;
+
+      // If available slot selected, use it; otherwise compute slot on chosen date at 10:30 AM
+      const startsAt =
+        selectedStartsAt || `${selectedDate}T05:00:00.000Z`;
+
+      const bookingRes = await BookingApi.createBooking(
+        "hq",
+        {
+          customerName: customerName.trim(),
+          customerPhone: customerPhone.trim(),
+          customerEmail: customerEmail.trim() || null,
+          serviceId: backendId,
+          stylistId: null,
+          startsAt,
+          notes: `Booked via Naturals Kottakkal homepage modal for ${selectedService.title}`,
+        },
+        idempotencyKey
+      );
+
+      const bookingId = bookingRes?.data?.id;
+      if (bookingId) {
+        try {
+          await BookingApi.initializePayment("hq", bookingId, `pay_${idempotencyKey}`);
+        } catch (payErr) {
+          console.warn("Payment initialization warning:", payErr);
+        }
+      }
+
+      setBookingConfirmed(true);
+    } catch (err: any) {
+      console.error("Booking creation failed:", err);
+      setBookingError(
+        err?.message || "Unable to reserve slot. Please call or WhatsApp our desk."
+      );
+    } finally {
+      setIsSubmittingBooking(false);
+    }
   };
 
   return (
@@ -660,19 +749,23 @@ export default function HomePage() {
                         htmlFor="book-time"
                         className="block font-sans-label text-[10px] font-semibold mb-1.5"
                       >
-                        Time Slot
+                        Time Slot {isLoadingSlots && "(Checking...)"}
                       </label>
                       <select
                         id="book-time"
-                        value={selectedTime}
-                        onChange={(e) => setSelectedTime(e.target.value)}
+                        value={selectedStartsAt}
+                        onChange={(e) => setSelectedStartsAt(e.target.value)}
                         className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2.5 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
                       >
-                        <option>10:30 AM</option>
-                        <option>12:00 PM</option>
-                        <option>02:30 PM</option>
-                        <option>04:30 PM</option>
-                        <option>06:00 PM</option>
+                        {availableSlots.length > 0 ? (
+                          availableSlots.map((slot) => (
+                            <option key={slot.starts_at} value={slot.starts_at}>
+                              {slot.label}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="">{isLoadingSlots ? "Loading slots..." : "10:30 AM (Standard Slot)"}</option>
+                        )}
                       </select>
                     </div>
                   </div>
@@ -713,20 +806,44 @@ export default function HomePage() {
                     />
                   </div>
 
+                  <div>
+                    <label
+                      htmlFor="book-email"
+                      className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                    >
+                      Email (Optional)
+                    </label>
+                    <input
+                      id="book-email"
+                      type="email"
+                      placeholder="name@example.com"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                    />
+                  </div>
+
+                  {bookingError && (
+                    <div className="p-3 bg-red-100 border border-red-300 text-red-800 text-xs">
+                      {bookingError}
+                    </div>
+                  )}
+
                   <div className="text-sm font-serif-editorial italic text-[#46443f] pt-1">
                     Estimated duration: {selectedService.duration} • {selectedService.price}
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full font-sans-label text-[11px] font-semibold py-3.5 bg-[#252628] text-white hover:opacity-90 transition active:scale-95"
+                    disabled={isSubmittingBooking}
+                    className="w-full font-sans-label text-[11px] font-semibold py-3.5 bg-[#252628] text-white hover:opacity-90 transition active:scale-95 disabled:opacity-50"
                   >
-                    Confirm Reservation Request
+                    {isSubmittingBooking ? "Reserving Appointment..." : "Confirm Reservation Request"}
                   </button>
 
                   <div className="text-center pt-2">
                     <Link
-                      href={`/appointments?serviceId=${selectedServiceId}`}
+                      href={`/appointments?serviceId=${selectedService.backendServiceId || selectedServiceId}`}
                       className="text-xs font-sans-label text-[#252628] hover:underline"
                     >
                       Or open full live schedule picker →
@@ -737,12 +854,11 @@ export default function HomePage() {
             ) : (
               <div className="text-center py-6">
                 <p className="font-serif-editorial text-3xl mb-2">
-                  Reservation Request Noted
+                  Reservation Request Confirmed
                 </p>
                 <div className="hairline-dark my-4" />
                 <p className="font-serif-editorial text-lg text-[#46443f] mb-6">
-                  {customerName}, your {selectedService.title} request for {selectedDate} at{" "}
-                  {selectedTime} ({selectedService.price}) has been recorded.
+                  {customerName}, your {selectedService.title} reservation for {selectedDate} ({selectedService.price}) has been securely recorded in our appointment schedule.
                   Our Kottakkal desk will confirm via WhatsApp/SMS.
                 </p>
                 <button
