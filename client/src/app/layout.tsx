@@ -1,20 +1,69 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const cormorantGaramond = Cormorant_Garamond({
+const cormorantGaramond = localFont({
   variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   display: "swap",
+  src: [
+    {
+      path: "../../public/fonts/cormorant-normal-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/cormorant-normal-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/cormorant-normal-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/cormorant-normal-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/cormorant-italic-400.woff2",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../../public/fonts/cormorant-italic-600.woff2",
+      weight: "600",
+      style: "italic",
+    },
+  ],
 });
 
-const montserrat = Montserrat({
+const montserrat = localFont({
   variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
+  src: [
+    {
+      path: "../../public/fonts/montserrat-normal-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/montserrat-normal-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/montserrat-normal-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/montserrat-normal-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -52,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${cormorantGaramond.variable} ${montserrat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-serif bg-[#c4beae] text-[#252628]">
+      <body className="min-h-full flex flex-col font-sans bg-[var(--bg-taupe)] text-[var(--bg-charcoal)]">
         <Providers>{children}</Providers>
       </body>
     </html>
