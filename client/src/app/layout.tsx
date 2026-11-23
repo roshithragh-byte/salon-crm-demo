@@ -1,27 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
+const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-serif",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Natural's Salon | India's No.1 Hair & Beauty Salon • Kottakkal",
+  title: "Naturals Unisex Salon — Editorial Web App • Kottakkal",
   description:
-    "Natural's Salon Kottakkal — premier hair, beauty, skincare, and bridal salon. Book your personalised salon appointment online.",
+    "Unisex hair, skin, bridal, and spa care tailored to your natural texture and personal style at Naturals Salon Kottakkal.",
   keywords: [
     "Natural's Salon",
     "Naturals Kottakkal",
@@ -38,9 +37,9 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "Natural's Salon | India's No.1 Hair & Beauty Salon • Kottakkal",
+    title: "Naturals Unisex Salon — Editorial Web App • Kottakkal",
     description:
-      "Book a premier hair, beauty, or skincare appointment at Natural's Salon Kottakkal, Kerala.",
+      "Unisex hair, skin, bridal, and spa care tailored to your natural texture and personal style at Naturals Salon Kottakkal.",
     type: "website",
   },
 };
@@ -51,9 +50,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
+      className={`${cormorantGaramond.variable} ${montserrat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><Providers>{children}</Providers></body>
+      <body className="min-h-full flex flex-col font-serif bg-[#c4beae] text-[#252628]">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

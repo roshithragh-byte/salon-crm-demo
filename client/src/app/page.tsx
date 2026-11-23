@@ -1,527 +1,762 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
-  ArrowRight,
-  MapPin,
-  Phone,
-  Clock,
-  Sparkles,
-  Star,
-  CheckCircle2,
-  Calendar,
-  ShieldCheck,
-  Award,
-  Heart,
-  ChevronRight,
-  ExternalLink,
-} from "lucide-react";
-import Gallery from "@/components/Gallery";
+  EDITORIAL_SERVICES,
+  EDITORIAL_TEAM,
+  EDITORIAL_TESTIMONIALS,
+  ServiceItem,
+} from "@/lib/editorialData";
+import { businessConfig } from "@/business.config";
 
-const businessConfig = {
-  name: "Natural's Salon",
-  phone: "+91 87142 29297",
-  whatsapp: "+91 87142 29297",
-  email: "hello@naturalssalon.com",
-  address: {
-    street: "1st Floor, Al Wahad Complex, Changuvetty",
-    landmark: "Opposite PWD Rest House",
-    city: "Kottakkal",
-    district: "Malappuram",
-    state: "Kerala",
-    postalCode: "676501",
-    country: "IN",
-  },
-  geo: {
-    latitude: 10.99497357,
-    longitude: 75.9923958,
-  },
-  hours: {
-    weekdays: "10:00 AM - 9:00 PM",
-    weekends: "09:00 AM - 9:00 PM",
-  },
-  social: {
-    instagram: "https://www.instagram.com/naturals_kottakkal/?hl=en",
-    facebook: "https://www.facebook.com/naturalskottakkal07/",
-  },
-  maps: "https://maps.google.com/?q=10.99497357,75.9923958",
-};
+export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-export default function Home() {
+  // Reservation Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string>(
+    EDITORIAL_SERVICES[0].id
+  );
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+  const [selectedTime, setSelectedTime] = useState<string>("10:30 AM");
+  const [customerName, setCustomerName] = useState<string>("");
+  const [customerPhone, setCustomerPhone] = useState<string>("");
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+
+  const displayedServices =
+    activeCategory === "all"
+      ? EDITORIAL_SERVICES.slice(0, 6)
+      : EDITORIAL_SERVICES.filter((s) => s.category === activeCategory);
+
+  const selectedService =
+    EDITORIAL_SERVICES.find((s) => s.id === selectedServiceId) ||
+    EDITORIAL_SERVICES[0];
+
+  const handleOpenModal = (serviceId?: string) => {
+    if (serviceId) {
+      setSelectedServiceId(serviceId);
+    }
+    setBookingConfirmed(false);
+    setIsModalOpen(true);
+  };
+
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerName.trim() || !customerPhone.trim()) return;
+    setBookingConfirmed(true);
+  };
+
   return (
-    <main className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-[#5E127E]/10 selection:text-[#5E127E]">
-      {/* ── TOP UTILITY NOTIFICATION BAR ── */}
-      <div className="bg-[#230B29] text-[#FAFAF8] text-xs py-2.5 px-4 text-center tracking-wider font-light border-b border-[#3D1947]/40 flex items-center justify-center gap-2">
-        <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-        <span>Experience India&apos;s No.1 Hair &amp; Beauty Destination in Kottakkal • Open 7 Days</span>
-        <span className="hidden sm:inline text-white/30">•</span>
-        <a
-          href={`tel:${businessConfig.phone}`}
-          className="hidden sm:inline font-medium text-[#D4AF37] hover:underline"
-        >
-          Call {businessConfig.phone}
-        </a>
-      </div>
+    <div className="min-h-screen bg-[#c4beae] text-[#252628] selection:bg-[#252628] selection:text-white">
+      {/* ── TOP STICKY BAR ── */}
+      <header
+        className="sticky top-0 z-40 bg-[#c4beae]"
+        style={{ borderBottom: "1px solid rgba(37, 38, 40, 0.28)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <Link
+            href="#top"
+            className="font-serif-editorial text-2xl tracking-tight text-[#252628] whitespace-nowrap hover:opacity-85 transition"
+          >
+            Naturals Salon
+          </Link>
 
-      {/* ── STICKY GLASS HEADER ── */}
-      <header className="sticky top-0 left-0 right-0 z-50 bg-[#FAFAF8]/90 backdrop-blur-md border-b border-[#EFECE6] transition-all">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative w-40 h-11 flex items-center">
+          <nav className="hidden md:flex items-center gap-7">
+            <a
+              href="#services"
+              className="font-sans-label text-[11px] font-semibold text-[#252628] hover:opacity-70 transition"
+            >
+              Services
+            </a>
+            <a
+              href="#products"
+              className="font-sans-label text-[11px] font-semibold text-[#252628] hover:opacity-70 transition"
+            >
+              Products
+            </a>
+            <a
+              href="#team"
+              className="font-sans-label text-[11px] font-semibold text-[#252628] hover:opacity-70 transition"
+            >
+              Team
+            </a>
+            <a
+              href="#testimonials"
+              className="font-sans-label text-[11px] font-semibold text-[#252628] hover:opacity-70 transition"
+            >
+              Reviews
+            </a>
+            <a
+              href="#contact"
+              className="font-sans-label text-[11px] font-semibold text-[#252628] hover:opacity-70 transition"
+            >
+              Contact
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleOpenModal()}
+              type="button"
+              className="font-sans-label text-[11px] font-semibold px-5 py-2.5 bg-[#252628] text-white hover:opacity-90 transition whitespace-nowrap active:scale-95 shadow-xs"
+            >
+              Book Visit
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              type="button"
+              aria-label="Toggle Menu"
+              className="md:hidden p-2 border border-[#252628]/40 text-[#252628]"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 7.5h16.5M3.75 12h16.5m-16.5 4.5h16.5"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden px-6 pb-4 flex flex-col gap-3 border-t border-[#252628]/20 pt-3 bg-[#c4beae]">
+            <a
+              href="#services"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="font-sans-label text-[11px] font-semibold text-[#252628]"
+            >
+              Services
+            </a>
+            <a
+              href="#products"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="font-sans-label text-[11px] font-semibold text-[#252628]"
+            >
+              Products
+            </a>
+            <a
+              href="#team"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="font-sans-label text-[11px] font-semibold text-[#252628]"
+            >
+              Team
+            </a>
+            <a
+              href="#testimonials"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="font-sans-label text-[11px] font-semibold text-[#252628]"
+            >
+              Reviews
+            </a>
+            <a
+              href="#contact"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="font-sans-label text-[11px] font-semibold text-[#252628]"
+            >
+              Contact
+            </a>
+          </div>
+        )}
+      </header>
+
+      {/* ── SECTION 1: HERO / FULL-SERVICE SALON ── */}
+      <section
+        id="top"
+        style={{ backgroundColor: "#c4beae" }}
+        className="py-16 md:py-24 px-6"
+      >
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 items-stretch">
+          <div className="md:col-span-5 flex flex-col justify-between">
+            <div>
+              <h1 className="font-serif-editorial text-4xl sm:text-5xl leading-[1.08] tracking-tight text-[#252628] pb-5">
+                We are a full-service salon.
+              </h1>
+              <div className="hairline-dark mb-8" />
+            </div>
+
+            <div className="pt-8 md:pt-16">
+              <p className="font-serif-editorial text-xl sm:text-[22px] leading-[1.5] text-[#252628] mb-7">
+                Unisex hair, skin, bridal, and spa care tailored to your natural
+                texture and personal style. From precision cuts and botanical
+                keratin infusions to clinical Hydra facials, every ritual is
+                crafted for effortless radiance.
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  href="#services"
+                  className="font-sans-label text-[11px] font-semibold px-6 py-3 bg-[#252628] text-white hover:opacity-90 transition active:scale-95"
+                >
+                  Explore Menu
+                </a>
+                <button
+                  onClick={() => handleOpenModal()}
+                  type="button"
+                  className="font-sans-label text-[11px] font-semibold px-6 py-3 border border-[#252628] text-[#252628] hover:bg-[#252628] hover:text-white transition active:scale-95"
+                >
+                  Book Appointment
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-7 flex flex-col gap-6">
+            <div className="overflow-hidden aspect-[16/10] bg-[#b5ae9d] relative shadow-sm">
               <Image
-                src="/logo-horizontal-purple.png"
-                alt="Natural's Salon Kottakkal"
+                src="/editorial/editorial_1.jpeg"
+                alt="Editorial salon skincare and hair portrait"
                 fill
-                className="object-contain object-left"
+                className="object-cover"
                 priority
               />
             </div>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-9 text-xs font-semibold uppercase tracking-widest text-[#615668]">
-            <a href="#services" className="hover:text-[#5E127E] transition-colors">Treatments</a>
-            <a href="#ethos" className="hover:text-[#5E127E] transition-colors">The Experience</a>
-            <a href="#gallery" className="hover:text-[#5E127E] transition-colors">Portfolio</a>
-            <a href="#location" className="hover:text-[#5E127E] transition-colors">Salon &amp; Hours</a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/account"
-              className="hidden lg:inline-flex text-xs font-semibold uppercase tracking-wider text-[#615668] hover:text-[#5E127E] transition-colors px-3 py-2"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/appointments"
-              className="bg-[#5E127E] hover:bg-[#4D0F68] text-white px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all shadow-md shadow-[#5E127E]/20 hover:shadow-lg active:scale-95"
-            >
-              Reserve Visit
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* ── EDITORIAL LUXURY HERO SECTION ── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#FAF8FC] via-[#FAFAF8] to-[#FAFAF8] pt-16 pb-24 md:pt-24 md:pb-32 border-b border-[#EFECE6]">
-        {/* Subtle decorative background blurbs */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#F3E8F6] rounded-full blur-3xl opacity-60 pointer-events-none -z-10" />
-
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
-          {/* Trust Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white border border-[#EFECE6] shadow-sm text-xs text-[#615668]">
-            <div className="flex items-center text-[#D4AF37]">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-[#D4AF37]" />
-              ))}
-            </div>
-            <span className="font-semibold text-[#1E1822]">4.9 / 5.0</span>
-            <span className="text-[#615668]/60">•</span>
-            <span>Kottakkal&apos;s Preferred Luxury Salon</span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-[#230B29] tracking-tight leading-[1.12]">
-            Hair Couture &amp; Botanical Beauty,{" "}
-            <span className="italic text-[#5E127E] font-normal block mt-1 md:mt-2">
-              Crafted in Kottakkal.
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-base sm:text-lg md:text-xl text-[#615668] max-w-2xl mx-auto font-light leading-relaxed">
-            Personalised styling, master colour artistry, rejuvenating skincare rituals,
-            and complete bridal bespoke care by certified beauty therapists.
-          </p>
-
-          {/* Primary Action Group */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-            <Link
-              href="/appointments"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-[#5E127E] hover:bg-[#4D0F68] text-white px-8 py-4 rounded-full font-medium text-sm tracking-wide transition-all shadow-lg shadow-[#5E127E]/25 hover:shadow-xl active:scale-95"
-            >
-              <span>Book Appointment Online</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <a
-              href="#services"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-[#FAF8FC] text-[#230B29] border border-[#EFECE6] px-8 py-4 rounded-full font-medium text-sm tracking-wide transition-all shadow-sm hover:shadow"
-            >
-              <span>Explore Treatments</span>
-            </a>
-          </div>
-
-          {/* Quick Metrics Bar */}
-          <div className="pt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto border-t border-[#EFECE6]">
-            <div>
-              <div className="text-2xl font-serif font-semibold text-[#230B29]">20+ Years</div>
-              <div className="text-xs text-[#615668] mt-0.5">Brand Heritage</div>
-            </div>
-            <div>
-              <div className="text-2xl font-serif font-semibold text-[#230B29]">100%</div>
-              <div className="text-xs text-[#615668] mt-0.5">Authentic Products</div>
-            </div>
-            <div>
-              <div className="text-2xl font-serif font-semibold text-[#230B29]">Master</div>
-              <div className="text-xs text-[#615668] mt-0.5">Certified Stylists</div>
-            </div>
-            <div>
-              <div className="text-2xl font-serif font-semibold text-[#230B29]">7 Days</div>
-              <div className="text-xs text-[#615668] mt-0.5">Open 10 AM - 9 PM</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CURATED SERVICE CATEGORIES ── */}
-      <section id="services" className="px-6 py-24 md:py-32 bg-[#FAFAF8] border-b border-[#EFECE6]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#5E127E]">
-              The Rituals &amp; Menu
-            </span>
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-[#230B29] tracking-tight">
-              Tailored Treatments for Hair, Skin &amp; Special Occasions
-            </h2>
-            <p className="text-sm md:text-base text-[#615668] font-light leading-relaxed">
-              Every appointment begins with an in-depth consultation to determine the ideal formulations for your unique hair texture and skin vitality.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Hair Couture",
-                subtitle: "Precision cuts, blowouts, balayage, keratin smoothing, and deep scalp therapies.",
-                icon: "✂",
-                popular: "Precision Cut & Blowout",
-                tag: "Most Requested",
-              },
-              {
-                title: "Skin Vitality",
-                subtitle: "Custom hydra facials, brightening cleanups, de-tan therapies, and organic peels.",
-                icon: "✨",
-                popular: "Hydra Renewal Facial",
-                tag: "Skin Ritual",
-              },
-              {
-                title: "Bespoke Bridal",
-                subtitle: "Complete pre-bridal care, master HD makeup, saree draping, and styling.",
-                icon: "👑",
-                popular: "Signature Bridal Suite",
-                tag: "Bridal Couture",
-              },
-              {
-                title: "Wellness & Spa",
-                subtitle: "Spa manicures, pedicures, therapeutic head massages, and reflexology.",
-                icon: "🌿",
-                popular: "Botanical Spa Pedicure",
-                tag: "Relaxation",
-              },
-            ].map((cat, i) => (
-              <div
-                key={i}
-                className="group relative bg-white p-8 rounded-3xl border border-[#EFECE6] shadow-sm hover:shadow-xl hover:border-[#5E127E]/30 transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <span className="w-12 h-12 rounded-2xl bg-[#F3E8F6] text-[#5E127E] flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-                      {cat.icon}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#5E127E] bg-[#F3E8F6] px-2.5 py-1 rounded-full">
-                      {cat.tag}
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl font-serif font-semibold text-[#230B29] mb-2 group-hover:text-[#5E127E] transition-colors">
-                    {cat.title}
-                  </h3>
-                  <p className="text-xs text-[#615668] leading-relaxed mb-6">
-                    {cat.subtitle}
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-[#EFECE6] flex items-center justify-between">
-                  <span className="text-xs font-medium text-[#1E1822]">{cat.popular}</span>
-                  <Link
-                    href="/appointments"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#5E127E] hover:underline"
-                  >
-                    <span>Reserve</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center">
-            <Link
-              href="/appointments"
-              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[#5E127E] hover:text-[#4D0F68] transition-colors bg-[#F3E8F6] px-6 py-3 rounded-full hover:bg-[#EBD8EF]"
-            >
-              <span>View Full Service Catalogue &amp; Pricing</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── THE EXPERIENCE / ETHOS SECTION ── */}
-      <section id="ethos" className="bg-white text-[#1E1822] px-6 py-24 md:py-32 border-b border-[#EFECE6]">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-          <div className="space-y-6">
-            <span className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-[#5E127E]">
-              The Naturals Philosophy
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-medium text-[#230B29] leading-[1.18] tracking-tight">
-              A Sanctuary of Rejuvenation,{" "}
-              <span className="italic text-[#5E127E] font-normal block mt-1">
-                Designed for You.
-              </span>
-            </h2>
-            <div className="space-y-4 text-[#615668] text-sm md:text-base leading-relaxed font-light">
-              <p>
-                Located at Al Wahad Complex in Changuvetty, Kottakkal, our salon is thoughtfully engineered to deliver a calming escape from daily busyness.
-              </p>
-              <p>
-                Whether you visit us for a maintenance blowout or an elaborate bridal suite transformation, you receive attentive care from artists trained in international techniques and equipped with leading dermatological formulations.
-              </p>
-            </div>
-
-            <div className="pt-2 flex flex-wrap gap-4">
-              <div className="flex items-center gap-2 text-xs text-[#230B29] font-medium bg-[#FAFAF8] border border-[#EFECE6] px-4 py-2.5 rounded-full">
-                <ShieldCheck className="w-4 h-4 text-[#5E127E]" />
-                <span>Hospital-Grade Sanitization</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-[#230B29] font-medium bg-[#FAFAF8] border border-[#EFECE6] px-4 py-2.5 rounded-full">
-                <Award className="w-4 h-4 text-[#D4AF37]" />
-                <span>Certified Colorists</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-5">
-            {[
-              {
-                title: "Certified Master Stylists",
-                desc: "Continually trained in the latest international cuts, balayage, and styling techniques.",
-                icon: Award,
-              },
-              {
-                title: "Curated Formulations",
-                desc: "Strictly authentic, salon-exclusive products gentle on scalp, hair, and delicate skin.",
-                icon: Sparkles,
-              },
-              {
-                title: "Personalized Consultation",
-                desc: "Every appointment begins with tailored recommendations matching your lifestyle.",
-                icon: Heart,
-              },
-              {
-                title: "Serene Private Suites",
-                desc: "Hygienic, private aesthetic rooms ensuring peaceful comfort throughout your treatment.",
-                icon: CheckCircle2,
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="bg-[#FAFAF8] p-6 rounded-2xl border border-[#EFECE6] hover:border-[#5E127E]/30 transition-all space-y-3"
-              >
-                <item.icon className="w-5 h-5 text-[#5E127E]" />
-                <h3 className="font-serif font-semibold text-base text-[#230B29]">{item.title}</h3>
-                <p className="text-xs text-[#615668] leading-relaxed font-light">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CLIENT ARTISTRY PORTFOLIO & REELS ── */}
-      <Gallery />
-
-      {/* ── LOCATION, HOURS & CONTACT CARD ── */}
-      <section id="location" className="px-6 py-24 md:py-32 bg-[#FAFAF8] border-b border-[#EFECE6]">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-[#230B29] text-[#FAFAF8] rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden">
-            <div className="absolute -right-24 -bottom-24 w-96 h-96 bg-[#5E127E]/30 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 grid lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-7 space-y-6">
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#D4AF37]">
-                  Visit Our Salon in Kottakkal
-                </span>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif font-medium leading-tight">
-                  Step In &amp; Relax. We&apos;re Ready to Welcome You.
-                </h2>
-                <p className="text-white/70 text-sm md:text-base font-light leading-relaxed max-w-xl">
-                  Centrally located at Al Wahad Complex, Changuvetty (opposite PWD Rest House) with convenient parking and accessibility.
-                </p>
-
-                <div className="pt-2 grid sm:grid-cols-2 gap-6 text-sm text-white/80">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[#D4AF37] font-semibold text-xs uppercase tracking-wider">
-                      <Clock className="w-4 h-4" />
-                      <span>Business Hours</span>
-                    </div>
-                    <p className="text-xs leading-relaxed text-white/70">
-                      Weekdays: {businessConfig.hours.weekdays}<br />
-                      Weekends: {businessConfig.hours.weekends}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[#D4AF37] font-semibold text-xs uppercase tracking-wider">
-                      <Phone className="w-4 h-4" />
-                      <span>Direct Contact</span>
-                    </div>
-                    <p className="text-xs leading-relaxed text-white/70">
-                      Appointments: <a href={`tel:${businessConfig.phone}`} className="hover:text-white underline">{businessConfig.phone}</a><br />
-                      WhatsApp: <a href={`https://wa.me/${businessConfig.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-white underline">{businessConfig.whatsapp}</a>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-4 flex flex-wrap gap-4">
-                  <Link
-                    href="/appointments"
-                    className="inline-flex items-center justify-center gap-2 bg-[#D4AF37] hover:bg-[#C59B27] text-[#230B29] px-7 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-md active:scale-95"
-                  >
-                    <span>Reserve Online</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <a
-                    href={businessConfig.maps}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-7 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border border-white/20"
-                  >
-                    <span>Open in Google Maps</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 bg-[#371540] p-8 rounded-2xl border border-white/10 space-y-4">
-                <div className="flex items-start gap-4">
-                  <MapPin className="w-5 h-5 text-[#D4AF37] shrink-0 mt-1" />
-                  <div>
-                    <h3 className="font-serif font-semibold text-base text-white">Natural&apos;s Salon Kottakkal</h3>
-                    <p className="text-xs text-white/70 mt-1 leading-relaxed">
-                      {businessConfig.address.street}<br />
-                      {businessConfig.address.landmark}<br />
-                      {businessConfig.address.city}, {businessConfig.address.state} — {businessConfig.address.postalCode}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/10 text-xs text-white/60">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse" />
-                  <span>Open today until 9:00 PM • Valet / Easy Parking</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ── */}
-      <footer className="bg-[#150619] text-[#FAFAF8] pt-20 pb-12 px-6">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-12 gap-12 mb-16">
-          <div className="md:col-span-5 space-y-6">
-            <div className="relative w-44 h-12">
+            <div className="overflow-hidden aspect-[16/10] bg-[#b5ae9d] relative shadow-sm">
               <Image
-                src="/logo-white.svg"
-                alt="Natural's Salon Kottakkal"
+                src="/editorial/editorial_2.jpeg"
+                alt="Botanical hair treatment cream and oil"
                 fill
-                className="object-contain object-left"
+                className="object-cover"
               />
             </div>
-            <p className="text-white/60 text-xs sm:text-sm font-light max-w-sm leading-relaxed">
-              India&apos;s No.1 Hair &amp; Beauty Salon franchise at Kottakkal. Dedicated to elevated hair couture, rejuvenating skincare, and radiant bridal experiences.
-            </p>
-            <div className="flex gap-4 items-center">
-              <a
-                href={businessConfig.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#5E127E] flex items-center justify-center transition-colors text-white/80 hover:text-white"
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: OUR SERVICES ── */}
+      <section
+        id="services"
+        style={{ backgroundColor: "#c4beae" }}
+        className="py-16 md:py-24 px-6 border-t border-[#252628]/15"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-serif-editorial text-4xl sm:text-5xl text-center text-[#252628] pb-5">
+            Our Services
+          </h2>
+          <div className="hairline-dark mb-8" />
+
+          {/* Interactive Filter Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-12">
+            {[
+              { label: "All Services", category: "all" },
+              { label: "Haircare", category: "HAIRCARE" },
+              { label: "Treatments", category: "TREATMENTS" },
+              { label: "Skin & Face", category: "SKIN & FACE" },
+              { label: "Signature Combos", category: "COMBOS" },
+            ].map((btn) => (
+              <button
+                key={btn.category}
+                type="button"
+                onClick={() => setActiveCategory(btn.category)}
+                className={`filter-btn ${
+                  activeCategory === btn.category ? "active" : ""
+                }`}
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-              <a
-                href={businessConfig.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-[#5E127E] flex items-center justify-center transition-colors text-white/80 hover:text-white"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-            </div>
+                {btn.label}
+              </button>
+            ))}
           </div>
 
-          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 text-xs">
-            <div className="space-y-4">
-              <span className="font-semibold uppercase tracking-wider text-[#D4AF37] block">Services</span>
-              <ul className="space-y-2.5 text-white/60">
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Hair Styling</Link></li>
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Colour &amp; Highlights</Link></li>
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Hydra Facial</Link></li>
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Bridal Makeover</Link></li>
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Pedicure &amp; Spa</Link></li>
-              </ul>
+          {/* 3-Column Editorial Service Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+            {displayedServices.map((s: ServiceItem) => (
+              <article
+                key={s.id}
+                onClick={() => handleOpenModal(s.id)}
+                className="service-card text-center cursor-pointer group"
+              >
+                <div className="aspect-square overflow-hidden bg-[#b5ae9d] mb-4 relative shadow-xs">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <p className="font-sans-label text-[11px] font-semibold text-[#252628] pb-2">
+                  {s.category}
+                </p>
+                <div className="hairline-dark mb-3" />
+                <h3 className="font-serif-editorial text-2xl text-[#252628] group-hover:opacity-85 transition">
+                  {s.title}
+                </h3>
+                <p className="font-serif-editorial text-lg text-[#252628]/90 mt-1">
+                  {s.price}
+                </p>
+                <span className="font-sans-label text-[9px] text-[#252628]/60 mt-1 inline-block uppercase tracking-wider">
+                  {s.duration}
+                </span>
+              </article>
+            ))}
+          </div>
+
+          <div className="hairline-dark mt-16" />
+        </div>
+      </section>
+
+      {/* ── SECTION 3: THE PRODUCTS WE USE ── */}
+      <section
+        id="products"
+        className="relative py-24 md:py-32 px-6 overflow-hidden bg-[#252628]"
+      >
+        <Image
+          src="/editorial/editorial_3.jpeg"
+          alt="Botanical meadow hair care backdrop"
+          fill
+          className="object-cover opacity-70"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#252628]/50 via-[#252628]/40 to-[#252628]/60" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto text-center text-white">
+          <h2 className="font-serif-editorial text-4xl sm:text-5xl pb-5">
+            The Products We Use
+          </h2>
+          <div className="hairline-light mb-14" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 max-w-3xl mx-auto">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full border border-white/85 flex items-center justify-center bg-black/15 shadow-sm">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 21c0-6 4-10 9-11-1 5-4 9-9 11Zm0 0c0-5-3-8-7-9 1 4 3 7 7 9Z"
+                  />
+                </svg>
+              </div>
+              <span className="font-serif-editorial text-2xl">Organic</span>
             </div>
 
-            <div className="space-y-4">
-              <span className="font-semibold uppercase tracking-wider text-[#D4AF37] block">Client Links</span>
-              <ul className="space-y-2.5 text-white/60">
-                <li><Link href="/appointments" className="hover:text-white transition-colors">Book Online</Link></li>
-                <li><Link href="/account" className="hover:text-white transition-colors">Client Account</Link></li>
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/admin/login" className="hover:text-white transition-colors">Staff Portal</Link></li>
-              </ul>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full border border-white/85 flex items-center justify-center bg-black/15 shadow-sm">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 9c2-2 4-2 6 0s4 2 6 0 4-2 4 0M4 15c2-2 4-2 6 0s4 2 6 0 4-2 4 0"
+                  />
+                </svg>
+              </div>
+              <span className="font-serif-editorial text-2xl">Non-toxic</span>
             </div>
 
-            <div className="space-y-4 col-span-2 sm:col-span-1">
-              <span className="font-semibold uppercase tracking-wider text-[#D4AF37] block">Location</span>
-              <p className="text-white/60 leading-relaxed">
-                Al Wahad Complex, Changuvetty, Kottakkal, Kerala 676501
-              </p>
-              <p className="text-[#D4AF37] font-medium pt-1">
-                {businessConfig.phone}
-              </p>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full border border-white/85 flex items-center justify-center bg-black/15 shadow-sm">
+                <svg
+                  className="w-7 h-7 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 20v-6m0 0c-3.5 0-6-2.2-6-5.2 0-2.5 2-4.8 6-5.8 4 1 6 3.3 6 5.8 0 3-2.5 5.2-6 5.2Z"
+                  />
+                </svg>
+              </div>
+              <span className="font-serif-editorial text-2xl">Eco-friendly</span>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
-          <p>© {new Date().getFullYear()} {businessConfig.name} Kottakkal. All rights reserved.</p>
-          <p>Crafted for Luxury Wellness &amp; Salon Experience.</p>
+      {/* ── SECTION 4: OUR TEAM ── */}
+      <section
+        id="team"
+        style={{ backgroundColor: "#252628" }}
+        className="py-20 md:py-28 px-6 text-white border-t border-white/10"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-serif-editorial text-4xl sm:text-5xl text-center pb-5">
+            Our Team
+          </h2>
+          <div className="hairline-light mb-14" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {EDITORIAL_TEAM.map((member, i) => (
+              <article key={i}>
+                <div className="aspect-square overflow-hidden bg-[#333437] mb-4 relative shadow-sm">
+                  <Image
+                    src={member.image}
+                    alt={member.role}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-serif-editorial text-2xl text-white">
+                  {member.name}
+                </h3>
+                <p className="font-sans-label text-[10px] font-semibold text-white/80 mt-1">
+                  {member.role}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 5: CLIENT TESTIMONIALS ── */}
+      <section
+        id="testimonials"
+        style={{ backgroundColor: "#ffffff" }}
+        className="py-20 md:py-28 px-6 text-[#252628]"
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-serif-editorial text-4xl sm:text-5xl text-center text-[#252628] pb-5">
+            Client Testimonials
+          </h2>
+          <div className="hairline-dark mb-14" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+            {EDITORIAL_TESTIMONIALS.map((item, i) => (
+              <article key={i} className="testimonial-card flex flex-col shadow-sm">
+                <div className="aspect-[16/9] overflow-hidden bg-[#ece9e1] relative">
+                  <Image
+                    src={item.image}
+                    alt="Client testimonial portrait"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-8 flex-1 flex flex-col justify-between">
+                  <p className="font-serif-editorial text-lg leading-[1.55] text-[#252628] mb-8">
+                    &ldquo;{item.quote}&rdquo;
+                  </p>
+                  <p className="font-serif-editorial text-2xl text-[#252628]">
+                    &mdash; {item.author}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 6: WE TAKE CARE OF OUR CLIENTS ── */}
+      <section
+        style={{ backgroundColor: "#c4beae" }}
+        className="py-20 md:py-28 px-6 border-t border-[#252628]/15"
+      >
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-stretch">
+          <div className="md:col-span-6 overflow-hidden aspect-[4/3] bg-[#b5ae9d] relative shadow-sm">
+            <Image
+              src="/editorial/editorial_11.jpeg"
+              alt="Warm salon client care"
+              fill
+              className="object-cover"
+            />
+          </div>
+          
+          <div className="md:col-span-6 flex flex-col justify-between">
+            <div>
+              <h2 className="font-serif-editorial text-4xl sm:text-5xl leading-[1.08] text-[#252628] pb-6">
+                We take care of our clients and our people.
+              </h2>
+              <div className="hairline-dark" />
+            </div>
+            
+            <p className="font-serif-editorial text-xl sm:text-[21px] leading-[1.55] text-[#252628] pt-10">
+              Every appointment begins with a quiet consultation. We pair
+              dermatologist-tested clinical facials and ammonia-free formulations
+              with unhurried craftsmanship—building a studio where both clients
+              and stylists thrive.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 7: CONTACT US ── */}
+      <section
+        id="contact"
+        style={{ backgroundColor: "#252628" }}
+        className="py-20 md:py-28 px-6 text-white border-t border-white/10"
+      >
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="font-serif-editorial text-4xl sm:text-5xl pb-5">
+            Contact Us
+          </h2>
+          <div className="hairline-light mb-16" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-14">
+            <div>
+              <h3 className="font-serif-editorial text-2xl font-semibold mb-2">
+                Phone
+              </h3>
+              <p className="font-serif-editorial text-xl text-white/90">
+                <a href={`tel:${businessConfig.phone}`} className="hover:underline">
+                  {businessConfig.phone}
+                </a>
+              </p>
+            </div>
+            <div>
+              <h3 className="font-serif-editorial text-2xl font-semibold mb-2">
+                Email
+              </h3>
+              <p className="font-serif-editorial text-xl text-white/90">
+                <a href={`mailto:${businessConfig.email}`} className="hover:underline">
+                  {businessConfig.email}
+                </a>
+              </p>
+            </div>
+            <div>
+              <h3 className="font-serif-editorial text-2xl font-semibold mb-2">
+                Address
+              </h3>
+              <p className="font-serif-editorial text-xl text-white/90">
+                {businessConfig.address.street}, {businessConfig.address.city}
+              </p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => handleOpenModal()}
+            type="button"
+            className="font-sans-label text-[11px] font-semibold px-8 py-3.5 border border-white/75 text-white hover:bg-white hover:text-[#252628] transition active:scale-95"
+          >
+            Schedule an Appointment
+          </button>
+        </div>
+      </section>
+
+      {/* ── SECTION 8: ACCESSIBILITY BANNER ── */}
+      <section className="relative h-[420px] sm:h-[500px] overflow-hidden bg-[#c4beae]">
+        <Image
+          src="/editorial/editorial_12.jpeg"
+          alt="Wooden comb through natural silver curls"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        
+        <div className="absolute inset-x-0 bottom-8 px-6 text-center">
+          <p className="font-sans-label text-[11px] sm:text-xs font-semibold text-white max-w-2xl mx-auto leading-relaxed tracking-widest">
+            OUR SALON IS ACCESSIBLE FOR WHEELCHAIRS AND MOBILITY SCOOTERS, WITH
+            RAMPS AND ELEVATORS FOR EASY NAVIGATION.
+          </p>
+        </div>
+      </section>
+
+      {/* ── FOOTER UTILITY STRIP ── */}
+      <footer className="bg-[#1e1f20] text-white/50 py-6 px-6 text-xs text-center border-t border-white/5 flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto gap-4">
+        <p>© {new Date().getFullYear()} Naturals Unisex Salon Kottakkal. All rights reserved.</p>
+        <div className="flex gap-6 uppercase font-sans-label text-[10px]">
+          <Link href="/appointments" className="hover:text-white transition">
+            Booking Engine
+          </Link>
+          <Link href="/account" className="hover:text-white transition">
+            Client Portal
+          </Link>
+          <Link href="/admin/login" className="hover:text-white transition">
+            Admin Login
+          </Link>
+          <Link href="/privacy" className="hover:text-white transition">
+            Privacy Policy
+          </Link>
         </div>
       </footer>
 
-      {/* ── STICKY MOBILE RESERVATION BAR ── */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-[#EFECE6] shadow-lg md:hidden flex gap-2 z-50">
-        <a
-          href={`tel:${businessConfig.phone}`}
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-[#FAFAF8] border border-[#EFECE6] text-[#230B29] shrink-0"
-          aria-label="Call salon"
+      {/* ── INTERACTIVE APPOINTMENT BOOKING MODAL ── */}
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsModalOpen(false);
+          }}
         >
-          <Phone className="w-4 h-4" />
-        </a>
-        <Link
-          href="/appointments"
-          className="flex-1 bg-[#5E127E] hover:bg-[#4D0F68] text-white rounded-full font-semibold text-xs tracking-wider uppercase py-3.5 text-center flex items-center justify-center gap-2 shadow-md"
-        >
-          <span>Book Appointment</span>
-          <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-    </main>
+          <div className="bg-[#c4beae] text-[#252628] max-w-lg w-full border border-[#252628] p-7 sm:p-9 relative shadow-2xl animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              type="button"
+              aria-label="Close modal"
+              className="absolute top-5 right-5 text-[#252628] hover:opacity-65"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {!bookingConfirmed ? (
+              <>
+                <h3 className="font-serif-editorial text-3xl pb-3">
+                  Reserve Your Visit
+                </h3>
+                <div className="hairline-dark mb-6" />
+
+                <form onSubmit={handleBookingSubmit} className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="book-service"
+                      className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                    >
+                      Selected Service
+                    </label>
+                    <select
+                      id="book-service"
+                      value={selectedServiceId}
+                      onChange={(e) => setSelectedServiceId(e.target.value)}
+                      className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2.5 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                    >
+                      {EDITORIAL_SERVICES.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.title} ({s.price})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="book-date"
+                        className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                      >
+                        Preferred Date
+                      </label>
+                      <input
+                        id="book-date"
+                        type="date"
+                        required
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="book-time"
+                        className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                      >
+                        Time Slot
+                      </label>
+                      <select
+                        id="book-time"
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2.5 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                      >
+                        <option>10:30 AM</option>
+                        <option>12:00 PM</option>
+                        <option>02:30 PM</option>
+                        <option>04:30 PM</option>
+                        <option>06:00 PM</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="book-name"
+                      className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                    >
+                      Your Name
+                    </label>
+                    <input
+                      id="book-name"
+                      type="text"
+                      required
+                      placeholder="Full name"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="book-phone"
+                      className="block font-sans-label text-[10px] font-semibold mb-1.5"
+                    >
+                      Phone / WhatsApp
+                    </label>
+                    <input
+                      id="book-phone"
+                      type="tel"
+                      required
+                      placeholder="+91 98765 43210"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      className="w-full bg-white/90 border border-[#252628]/60 px-3.5 py-2 font-serif-editorial text-lg focus:outline-none focus:border-[#252628]"
+                    />
+                  </div>
+
+                  <div className="text-sm font-serif-editorial italic text-[#46443f] pt-1">
+                    Estimated duration: {selectedService.duration} • {selectedService.price}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full font-sans-label text-[11px] font-semibold py-3.5 bg-[#252628] text-white hover:opacity-90 transition active:scale-95"
+                  >
+                    Confirm Reservation Request
+                  </button>
+
+                  <div className="text-center pt-2">
+                    <Link
+                      href={`/appointments?serviceId=${selectedServiceId}`}
+                      className="text-xs font-sans-label text-[#252628] hover:underline"
+                    >
+                      Or open full live schedule picker →
+                    </Link>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-6">
+                <p className="font-serif-editorial text-3xl mb-2">
+                  Reservation Request Noted
+                </p>
+                <div className="hairline-dark my-4" />
+                <p className="font-serif-editorial text-lg text-[#46443f] mb-6">
+                  {customerName}, your {selectedService.title} request for {selectedDate} at{" "}
+                  {selectedTime} ({selectedService.price}) has been recorded.
+                  Our Kottakkal desk will confirm via WhatsApp/SMS.
+                </p>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  type="button"
+                  className="font-sans-label text-[11px] font-semibold px-8 py-3 bg-[#252628] text-white hover:opacity-90"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
