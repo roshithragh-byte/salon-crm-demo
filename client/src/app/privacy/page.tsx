@@ -2,174 +2,178 @@ import Link from 'next/link';
 import { ChevronLeft, ShieldCheck, Lock, Eye, FileText, Database, UserCheck } from 'lucide-react';
 
 export const metadata = {
-  title: 'Privacy Policy | Natural\'s Salon Kottakkal',
-  description: 'Learn how Natural\'s Salon Kottakkal and PilotWave collect, protect, and process your personal data in compliance with DPDPA and global standards.',
+  title: 'Privacy Policy | Naturals Unisex Salon • Kottakkal',
+  description: 'Learn how Naturals Unisex Salon Kottakkal collects, protects, and processes your personal data with editorial transparency and strict privacy standards.',
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 pb-24">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-6 py-4">
+    <main className="min-h-screen bg-[var(--bg-taupe)] text-[var(--bg-charcoal)] pb-24 selection:bg-[var(--bg-charcoal)] selection:text-[var(--bg-taupe)] font-sans">
+      {/* Navigation Bar */}
+      <nav className="sticky top-0 z-50 bg-[var(--bg-taupe)]/95 backdrop-blur-md border-b border-[var(--border-hairline)] px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-purple-900 transition-colors"
+            className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--bg-charcoal)]/80 hover:text-[var(--bg-charcoal)] transition-colors"
           >
             <ChevronLeft className="w-4 h-4" /> Back to Home
           </Link>
-          <span className="text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--bg-charcoal)] border border-[var(--border-hairline)] px-3 py-1 bg-white/40">
             Legal & Compliance
           </span>
         </div>
       </nav>
 
       {/* Hero Header */}
-      <header className="bg-white border-b border-slate-200 py-16 px-6 shadow-sm">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center p-3 bg-purple-50 text-purple-900 rounded-2xl mb-6">
-            <ShieldCheck className="w-8 h-8 text-amber-500" />
+      <header className="border-b border-[var(--border-hairline)] py-16 px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <div className="inline-flex items-center justify-center p-3 border border-[var(--border-hairline)] bg-white/40 mb-2">
+            <ShieldCheck className="w-7 h-7 text-[var(--bg-charcoal)]" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-purple-950 mb-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-normal text-[var(--bg-charcoal)] tracking-tight">
             Privacy Policy
           </h1>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            Your trust is our highest priority. Learn how Natural&apos;s Salon Kottakkal and PilotWave safeguard your personal data, appointment details, and digital footprint.
+          <p className="text-base md:text-lg text-[var(--bg-charcoal)]/85 max-w-2xl mx-auto font-normal leading-relaxed">
+            Your trust is our highest priority. Learn how Naturals Unisex Salon Kottakkal safeguards your personal data, appointment details, and digital footprint.
           </p>
-          <div className="mt-6 text-xs text-slate-400">
-            Effective Date: October 8, 2026 • Last Updated: October 8, 2026
+          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--bg-charcoal)]/70 pt-2">
+            Effective Date: October 2026 • Naturals Kottakkal
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 pt-12 space-y-12">
+      <div className="max-w-4xl mx-auto px-6 pt-12 space-y-10">
         {/* Section 1 */}
-        <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 text-purple-950">
-            <FileText className="w-6 h-6 text-amber-500" />
-            <h2 className="text-2xl font-serif font-bold">1. Overview & Scope</h2>
+        <section className="border border-[var(--border-hairline)] bg-white/40 p-8 space-y-4">
+          <div className="flex items-center gap-3 text-[var(--bg-charcoal)]">
+            <FileText className="w-5 h-5 text-[var(--bg-charcoal)]" />
+            <h2 className="text-2xl font-serif font-normal tracking-wide">1. Overview & Scope</h2>
           </div>
-          <p className="text-slate-600 leading-relaxed">
-            This Privacy Policy applies to <strong>Natural&apos;s Salon</strong> (Kottakkal, Kerala, India) and the underlying <strong>PilotWave Salon Management Platform</strong>. It details our procedures regarding the collection, storage, use, and protection of personal data across our public booking wizard, client portals, and administrative operations.
+          <p className="text-xs sm:text-sm text-[var(--bg-charcoal)]/85 leading-relaxed font-normal">
+            This Privacy Policy applies to <strong>Naturals Unisex Salon</strong> (Kottakkal, Kerala, India) and its digital booking systems. It details our procedures regarding the collection, storage, use, and protection of personal data across our public booking portal, client interactions, and in-salon service records.
           </p>
-          <p className="text-slate-600 leading-relaxed">
-            We adhere to the <strong>Digital Personal Data Protection Act, 2023 (DPDPA - India)</strong> and recognized international standards (including <strong>GDPR</strong> principles) to respect your privacy rights.
+          <p className="text-xs sm:text-sm text-[var(--bg-charcoal)]/85 leading-relaxed font-normal">
+            We adhere to the <strong>Digital Personal Data Protection Act, 2023 (DPDPA - India)</strong> and global privacy standards (including <strong>GDPR</strong> principles) to respect your privacy rights and guarantee discreet, dignified data stewardship.
           </p>
         </section>
 
         {/* Section 2 */}
-        <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 text-purple-950">
-            <Database className="w-6 h-6 text-amber-500" />
-            <h2 className="text-2xl font-serif font-bold">2. Information We Collect</h2>
+        <section className="border border-[var(--border-hairline)] bg-white/40 p-8 space-y-4">
+          <div className="flex items-center gap-3 text-[var(--bg-charcoal)]">
+            <Database className="w-5 h-5 text-[var(--bg-charcoal)]" />
+            <h2 className="text-2xl font-serif font-normal tracking-wide">2. Information We Collect</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-              <h3 className="font-bold text-purple-950 mb-2">Directly Provided Information</h3>
-              <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
+            <div className="p-5 border border-[var(--border-hairline)] bg-white/60">
+              <h3 className="font-bold text-[11px] uppercase tracking-[0.16em] text-[var(--bg-charcoal)] mb-3">
+                Directly Provided Information
+              </h3>
+              <ul className="text-xs text-[var(--bg-charcoal)]/80 space-y-2 list-disc list-inside">
                 <li>Full name, mobile number, and email address</li>
                 <li>Preferred appointment schedules & treatment notes</li>
                 <li>Assigned stylist requests and service add-ons</li>
                 <li>Customer feedback, reviews, and satisfaction ratings</li>
               </ul>
             </div>
-            <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
-              <h3 className="font-bold text-purple-950 mb-2">Automated & Operational Data</h3>
-              <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-                <li>Payment transaction IDs & status (via Razorpay)</li>
-                <li>Loyalty points ledger and accrual transactions</li>
+            <div className="p-5 border border-[var(--border-hairline)] bg-white/60">
+              <h3 className="font-bold text-[11px] uppercase tracking-[0.16em] text-[var(--bg-charcoal)] mb-3">
+                Automated & Operational Data
+              </h3>
+              <ul className="text-xs text-[var(--bg-charcoal)]/80 space-y-2 list-disc list-inside">
+                <li>Payment transaction IDs & status</li>
+                <li>Loyalty points ledger and visit accruals</li>
                 <li>Session tokens & encrypted authentication claims</li>
-                <li>Audit logs for security and fraud prevention</li>
+                <li>Audit logs for security and abuse prevention</li>
               </ul>
             </div>
           </div>
-          <div className="p-4 bg-purple-50 rounded-xl text-xs text-purple-950 border border-purple-100 mt-4">
-            <strong>Payment Security Note:</strong> We use PCI-DSS Level 1 certified payment gateways. Credit/debit card numbers, CVVs, and banking credentials are never transmitted through or stored on our servers.
+          <div className="p-4 border border-[var(--border-hairline)] bg-white/70 text-xs text-[var(--bg-charcoal)] mt-4">
+            <strong>Payment Security Note:</strong> We use PCI-DSS certified payment integrations. Credit/debit card numbers, CVVs, and netbanking credentials are never transmitted through or stored on our salon servers.
           </div>
         </section>
 
         {/* Section 3 */}
-        <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 text-purple-950">
-            <Lock className="w-6 h-6 text-amber-500" />
-            <h2 className="text-2xl font-serif font-bold">3. Technical Safeguards & Data Security</h2>
+        <section className="border border-[var(--border-hairline)] bg-white/40 p-8 space-y-4">
+          <div className="flex items-center gap-3 text-[var(--bg-charcoal)]">
+            <Lock className="w-5 h-5 text-[var(--bg-charcoal)]" />
+            <h2 className="text-2xl font-serif font-normal tracking-wide">3. Technical Safeguards & Data Security</h2>
           </div>
-          <p className="text-slate-600 leading-relaxed">
-            PilotWave implements robust architectural safeguards to protect personal data against unauthorized access, loss, or disclosure:
+          <p className="text-xs sm:text-sm text-[var(--bg-charcoal)]/85 leading-relaxed font-normal">
+            Our architecture incorporates layered technical safeguards to protect personal data against unauthorized access, loss, or disclosure:
           </p>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-600 pt-2">
-            <li className="flex items-start gap-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <span className="text-amber-500 font-bold">✓</span>
-              <span><strong>Canonical HS256 JWT:</strong> Cryptographically verified session signatures with strict audience and issuer validation.</span>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[var(--bg-charcoal)]/85 pt-2">
+            <li className="flex items-start gap-2.5 border border-[var(--border-hairline)] bg-white/60 p-4">
+              <span className="font-bold text-[var(--bg-charcoal)]">✓</span>
+              <span><strong>Cryptographic Signatures:</strong> Verified session tokens with audience and issuer validation.</span>
             </li>
-            <li className="flex items-start gap-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <span className="text-amber-500 font-bold">✓</span>
-              <span><strong>HMAC-SHA256 Webhooks:</strong> Server-authoritative timing-safe signature verification for all payment events.</span>
+            <li className="flex items-start gap-2.5 border border-[var(--border-hairline)] bg-white/60 p-4">
+              <span className="font-bold text-[var(--bg-charcoal)]">✓</span>
+              <span><strong>Timing-Safe Verification:</strong> Server-authoritative webhook verification for online reservations.</span>
             </li>
-            <li className="flex items-start gap-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <span className="text-amber-500 font-bold">✓</span>
-              <span><strong>TLS 1.3 & AES-256:</strong> Complete encryption in transit and at rest across database clusters.</span>
+            <li className="flex items-start gap-2.5 border border-[var(--border-hairline)] bg-white/60 p-4">
+              <span className="font-bold text-[var(--bg-charcoal)]">✓</span>
+              <span><strong>TLS 1.3 & Encrypted Stores:</strong> End-to-end transport security and encrypted database storage.</span>
             </li>
-            <li className="flex items-start gap-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <span className="text-amber-500 font-bold">✓</span>
-              <span><strong>Role & Tenant Isolation:</strong> Strict database queries and middleware guards preventing cross-tenant access.</span>
+            <li className="flex items-start gap-2.5 border border-[var(--border-hairline)] bg-white/60 p-4">
+              <span className="font-bold text-[var(--bg-charcoal)]">✓</span>
+              <span><strong>Strict Role Isolation:</strong> Middleware guards ensuring customers and administrative staff only access authorized records.</span>
             </li>
           </ul>
         </section>
 
         {/* Section 4 */}
-        <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 text-purple-950">
-            <Eye className="w-6 h-6 text-amber-500" />
-            <h2 className="text-2xl font-serif font-bold">4. AI Intelligence & Privacy Boundaries</h2>
+        <section className="border border-[var(--border-hairline)] bg-white/40 p-8 space-y-4">
+          <div className="flex items-center gap-3 text-[var(--bg-charcoal)]">
+            <Eye className="w-5 h-5 text-[var(--bg-charcoal)]" />
+            <h2 className="text-2xl font-serif font-normal tracking-wide">4. Digital Intelligence & Privacy Boundaries</h2>
           </div>
-          <p className="text-slate-600 leading-relaxed">
-            Our platform incorporates TypeSafe AI modules strictly to enhance client experience and scheduling efficiency:
+          <p className="text-xs sm:text-sm text-[var(--bg-charcoal)]/85 leading-relaxed font-normal">
+            Our digital services operate strictly to enhance client booking experience and scheduling convenience:
           </p>
-          <ul className="text-sm text-slate-600 space-y-2 list-disc list-inside">
-            <li>Customer review sentiment scoring and topic categorization for quality assurance.</li>
-            <li>Predictive staff-matching based on service specialization.</li>
-            <li>No personal customer records are ever used to train public LLMs or sold to third-party advertisers.</li>
+          <ul className="text-xs text-[var(--bg-charcoal)]/80 space-y-2 list-disc list-inside">
+            <li>Customer review analysis and quality assurance to maintain salon service standards.</li>
+            <li>Real-time slot availability computation preventing double bookings.</li>
+            <li>No personal customer records are ever sold, traded, or shared with third-party advertisers.</li>
           </ul>
         </section>
 
         {/* Section 5 */}
-        <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 text-purple-950">
-            <UserCheck className="w-6 h-6 text-amber-500" />
-            <h2 className="text-2xl font-serif font-bold">5. Your Privacy Rights</h2>
+        <section className="border border-[var(--border-hairline)] bg-white/40 p-8 space-y-4">
+          <div className="flex items-center gap-3 text-[var(--bg-charcoal)]">
+            <UserCheck className="w-5 h-5 text-[var(--bg-charcoal)]" />
+            <h2 className="text-2xl font-serif font-normal tracking-wide">5. Your Privacy Rights</h2>
           </div>
-          <p className="text-slate-600 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[var(--bg-charcoal)]/85 leading-relaxed font-normal">
             You retain complete control over your personal data. You are entitled to:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
-              <h4 className="font-bold text-purple-950 mb-1">Access & Review</h4>
-              <p className="text-xs text-slate-500">Request a copy of your appointment and profile history.</p>
+            <div className="p-4 border border-[var(--border-hairline)] bg-white/60 text-center">
+              <h4 className="font-bold uppercase tracking-wider text-[11px] text-[var(--bg-charcoal)] mb-1">Access & Review</h4>
+              <p className="text-[11px] text-[var(--bg-charcoal)]/75">Request a copy of your appointment and visit history.</p>
             </div>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
-              <h4 className="font-bold text-purple-950 mb-1">Rectification</h4>
-              <p className="text-xs text-slate-500">Correct or update inaccurate contact or profile details.</p>
+            <div className="p-4 border border-[var(--border-hairline)] bg-white/60 text-center">
+              <h4 className="font-bold uppercase tracking-wider text-[11px] text-[var(--bg-charcoal)] mb-1">Rectification</h4>
+              <p className="text-[11px] text-[var(--bg-charcoal)]/75">Correct or update inaccurate contact or profile details.</p>
             </div>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
-              <h4 className="font-bold text-purple-950 mb-1">Erasure</h4>
-              <p className="text-xs text-slate-500">Request permanent deletion of your customer profile.</p>
+            <div className="p-4 border border-[var(--border-hairline)] bg-white/60 text-center">
+              <h4 className="font-bold uppercase tracking-wider text-[11px] text-[var(--bg-charcoal)] mb-1">Erasure</h4>
+              <p className="text-[11px] text-[var(--bg-charcoal)]/75">Request permanent deletion of your customer profile.</p>
             </div>
           </div>
         </section>
 
         {/* Section 6: Contact */}
-        <section className="bg-purple-950 text-white p-8 rounded-2xl shadow-md space-y-4">
-          <h2 className="text-2xl font-serif font-bold text-amber-300">6. Contact & Grievance Redressal</h2>
-          <p className="text-purple-200 text-sm leading-relaxed">
-            For data inquiries, rights requests, or grievances, reach out to our dedicated privacy office:
+        <section className="bg-[var(--bg-charcoal)] text-[var(--bg-taupe)] p-8 border border-[var(--border-hairline)] space-y-4 shadow-sm">
+          <h2 className="text-2xl font-serif font-normal tracking-wide text-white">6. Contact & Privacy Inquiries</h2>
+          <p className="text-xs sm:text-sm text-[var(--bg-taupe)]/85 leading-relaxed font-normal">
+            For data inquiries, rights requests, or feedback, reach out to our team at Kottakkal:
           </p>
-          <div className="text-sm space-y-1 text-purple-100">
-            <p><strong>Data Protection Officer:</strong> Compliance & Privacy Desk</p>
-            <p><strong>Studio:</strong> Natural&apos;s Salon / PilotWave Platform</p>
-            <p><strong>Location:</strong> Kottakkal, Malappuram, Kerala, India — 676501</p>
-            <p><strong>Email:</strong> <a href="mailto:privacy@naturalssalon.com" className="text-amber-400 underline">privacy@naturalssalon.com</a></p>
+          <div className="text-xs space-y-1.5 text-[var(--bg-taupe)]/90 pt-1">
+            <p><strong className="text-white">Studio:</strong> Naturals Unisex Salon Kottakkal</p>
+            <p><strong className="text-white">Location:</strong> Kottakkal, Malappuram District, Kerala — 676503</p>
+            <p><strong className="text-white">Telephone / WhatsApp:</strong> +91 87142 29297 / +91 99954 89894</p>
+            <p><strong className="text-white">Email:</strong> <a href="mailto:care@naturalssalon.com" className="underline hover:text-white">care@naturalssalon.com</a></p>
           </div>
         </section>
       </div>
