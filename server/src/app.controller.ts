@@ -1,6 +1,9 @@
-import { Controller, Get, Param, Post, Body, BadRequestException, HttpCode } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, BadRequestException, HttpCode, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
+import { JwtAuthGuard } from './auth/jwt.auth.guard';
+import { RolesGuard } from './auth/roles.guard';
+import { Roles } from './auth/roles.decorator';
 
 @Controller()
 export class AppController {
@@ -119,5 +122,38 @@ export class AppController {
       throw new BadRequestException('Service not found');
     }
     return { data: service };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'OWNER')
+  @Post('admin/reset-database')
+  @HttpCode(200)
+  async resetDatabaseData() {
+    return await this.prisma.$transaction(async (tx) => {
+      // Delete transactional tables in foreign-key dependency order
+      const deletedPayments = await tx.payment.deleteMany({});
+      const deletedLoyalty = await tx.loyaltyTransaction.deleteMany({});
+      const deletedAppointments = await tx.appointment.deleteMany({});
+      const deletedCustomers = await tx.customer.deleteMany({});
+      const deletedReviews = await tx.review.deleteMany({});
+      const deletedOutbox = await tx.outboxEvent.deleteMany({});
+      const deletedSubscriptions = await tx.subscription.deleteMany({});
+      const deletedAudits = await tx.auditLog.deleteMany({});
+
+      return {
+        success: true,
+        message: 'Transactional and customer database records cleared successfully.',
+        cleared: {
+          payments: deletedPayments.count,
+          loyaltyTransactions: deletedLoyalty.count,
+          appointments: deletedAppointments.count,
+          customers: deletedCustomers.count,
+          reviews: deletedReviews.count,
+          outboxEvents: deletedOutbox.count,
+          subscriptions: deletedSubscriptions.count,
+          auditLogs: deletedAudits.count,
+        }
+      };
+    });
   }
 }
