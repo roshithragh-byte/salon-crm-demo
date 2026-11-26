@@ -13,9 +13,10 @@ export class BookingsController {
   async createBooking(
     @Param('salonId') salonId: string,
     @Body() body: any,
-    @Headers('idempotency-key') idempotencyKey: string
+    @Headers('idempotency-key') idempotencyKey: string,
+    @Headers('x-integration-key') integrationKey?: string,
   ) {
-    return this.bookingsService.createBooking(salonId, body, idempotencyKey);
+    return this.bookingsService.createBooking(salonId, body, idempotencyKey, integrationKey);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

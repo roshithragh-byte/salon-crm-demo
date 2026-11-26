@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException, Logger } from '@nestjs/common';
+import { assertIntegrationKey } from './integration-key';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TypeSafeService } from '../typesafe/typesafe.service';
@@ -15,7 +16,25 @@ export class BookingsService {
     private readonly typeSafe: TypeSafeService,
   ) {}
 
-  async createBooking(salonId: string, body: any, idempotencyKey?: string) {
+  async createBooking(salonId: string, body: any, idempotencyKey?: string, integrationKey?: string) {
+    // Optional WhatsApp-bot source. Absent/'WEB' => original web behaviour, untouched.
+    const rawSource = body?.source;
+    if (rawSource !== undefined && rawSource !== null && rawSource !== 'WEB' && rawSource !== 'WHATSAPP') {
+      throw new BadRequestException("source must be 'WEB' or 'WHATSAPP'");
+    }
+    const isWhatsapp = rawSource === 'WHATSAPP';
+    let overrideDuration: number | undefined;
+    if (isWhatsapp) {
+      assertIntegrationKey(integrationKey);
+      const d = body.durationMinutes;
+      if (d !== undefined && d !== null) {
+        if (!Number.isInteger(d) || d < 5 || d > 480) {
+          throw new BadRequestException('durationMinutes must be an integer between 5 and 480');
+        }
+        overrideDuration = d;
+      }
+    }
+
     // Determine the actual salon ID if salonId is a slug
     const salon = await this.prisma.client.salon.findFirst({
       where: { OR: [{ id: salonId }, { slug: salonId }] }
@@ -38,7 +57,7 @@ export class BookingsService {
       throw new NotFoundException('Service not found');
     }
 
-    const end = new Date(start.getTime() + service.durationMinutes * 60000);
+    const end = new Date(start.getTime() + (overrideDuration ?? service.durationMinutes) * 60000);
 
     // Validate semantic conflicts in booking notes if provided
     if (notes && notes.trim().length >= 5) {
@@ -161,7 +180,7 @@ export class BookingsService {
           startsAt: start,
           endsAt: end,
           notes,
-          status: 'PENDING',
+          status: isWhatsapp ? 'CONFIRMED' : 'PENDING',
           idempotencyKey,
           consent: true,
           totalValue: service.basePrice,
@@ -176,6 +195,40 @@ export class BookingsService {
       });
       return { data: appointment };
     });
+  }
+
+  /** Busy intervals (non-CANCELLED) overlapping the given IST calendar day. */
+  async getBusy(salonId: string, date: string, integrationKey?: string) {
+    assertIntegrationKey(integrationKey);
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(new Date(`${date}T00:00:00Z`).getTime())) {
+      throw new BadRequestException('date must be YYYY-MM-DD');
+    }
+    const salon = await this.prisma.client.salon.findFirst({
+      where: { OR: [{ id: salonId }, { slug: salonId }] }
+    });
+    if (!salon) throw new NotFoundException('Salon not found');
+
+    const IST_OFFSET_MS = 330 * 60000;
+    const dayStart = new Date(new Date(`${date}T00:00:00Z`).getTime() - IST_OFFSET_MS);
+    const dayEnd = new Date(dayStart.getTime() + 24 * 3600000);
+
+    const rows = await this.prisma.client.appointment.findMany({
+      where: {
+        salonId: salon.id,
+        status: { not: 'CANCELLED' },
+        startsAt: { lt: dayEnd },
+        endsAt: { gt: dayStart },
+      },
+      select: { startsAt: true, endsAt: true, staffId: true },
+      orderBy: { startsAt: 'asc' },
+    });
+    return {
+      data: rows.map((r: any) => ({
+        startsAt: new Date(r.startsAt).toISOString(),
+        endsAt: new Date(r.endsAt).toISOString(),
+        staffId: r.staffId,
+      })),
+    };
   }
 
   async cancelBooking(salonId: string, bookingId: string) {
