@@ -13,8 +13,12 @@ interface DashboardData {
   upcomingAppointments: Array<{
     id: string;
     customerName: string;
+    customerPhone?: string;
     startsAt: string;
     status: string;
+    serviceId?: string;
+    serviceName?: string;
+    notes?: string;
   }>;
   topServices: Array<{
     name: string;
@@ -107,36 +111,40 @@ export default function DashboardPage() {
         <div className="bg-white p-6 rounded-3xl border border-[#EFECE6] shadow-sm space-y-2">
           <span className="text-xs text-[#615668] font-medium block">Total Reservations</span>
           <div className="text-3xl font-serif font-semibold text-[#230B29]">
-            {totalBookings ? Math.max(totalBookings, 28) : 28}
+            {totalBookings ?? 0}
           </div>
           <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            <span>+12% vs last week</span>
+            <span>Live System</span>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-[#EFECE6] shadow-sm space-y-2">
           <span className="text-xs text-[#615668] font-medium block">Revenue Logged</span>
           <div className="text-3xl font-serif font-semibold text-[#230B29]">
-            ₹{totalRevenue ? (totalRevenue > 40000 ? totalRevenue.toLocaleString('en-IN') : "42,850") : "42,850"}
+            ₹{(totalRevenue ?? 0).toLocaleString('en-IN')}
           </div>
           <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            <span>+8.4% growth</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-3xl border border-[#EFECE6] shadow-sm space-y-2">
-          <span className="text-xs text-[#615668] font-medium block">New Clients</span>
-          <div className="text-3xl font-serif font-semibold text-[#230B29]">9</div>
-          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            <span>+3 today</span>
+            <span>Verified Bookings</span>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-[#EFECE6] shadow-sm space-y-2">
-          <span className="text-xs text-[#615668] font-medium block">Repeat Rate</span>
-          <div className="text-3xl font-serif font-semibold text-[#230B29]">68%</div>
+          <span className="text-xs text-[#615668] font-medium block">Upcoming Queue</span>
+          <div className="text-3xl font-serif font-semibold text-[#230B29]">
+            {upcomingAppointments?.length ?? 0}
+          </div>
           <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            <span>Loyalty Active</span>
+            <span>Active Slots</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-3xl border border-[#EFECE6] shadow-sm space-y-2">
+          <span className="text-xs text-[#615668] font-medium block">Top Service</span>
+          <div className="text-xl font-serif font-semibold text-[#230B29] truncate">
+            {data.topServices && data.topServices.length > 0 ? data.topServices[0].name : "Hair Styling"}
+          </div>
+          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span>Most Requested</span>
           </div>
         </div>
       </div>
@@ -151,33 +159,46 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3">
-            {(upcomingAppointments && upcomingAppointments.length > 0 ? upcomingAppointments : [
-              { id: '1', startsAt: '2026-10-08T09:30:00Z', customerName: 'Anu K.', serviceName: 'Hair Colour & Balayage' },
-              { id: '2', startsAt: '2026-10-08T11:00:00Z', customerName: 'Meera P.', serviceName: 'Hydra Renewal Facial' },
-              { id: '3', startsAt: '2026-10-08T13:30:00Z', customerName: 'Fathima S.', serviceName: 'Precision Haircut & Blowout' },
-              { id: '4', startsAt: '2026-10-08T16:00:00Z', customerName: 'Nisha R.', serviceName: 'Signature Bridal Makeover' },
-            ]).map((item) => {
-              const timeFormatted = item.startsAt ? format(new Date(item.startsAt), 'h:mm a') : '10:00 AM';
-              const serviceTitle = ('serviceName' in item ? item.serviceName : 'Hair Styling');
-              return (
-                <div
-                  key={item.id}
-                  className="bg-[#FAFAF8] px-5 py-4 rounded-2xl border border-[#EFECE6] hover:border-[#5E127E]/30 transition-all flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3 text-xs sm:text-sm">
-                    <span className="font-semibold text-[#5E127E] bg-white border border-[#EFECE6] px-2.5 py-1 rounded-lg">
-                      {timeFormatted}
+            {upcomingAppointments && upcomingAppointments.length > 0 ? (
+              upcomingAppointments.map((item) => {
+                const timeFormatted = item.startsAt ? format(new Date(item.startsAt), 'MMM d, h:mm a') : 'Scheduled Slot';
+                let serviceTitle = item.serviceName;
+                if (!serviceTitle && item.notes && item.notes.includes(' - ')) {
+                  const parts = item.notes.split(' - ');
+                  if (parts[1]) serviceTitle = parts[1].split(' [')[0].trim();
+                }
+                if (!serviceTitle) serviceTitle = 'Treatment Ritual';
+
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-[#FAFAF8] px-5 py-4 rounded-2xl border border-[#EFECE6] hover:border-[#5E127E]/30 transition-all flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3 text-xs sm:text-sm">
+                      <span className="font-semibold text-[#5E127E] bg-white border border-[#EFECE6] px-2.5 py-1 rounded-lg">
+                        {timeFormatted}
+                      </span>
+                      <span className="font-serif font-semibold text-[#1E1822]">{item.customerName}</span>
+                      <span className="text-[#615668] hidden sm:inline">•</span>
+                      <span className="text-[#615668] font-light hidden sm:inline">{serviceTitle}</span>
+                    </div>
+                    <span className={`text-[11px] font-semibold px-3 py-1 rounded-full border ${
+                      item.status === 'CONFIRMED' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
+                      item.status === 'PENDING' ? 'text-amber-700 bg-amber-50 border-amber-200' :
+                      'text-gray-700 bg-gray-50 border-gray-200'
+                    }`}>
+                      {item.status}
                     </span>
-                    <span className="font-serif font-semibold text-[#1E1822]">{item.customerName}</span>
-                    <span className="text-[#615668] hidden sm:inline">•</span>
-                    <span className="text-[#615668] font-light hidden sm:inline">{serviceTitle}</span>
                   </div>
-                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                    CONFIRMED
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="text-center py-12 text-[#615668] space-y-2">
+                <CalendarIcon className="mx-auto h-8 w-8 text-[#615668]/30" />
+                <p className="font-serif text-sm font-semibold text-[#1E1822]">No upcoming appointments in queue</p>
+                <p className="text-xs">New bookings confirmed via Web or WhatsApp will appear here automatically.</p>
+              </div>
+            )}
           </div>
         </div>
 
